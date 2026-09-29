@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "npm run start --workspaces",
-    "start:dev": "npm run start --workspaces"
+    "start": "http-server . -p 3000",
+    "start:dev": "http-server . -p 3000 -c-1 -o"
   },
   "devDependencies": {
     "@repo/prettier-config": "*"

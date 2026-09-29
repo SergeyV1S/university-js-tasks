@@ -6,12 +6,18 @@
   "author": "sergo-v1s",
   "license": "ISC",
   "scripts": {
-    "start:all": "npm run start --workspaces",
-    "start:calc": "npm run start --workspace=calculator",
-    "starttodo": "npm run start --workspace=todo",
-    "start:all:dev": "npm run start --workspaces",
-    "start:calc:dev": "npm run start --workspace=calculator",
-    "starttodo:dev": "npm run start --workspace=todo"
+    "start:all": "npm run start -w calculator & npm run start -w todo",
+    "start:calc": "npm run start -w calculator",
+    "start:todo": "npm run start -w todo",
+    "start:all:dev": "npm run start:dev -w calculator & npm run start:dev -w todo",
+    "start:calc:dev": "npm run start:dev -w calculator",
+    "start:todo:dev": "npm run start:dev -w todo"
   },
-  "workspaces": ["packages/*", "apps/*"]
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "dependencies": {
+    "http-server": "14.1.1"
+  }
 }
