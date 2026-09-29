@@ -9,7 +9,7 @@ const memoryHandler = (command, value) => {
     case "M-":
       return memoryMinus(savedValue);
     case "MR":
-      return memoryRead();
+      return memoryRead(savedValue);
     case "MS":
       return memorySave(value);
     case "MC":

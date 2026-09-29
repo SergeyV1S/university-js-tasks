@@ -1,10 +1,7 @@
 import { memoryHandler } from "./memory.js";
+import { numberHandler } from "./number.js";
 
 const keyboardElement = document.querySelector("#keyboard");
-
-const numberHandler = (number) => {
-  console.log(number, typeof number);
-};
 
 const operationsHandler = (operation) => {
   console.log(operation);
@@ -18,7 +15,7 @@ keyboardElement.addEventListener("click", (event) => {
   }
 
   if (!elementId) {
-    numberHandler(Number(textContent));
+    numberHandler(textContent);
     return;
   }
 
