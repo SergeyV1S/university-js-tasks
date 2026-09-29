@@ -1,0 +1,17 @@
+{
+  "name": "university-js-tasks",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "author": "sergo-v1s",
+  "license": "ISC",
+  "scripts": {
+    "start:all": "npm run start --workspaces",
+    "start:calc": "npm run start --workspace=calculator",
+    "starttodo": "npm run start --workspace=todo",
+    "start:all:dev": "npm run start --workspaces",
+    "start:calc:dev": "npm run start --workspace=calculator",
+    "starttodo:dev": "npm run start --workspace=todo"
+  },
+  "workspaces": ["packages/*", "apps/*"]
+}
