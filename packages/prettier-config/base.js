@@ -8,4 +8,6 @@ module.exports = {
   useTabs: false,
   endOfLine: "lf",
   arrowParens: "always",
+  htmlWhitespaceSensitivity: "css",
+  singleAttributePerLine: false
 };

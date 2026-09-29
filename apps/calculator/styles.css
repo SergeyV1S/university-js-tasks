@@ -1,0 +1,122 @@
+* {
+  margin: 0;
+  padding: 0;
+  outline: none;
+  border: none;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+:root {
+  --black: rgba(0, 0, 0, 1);
+  --white: rgb(255, 255, 255);
+  --calculator-black: rgba(51, 51, 51, 1);
+  --calculator-black-hover: rgb(59, 59, 59);
+  --calculator-black-active: rgb(72, 72, 72);
+  --calculator-gray: rgba(165, 165, 165, 1);
+  --calculator-gray-hover: rgb(194, 194, 194);
+  --calculator-gray-active: rgb(206, 206, 206);
+  --calculator-orange: rgba(241, 163, 59, 1);
+  --calculator-orange-hover: rgb(225, 147, 44);
+  --calculator-orange-active: rgb(214, 139, 41);
+
+  --pixel: min(100vw / 428, 100dvh / 766);
+}
+
+body {
+  background-color: var(--black);
+  height: 100dvh;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: calc(29 * var(--pixel));
+  padding: calc(17 * var(--pixel));
+  width: calc(428 * var(--pixel));
+  box-sizing: border-box;
+}
+
+.input-wrapper input {
+  caret-color: transparent;
+  background: transparent;
+  font-size: calc(90 * var(--pixel));
+  font-weight: 400;
+  color: var(--white);
+  width: 100%;
+  height: calc(105 * var(--pixel));
+}
+
+.input-wrapper input::placeholder {
+  color: var(--white);
+}
+
+.keyboard {
+  display: grid;
+  gap: calc(14 * var(--pixel));
+  grid-template-columns: repeat(4, calc(88 * var(--pixel)));
+  grid-auto-rows: calc(88 * var(--pixel));
+}
+
+.button {
+  border-radius: 100%;
+  text-align: center;
+  cursor: pointer;
+  background-color: var(--calculator-black);
+  transition: transform 0.2s linear;
+
+  font-weight: 400;
+  font-size: calc(34 * var(--pixel));
+  color: var(--white);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.button:hover {
+  background-color: var(--calculator-black-hover);
+}
+
+.button:active {
+  background-color: var(--calculator-black-active);
+  transform: scale(0.95);
+}
+
+.orange {
+  background-color: var(--calculator-orange);
+}
+.orange:hover {
+  background-color: var(--calculator-orange-hover);
+}
+
+.orange:active {
+  background-color: var(--calculator-orange-active);
+  transform: scale(0.95);
+}
+
+.gray {
+  background-color: var(--calculator-gray);
+  color: var(--black);
+}
+.gray:hover {
+  background-color: var(--calculator-gray-hover);
+}
+
+.gray:active {
+  background-color: var(--calculator-gray-active);
+  transform: scale(0.95);
+}
+
+.zero {
+  border-radius: calc(88 * var(--pixel));
+  grid-column: span 2;
+}
