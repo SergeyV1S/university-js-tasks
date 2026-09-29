@@ -39,13 +39,31 @@ body {
   box-sizing: border-box;
 }
 
-.display {
-  font-size: calc(90 * var(--pixel));
+.display-containter {
+  display: flex;
+  flex-direction: column;
+  gap: calc(8 * var(--pixel));
   font-weight: 400;
+  width: 100%;
+  text-align: end;
+}
+
+.display {
+  font-size: calc(24 * var(--pixel));
+  color: var(--calculator-gray);
+  width: 100%;
+  height: calc(12 * var(--pixel));
+}
+
+.display-hide {
+  opacity: 0;
+}
+
+.display-number {
+  font-size: calc(90 * var(--pixel));
   color: var(--white);
   width: 100%;
   height: calc(105 * var(--pixel));
-  text-align: end;
 }
 
 .keyboard {
