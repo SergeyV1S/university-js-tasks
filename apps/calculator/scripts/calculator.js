@@ -1,4 +1,4 @@
-import { ERROR_TEXT, OPERATIONS } from "./constants/index.js";
+import { ERROR_TEXT, OPERATIONS, OPERATION_SYMBOLS } from "./constants/index.js";
 import { toNumber, toTextWithPrecision } from "./helpers/index.js";
 
 class Calculator {
@@ -52,7 +52,7 @@ class Calculator {
 
     this.previous = this.value;
     this.operator = operator;
-    this.expression = `${toTextWithPrecision(this.previous)} ${operator}`;
+    this.expression = `${toTextWithPrecision(this.previous)} ${OPERATION_SYMBOLS[operator]}`;
     this.isNewInput = true;
   };
 
@@ -61,7 +61,7 @@ class Calculator {
       return;
     }
 
-    this.expression = `${toTextWithPrecision(this.previous)} ${this.operator} ${this.current} =`;
+    this.expression = `${toTextWithPrecision(this.previous)} ${OPERATION_SYMBOLS[this.operator]} ${this.current} =`;
     this.calculate();
   };
 

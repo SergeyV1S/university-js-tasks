@@ -1,40 +1,54 @@
 import calculator from "./calculator.js";
 import { memoryHandler, render } from "./lib/index.js";
+import { VALID_KEYBOARD_KEYS } from "./constants/index.js";
 
 const keyboardElement = document.querySelector("#keyboard");
 
-const clickHandler = (elementId, textContent) => {
-  if (!elementId) {
-    return calculator.inputDigit(textContent);
+const inputHandler = (command) => {
+  if (!command || /^\d$/.test(key)) {
+    return calculator.inputDigit(command);
   }
 
-  if (elementId.startsWith("memory")) {
-    return memoryHandler(textContent);
+  if (command.startsWith("M")) {
+    return memoryHandler(command);
   }
 
-  if (elementId === "comma") {
+  if (command === ",") {
     return calculator.inputComma();
   }
 
-  switch (textContent) {
+  switch (command) {
+    case "Enter":
     case "=":
       return calculator.equal();
-    case "AC":
+    case "Delete":
       return calculator.clear();
     case "%":
       return calculator.percent();
     default:
-      return calculator.setOperator(textContent);
+      return calculator.setOperator(command);
   }
 };
 
 keyboardElement.addEventListener("click", (event) => {
-  const { id: elementId, textContent } = event.target;
+  const { id: elementId, value, textContent } = event.target;
 
   if (elementId === "keyboard") {
     return;
   }
 
-  clickHandler(elementId, textContent);
+  inputHandler(value, textContent);
+  render();
+});
+
+document.addEventListener("keypress", (event) => {
+  const key = event.key;
+
+  if (!VALID_KEYBOARD_KEYS.includes(key) && !/^\d$/.test(key)) {
+    return;
+  }
+
+  event.preventDefault();
+  inputHandler(key, key);
   render();
 });
