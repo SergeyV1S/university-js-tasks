@@ -1,10 +1,31 @@
-import { memoryHandler } from "./memory.js";
-import { numberHandler } from "./number.js";
+import calculator from "./calculator.js";
+import { memoryHandler, render } from "./lib/index.js";
 
 const keyboardElement = document.querySelector("#keyboard");
 
-const operationsHandler = (operation) => {
-  console.log(operation);
+const clickHandler = (elementId, textContent) => {
+  if (!elementId) {
+    return calculator.inputDigit(textContent);
+  }
+
+  if (elementId.startsWith("memory")) {
+    return memoryHandler(textContent);
+  }
+
+  if (elementId === "comma") {
+    return calculator.inputComma();
+  }
+
+  switch (textContent) {
+    case "=":
+      return calculator.equal();
+    case "AC":
+      return calculator.clear();
+    case "%":
+      return calculator.percent();
+    default:
+      return calculator.setOperator(textContent);
+  }
 };
 
 keyboardElement.addEventListener("click", (event) => {
@@ -14,20 +35,6 @@ keyboardElement.addEventListener("click", (event) => {
     return;
   }
 
-  if (!elementId) {
-    numberHandler(textContent);
-    return;
-  }
-
-  if (elementId.startsWith("memory")) {
-    memoryHandler(textContent);
-    return;
-  }
-
-  if (elementId === "comma") {
-    console.log("comma");
-    return;
-  }
-
-  operationsHandler(textContent);
+  clickHandler(elementId, textContent);
+  render();
 });

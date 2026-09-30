@@ -1,6 +1,7 @@
+import calculator from "../calculator.js";
 import storage from "./localStorage.js";
 
-const memoryHandler = (command, value) => {
+const memoryHandler = (command) => {
   const savedValue = Number(storage.read());
 
   switch (command) {
@@ -11,15 +12,14 @@ const memoryHandler = (command, value) => {
     case "MR":
       return memoryRead(savedValue);
     case "MS":
-      return memorySave(value);
+      return memorySave();
     case "MC":
       return memoryClear();
   }
 };
 
 const memoryPlus = (savedValue) => {
-  const displayNumber = document.querySelector("#display-number");
-  const currentValue = Number(displayNumber.textContent);
+  const currentValue = calculator.value;
 
   if (!currentValue) {
     return;
@@ -29,8 +29,7 @@ const memoryPlus = (savedValue) => {
 };
 
 const memoryMinus = (savedValue) => {
-  const displayNumber = document.querySelector("#display-number");
-  const currentValue = Number(displayNumber.textContent);
+  const currentValue = calculator.value;
 
   if (!currentValue) {
     return;
@@ -40,12 +39,12 @@ const memoryMinus = (savedValue) => {
 };
 
 const memoryRead = (savedValue) => {
-  const displayNumber = document.querySelector("#display-number");
-
-  displayNumber.textContent = savedValue || 0;
+  calculator.value = savedValue;
 };
 
-const memorySave = (value) => {
+const memorySave = () => {
+  const value = calculator.value;
+
   if (!value) {
     return;
   }
