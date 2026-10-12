@@ -1,0 +1,47 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: "Roboto", ui-sans-serif, system-ui, sans-serif;
+
+  --color-accent: #ffb309;
+  --color-muted: #7d7d7d;
+
+  --text-task: 20px;
+  --text-task--line-height: normal;
+  --text-input: 18px;
+  --text-input--line-height: normal;
+  --text-hint: 16px;
+  --text-hint--line-height: normal;
+
+  --spacing-gutter: 15px;
+  --radius-card: 10px;
+  --container-app: 411px;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-foreground: var(--foreground);
+}
+
+:root {
+  --background: #f0f0f0;
+  --surface: #ffffff;
+  --foreground: #000000;
+  color-scheme: light;
+}
+
+.dark {
+  --background: #000000;
+  --surface: #181818;
+  --foreground: #ffffff;
+  color-scheme: dark;
+}
+
+@layer base {
+  body {
+    @apply bg-background font-sans text-foreground antialiased;
+  }
+}
