@@ -1,0 +1,51 @@
+@import "tailwindcss";
+
+@custom-variant short (@media (max-height: 760px));
+
+@theme {
+  --font-sans: "Roboto", ui-sans-serif, system-ui, sans-serif;
+
+  --color-accent: #15bb70;
+  --color-muted: #888888;
+  --color-foreground: #1d1d1d;
+  --color-background: #f9fafc;
+  --color-surface: #ffffff;
+  --color-field: #f3f4f6;
+  --color-field-shade: #ebecef;
+
+  --text-title: 20px;
+  --text-title--line-height: normal;
+  --text-code: 24px;
+  --text-code--line-height: normal;
+  --text-caption: 16px;
+  --text-caption--line-height: normal;
+  --text-search: 18px;
+  --text-search--line-height: normal;
+  --text-amount: 30px;
+  --text-amount--line-height: normal;
+
+  --radius-card: 20px;
+  --radius-field: 9px;
+
+  --shadow-card: 0 0 60px rgb(0 0 0 / 0.2);
+  --shadow-key: 0 0 30px rgb(0 0 0 / 0.125);
+  --shadow-item: 0 2px 24px rgb(0 0 0 / 0.1);
+  --inset-shadow-card: inset 0 -14px 18px -10px rgb(0 0 0 / 0.045);
+  --inset-shadow-key:
+    inset 0 5px 8px -5px rgb(0 0 0 / 0.03), inset -4px -8px 14px -6px rgb(0 0 0 / 0.025);
+  --inset-shadow-item: inset 0 -14px 18px -12px rgb(0 0 0 / 0.05);
+
+  --container-app: 428px;
+}
+
+@layer base {
+  body {
+    @apply bg-background font-sans text-foreground antialiased;
+  }
+
+  button {
+    @apply cursor-pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+}

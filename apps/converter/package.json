@@ -1,0 +1,31 @@
+{
+  "name": "converter",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Конвертер валют на React + TypeScript + Vite + Tailwind CSS",
+  "scripts": {
+    "dev": "vite --port 3002",
+    "typecheck": "tsc -b",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview --port 3002",
+    "start": "npm run build && vite preview --port 3002",
+    "start:dev": "vite --port 3002 --open"
+  },
+  "dependencies": {
+    "@fontsource/roboto": "^5.3.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  },
+  "devDependencies": {
+    "@repo/prettier-config": "*",
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/node": "^26.6.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.4"
+  }
+}
