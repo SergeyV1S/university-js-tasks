@@ -1,25 +1,25 @@
 import { useEffect } from "react";
-import { STORAGE_KEYS, THEMES, type Theme } from "@/shared/constants";
-import { useLocalStorage } from "@/shared/hooks";
-import { applyTheme, getSystemTheme } from "../helpers/theme";
+import { THEMES } from "@/shared/constants";
+import { applyTheme } from "../helpers/theme";
+import { useThemeState } from "./useThemeState";
 
 export const useTheme = () => {
-  const themeStorage = useLocalStorage<Theme>(STORAGE_KEYS.theme, getSystemTheme);
+  const themeState = useThemeState();
 
   useEffect(() => {
-    applyTheme(themeStorage.state.value);
-  }, [themeStorage.state.value]);
+    applyTheme(themeState.state.theme);
+  }, [themeState.state.theme]);
 
   const toggleTheme = () => {
-    themeStorage.functions.setValue((current) =>
+    themeState.functions.setTheme((current) =>
       current === THEMES.dark ? THEMES.light : THEMES.dark
     );
   };
 
   return {
     state: {
-      theme: themeStorage.state.value,
-      isDark: themeStorage.state.value === THEMES.dark
+      theme: themeState.state.theme,
+      isDark: themeState.state.theme === THEMES.dark
     },
     functions: { toggleTheme }
   };
