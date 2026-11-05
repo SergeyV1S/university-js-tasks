@@ -1,4 +1,5 @@
 export const CBR_DAILY_URL = "https://www.cbr-xml-daily.ru/daily_json.js";
+export const CURRENCY_REQUEST_TIMEOUT = 10000;
 
 export const RUB = {
   CharCode: "RUB",
