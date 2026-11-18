@@ -6,14 +6,16 @@
   "author": "sergo-v1s",
   "license": "ISC",
   "scripts": {
-    "start:all": "npm run start -w calculator & npm run start -w todo & npm run start -w converter",
+    "start:all": "npm run start -w calculator & npm run start -w todo & npm run start -w converter & npm run start -w monkey-type",
     "start:calc": "npm run start -w calculator",
     "start:todo": "npm run start -w todo",
     "start:converter": "npm run start -w converter",
-    "start:all:dev": "npm run start:dev -w calculator & npm run start:dev -w todo & npm run start:dev -w converter",
+    "start:monkey-type": "npm run start -w monkey-type",
+    "start:all:dev": "npm run start:dev -w calculator & npm run start:dev -w todo & npm run start:dev -w converter & npm run start:dev -w monkey-type",
     "start:calc:dev": "npm run start:dev -w calculator",
     "start:todo:dev": "npm run start:dev -w todo",
-    "start:converter:dev": "npm run start:dev -w converter"
+    "start:converter:dev": "npm run start:dev -w converter",
+    "start:monkey-type:dev": "npm run start:dev -w monkey-type"
   },
   "workspaces": [
     "packages/*",
