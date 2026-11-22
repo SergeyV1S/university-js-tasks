@@ -1,1 +1,8 @@
 @import "tailwindcss";
+@import "./design-tokens.css";
+
+@layer base {
+  :focus-visible {
+    @apply outline-2 outline-solid outline-invest-focus;
+  }
+}
