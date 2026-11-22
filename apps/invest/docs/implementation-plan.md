@@ -84,9 +84,9 @@
 
 **Требования** ФТ-02, ФТ-05, ФТ-08, ФТ-11, ФТ-23, ФТ-40, ФТ-57, НФТ-05, НФТ-26.
 
-**Файлы** Создать `apps/invest/src/shared/market/client.ts`, `apps/invest/tests/market-client.test.ts`, `apps/invest/tests/market-fixture.ts`.
+**Файлы** Создать `apps/invest/src/shared/market/{client.ts,instance.ts,requests.ts}`, `apps/invest/tests/market-client.test.ts`, `apps/invest/tests/market-fixture.ts`.
 
-**Интерфейсы** `createMarketClient({ baseUrl, apiKey, fetchImpl = fetch }): MarketClient`. Все методы получают последним аргументом опциональный `{signal: AbortSignal}`. `Coin` содержит `{id: string, name: string, rank: number|null, price: number|null, change24h: number|null, marketCap: number|null}`. `MarketError` содержит `{kind: 'rate-limit'|'network'|'not-found'|'http'|'invalid-response', status?: number, retryAt?: number}`. Отмена сохраняет `AbortError`.
+**Интерфейсы** `createMarketClient({ baseUrl, apiKey, adapter? }): MarketClient` создаёт экземпляр Axios. Все методы получают последним аргументом опциональный `{signal: AbortSignal}`. `Coin` содержит `{id: string, name: string, rank: number|null, price: number|null, change24h: number|null, marketCap: number|null}`. `MarketError` содержит `{kind: 'rate-limit'|'network'|'not-found'|'http'|'invalid-response', status?: number, retryAt?: number}`. Отмена сохраняет `AbortError`.
 
 `installMarketFixture(context: BrowserContext, respond: (url: URL) => FixtureResponse | Promise<FixtureResponse>): Promise<{requests: RecordedRequest[]}>`. `FixtureResponse` содержит `{status: number, json?: unknown, headers?: Record<string, string>}` или `{abort: true}`. `RecordedRequest` содержит `{url: string, method: string, body: string|null, atMs: number, status: number|null}`. Перехват действует в обеих вкладках контекста.
 
@@ -101,7 +101,7 @@
 | `getExchangeRates(options?): Promise<Partial<Record<Currency, number>>>` | `/exchange_rates`, `rates.*.value` для USD/EUR/BTC/RUB, единиц валюты за 1 BTC. |
 
 - [x] Проверить подключение из браузера от origin приложения с действующим Demo-ключом и заголовком `x-cg-demo-api-key`. Проверить каталог, поиск по ID вне топ-100, выбранные метрики, историю на 365 дней, `simple/price` в нужных валютах, `rates.usd` и `rates.rub` и доступность `Retry-After` для JavaScript при наличии заголовка в ответе. Зафиксировать CORS, актуальные лимиты и правила учёта. На дату плана опубликованы 100 запросов в минуту и 10 000 кредитов в месяц. Приёмочные пороги на этих лимитах — 80 запросов в минуту и 8 000 кредитов в месяц. Все статусы учитываются в минутном лимите, HTTP 200 — в месячных кредитах. Если прямая интеграция не подтверждается, зафиксировать расхождение до выбора другого допустимого варианта. [Авторизация](https://docs.coingecko.com/demo/reference/authentication) · [Лимиты тарифа](https://www.coingecko.com/en/api/pricing) · [Правила учёта](https://support.coingecko.com/articles/1864417806-how-does-coingecko-api-count-the-api-usage-credit)
-- [x] Написать `normalizes_market_payloads_and_errors` в `market-client.test.ts`. Моделировать HTTP через `fetchImpl`, зафиксировать тестовое время для `Retry-After`. В `market-fixture.ts` реализовать `installMarketFixture` с перехватом запросов к `/api/v3/` на тестовом origin.
+- [x] Написать `normalizes_market_payloads_and_errors` в `market-client.test.ts`. Моделировать HTTP через адаптер Axios, зафиксировать тестовое время для `Retry-After`. В `market-fixture.ts` реализовать `installMarketFixture` с перехватом запросов к `/api/v3/` на тестовом origin.
 
   ```ts
   assert.equal(top[0].rank, 1)

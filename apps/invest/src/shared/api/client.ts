@@ -1,6 +1,11 @@
+import { marketError } from "./helpers";
+import { createMarketInstance } from "./instance";
+import { createMarketRequests } from "./requests";
+import type { MarketInstanceOptions, RequestOptions } from "./type";
+
+
 export type Currency = "USD" | "EUR" | "BTC" | "RUB";
 type HistoryDays = 1 | 7 | 30 | 365;
-type RequestOptions = { signal: AbortSignal };
 type CatalogCoin = { id: string; name: string };
 type Quotes = Partial<Record<Currency, number>>;
 
@@ -17,12 +22,6 @@ type GlobalMetrics = {
   volume24h: number | null;
 };
 
-export type MarketError = Error & {
-  kind: "rate-limit" | "network" | "not-found" | "http" | "invalid-response";
-  status?: number;
-  retryAt?: number;
-};
-
 export type MarketClient = {
   getCatalog: (options?: RequestOptions) => Promise<CatalogCoin[]>;
   getTop100: (options?: RequestOptions) => Promise<Coin[]>;
@@ -33,12 +32,6 @@ export type MarketClient = {
   getExchangeRates: (options?: RequestOptions) => Promise<Quotes>;
 };
 
-type ClientOptions = {
-  baseUrl: string;
-  apiKey?: string;
-  fetchImpl?: typeof fetch;
-};
-
 declare const __INVEST_DEV_MARKET_DEMO_KEY__: string;
 
 const DEMO_API_BASE = "https://api.coingecko.com/api/v3/";
@@ -47,10 +40,7 @@ const MARKETS_PAGE_SIZE = 250;
 const SIMPLE_PRICE_MAX_IDS = 515;
 // Budget for the encoded URL, including the base and all query parameters.
 const REQUEST_URL_BUDGET = 2_000;
-const USD_MARKETS = { vs_currency: "usd", order: "market_cap_desc", page: "1" };
-
-const marketError = (kind: MarketError["kind"], details?: Pick<MarketError, "status" | "retryAt">): MarketError =>
-  Object.assign(new Error(`CoinGecko: ${kind}`), { kind, ...details });
+const USD_MARKETS = { vs_currency: "usd", order: "market_cap_desc", page: 1 } as const;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   value !== null && typeof value === "object" && !Array.isArray(value);
@@ -100,119 +90,58 @@ const readQuotes = (
   return quotes;
 };
 
-const parseRetryAfter = (header: string | null) => {
-  if (!header) return undefined;
-  const value = header.trim();
-  const retryAt = /^\d+$/.test(value)
-    ? Date.now() + Number(value) * 1_000
-    : /[a-z]{3}/i.test(value) ? Date.parse(value) : NaN;
-  return Number.isFinite(retryAt) ? retryAt : undefined;
-};
-
-const rethrowAbort = (error: unknown, signal?: AbortSignal) => {
-  if (error instanceof Error && error.name === "AbortError") throw error;
-  signal?.throwIfAborted();
-};
-
-const batchByUrl = (
+const batchByUrl = <Params>(
   ids: string[],
   maxIds: number,
-  buildUrl: (ids: string[]) => URL,
+  buildParams: (ids: string[]) => Params,
+  getUri: (params: Params) => string,
 ) => {
-  const batches: Array<{ ids: string[]; url: URL }> = [];
+  const batches: Array<{ ids: string[]; params: Params }> = [];
   let batch: string[] = [];
-  let url = buildUrl(batch);
 
   for (const id of new Set(ids)) {
     const nextBatch = [...batch, id];
-    const nextUrl = buildUrl(nextBatch);
-    if (nextBatch.length <= maxIds && nextUrl.href.length <= REQUEST_URL_BUDGET) {
+    if (nextBatch.length <= maxIds && getUri(buildParams(nextBatch)).length <= REQUEST_URL_BUDGET) {
       batch = nextBatch;
-      url = nextUrl;
       continue;
     }
 
-    if (batch.length > 0) batches.push({ ids: batch, url });
+    if (batch.length > 0) batches.push({ ids: batch, params: buildParams(batch) });
     batch = [id];
-    url = buildUrl(batch);
-    if (url.href.length > REQUEST_URL_BUDGET) {
+    if (getUri(buildParams(batch)).length > REQUEST_URL_BUDGET) {
       throw new RangeError("Coin ID exceeds the CoinGecko request URL budget");
     }
   }
 
-  if (batch.length > 0) batches.push({ ids: batch, url });
+  if (batch.length > 0) batches.push({ ids: batch, params: buildParams(batch) });
   return batches;
 };
 
-export const createMarketClient = (config: ClientOptions): MarketClient => {
-  const { baseUrl, fetchImpl = fetch } = config;
-  const base = new URL(baseUrl, globalThis.location?.href);
-  if (!base.pathname.endsWith("/")) base.pathname += "/";
-
-  const buildUrl = (path: string, query?: Record<string, string>) => {
-    const url = new URL(path, base);
-    url.search = new URLSearchParams(query).toString();
-    return url;
-  };
-
-  const request = async (url: URL, options?: RequestOptions): Promise<unknown> => {
-    const signal = options?.signal;
-    signal?.throwIfAborted();
-    const apiKey = config.apiKey;
-    let response: Response;
-
-    try {
-      response = await fetchImpl(url, {
-        signal,
-        headers: apiKey ? { "x-cg-demo-api-key": apiKey } : undefined,
-      });
-    } catch (error) {
-      rethrowAbort(error, signal);
-      throw marketError("network");
-    }
-
-    signal?.throwIfAborted();
-    const { status } = response;
-    if (status === 429) {
-      const retryAt = parseRetryAfter(response.headers.get("Retry-After"));
-      throw marketError("rate-limit", retryAt === undefined ? { status } : { status, retryAt });
-    }
-    if (status === 404) throw marketError("not-found", { status });
-    if (!response.ok) throw marketError("http", { status });
-
-    let data: unknown;
-    try {
-      data = await response.json();
-    } catch (error) {
-      rethrowAbort(error, signal);
-      throw marketError(error instanceof SyntaxError ? "invalid-response" : "network");
-    }
-    signal?.throwIfAborted();
-    return data;
-  };
+export const createMarketClient = (config: MarketInstanceOptions): MarketClient => {
+  const requests = createMarketRequests(createMarketInstance(config));
 
   return {
     getCatalog: async (options) => {
-      const payload = await request(buildUrl("coins/list", { include_platform: "false" }), options);
+      const payload = await requests.getCoinsList(options);
       return readArray(payload).map((coin) => readCoinIdentity(readObject(coin)));
     },
-    getTop100: async (options) => readCoins(await request(
-      buildUrl("coins/markets", { ...USD_MARKETS, per_page: "100" }), options,
+    getTop100: async (options) => readCoins(await requests.getCoinsMarkets(
+      { ...USD_MARKETS, per_page: 100 }, options,
     )),
     getMarkets: async (ids, options) => {
-      const batches = batchByUrl(ids, MARKETS_PAGE_SIZE, (batch) => buildUrl("coins/markets", {
+      const batches = batchByUrl(ids, MARKETS_PAGE_SIZE, (batch) => ({
         ...USD_MARKETS,
-        per_page: String(batch.length),
+        per_page: batch.length,
         ids: batch.join(","),
-      }));
+      }), requests.getCoinsMarketsUri);
       const coins: Coin[] = [];
-      for (const { url } of batches) {
-        coins.push(...readCoins(await request(url, options)));
+      for (const { params } of batches) {
+        coins.push(...readCoins(await requests.getCoinsMarkets(params, options)));
       }
       return coins;
     },
     getGlobal: async (options) => {
-      const payload = readObject(await request(buildUrl("global"), options));
+      const payload = readObject(await requests.getGlobalMarketData(options));
       const data = readObject(payload.data);
       return {
         marketCap: numberOrNull(isRecord(data.total_market_cap) ? data.total_market_cap.usd : undefined),
@@ -222,10 +151,7 @@ export const createMarketClient = (config: ClientOptions): MarketClient => {
     },
     getHistory: async (id, days, options) => {
       if (id === "" || id === "." || id === "..") throw marketError("not-found");
-      const payload = readObject(await request(buildUrl(`coins/${encodeURIComponent(id)}/market_chart`, {
-        vs_currency: "usd",
-        days: String(days),
-      }), options));
+      const payload = readObject(await requests.getCoinMarketChart(id, days, options));
       return readArray(payload.prices).map((sample) => {
         const [timestamp, price] = readArray(sample);
         if (!isNumber(timestamp) || !isNumber(price)) throw marketError("invalid-response");
@@ -236,13 +162,14 @@ export const createMarketClient = (config: ClientOptions): MarketClient => {
       const requestedCurrencies = [...new Set(currencies)];
       if (requestedCurrencies.length === 0) return {};
 
-      const batches = batchByUrl(ids, SIMPLE_PRICE_MAX_IDS, (batch) => buildUrl("simple/price", {
+      const vsCurrencies = requestedCurrencies.map((currency) => currency.toLowerCase()).join(",");
+      const batches = batchByUrl(ids, SIMPLE_PRICE_MAX_IDS, (batch) => ({
         ids: batch.join(","),
-        vs_currencies: requestedCurrencies.map((currency) => currency.toLowerCase()).join(","),
-      }));
+        vs_currencies: vsCurrencies,
+      }), requests.getSimplePriceUri);
       const prices: Array<[string, Quotes]> = [];
-      for (const { ids: batch, url } of batches) {
-        const payload = readObject(await request(url, options));
+      for (const { ids: batch, params } of batches) {
+        const payload = readObject(await requests.getSimplePrice(params, options));
         for (const id of batch) {
           const values = payload[id];
           if (Object.hasOwn(payload, id) && isRecord(values)) {
@@ -253,7 +180,7 @@ export const createMarketClient = (config: ClientOptions): MarketClient => {
       return Object.fromEntries(prices);
     },
     getExchangeRates: async (options) => {
-      const payload = readObject(await request(buildUrl("exchange_rates"), options));
+      const payload = readObject(await requests.getExchangeRates(options));
       const rates = readObject(payload.rates);
       return readQuotes(CURRENCIES, (code) => {
         const rate = rates[code];

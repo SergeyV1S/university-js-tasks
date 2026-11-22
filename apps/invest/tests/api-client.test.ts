@@ -1,25 +1,41 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { createMarketClient } from "../src/shared/market/client.ts";
+import axios, { AxiosError } from "axios";
+import type { AxiosAdapter, InternalAxiosRequestConfig } from "axios";
+
+import { createMarketClient } from "../src/shared/api/client.ts";
 
 const baseUrl = "https://example.test/api/v3/";
 const row = { id: "bitcoin", name: "Bitcoin", market_cap_rank: 1 };
+
+const mockAdapter = (respond: (url: URL, config: InternalAxiosRequestConfig) => Response): AxiosAdapter =>
+  async (config) => {
+    const response = respond(new URL(axios.getUri(config)), config);
+    const reply = {
+      data: await response.text(),
+      status: response.status,
+      statusText: response.statusText,
+      headers: Object.fromEntries(response.headers),
+      config,
+    };
+    if (!response.ok) throw new AxiosError("HTTP error", undefined, config, undefined, reply);
+    return reply;
+  };
 
 test("normalizes_market_payloads_and_errors", async (context) => {
   const now = Date.parse("2026-11-22T12:00:00Z");
   context.mock.method(Date, "now", () => now);
 
-  const requests: Array<{ url: URL; init?: RequestInit }> = [];
+  const requests: Array<{ url: URL; config: InternalAxiosRequestConfig }> = [];
   const respond = context.mock.fn((_url: URL): Response => Response.json(null));
   const client = createMarketClient({
     baseUrl,
     apiKey: "test-key",
-    fetchImpl: async (input, init) => {
-      const url = new URL(String(input));
-      requests.push({ url, init });
+    adapter: mockAdapter((url, config) => {
+      requests.push({ url, config });
       return respond(url);
-    },
+    }),
   });
 
   respond.mock.mockImplementation(() => Response.json([{ ...row, platforms: {} }]));
@@ -91,15 +107,15 @@ test("normalizes_market_payloads_and_errors", async (context) => {
   const abortError = new DOMException("Aborted", "AbortError");
   respond.mock.mockImplementation(() => { throw abortError; });
   await assert.rejects(client.getGlobal({ signal: controller.signal }), (error) => error === abortError);
-  assert.equal(requests.at(-1)?.init?.signal, controller.signal);
+  assert.equal(requests.at(-1)?.config.signal, controller.signal);
 
-  for (const { url, init } of requests) {
+  for (const { url, config } of requests) {
     assert.equal(url.origin, new URL(baseUrl).origin);
     assert.ok(url.pathname.startsWith("/api/v3/"));
     assert.ok(!url.href.includes("test-key"));
-    assert.equal(new Headers(init?.headers).get("x-cg-demo-api-key"), "test-key");
-    assert.equal(init?.method ?? "GET", "GET");
-    assert.equal(init?.body, undefined);
+    assert.equal(config.headers.get("x-cg-demo-api-key"), "test-key");
+    assert.equal(config.method, "get");
+    assert.equal(config.data, undefined);
   }
 });
 
@@ -109,14 +125,13 @@ test("batches unique IDs without truncating long searches or requesting empty li
   const requests: URL[] = [];
   const client = createMarketClient({
     baseUrl,
-    fetchImpl: async (input) => {
-      const url = new URL(String(input));
+    adapter: mockAdapter((url) => {
       requests.push(url);
       const ids = url.searchParams.get("ids")!.split(",");
       return url.pathname.endsWith("/markets")
         ? Response.json(ids.map((id) => ({ id, name: id })))
         : Response.json(Object.fromEntries(ids.map((id) => [id, { usd: 0 }])));
-    },
+    }),
   });
 
   const ids = [...makeIds(300), ...makeIds(60, "long-id".repeat(14))];
@@ -144,20 +159,15 @@ test("stops a multi-request lookup when the signal is aborted", async () => {
   let requests = 0;
   const client = createMarketClient({
     baseUrl,
-    fetchImpl: async () => {
+    adapter: mockAdapter(() => {
       requests += 1;
-      const stream = new ReadableStream({
-        start(streamController) {
-          controller.abort();
-          streamController.enqueue(new TextEncoder().encode("[]"));
-          streamController.close();
-        },
-      });
-      return new Response(stream);
-    },
+      controller.abort();
+      return Response.json([]);
+    }),
   });
 
   const ids = Array.from({ length: 300 }, (_, index) => `coin-${index}`);
-  await assert.rejects(client.getMarkets(ids, { signal: controller.signal }), { name: "AbortError" });
+  await assert.rejects(client.getMarkets(ids, { signal: controller.signal }), (error) =>
+    error === controller.signal.reason && (error as Error).name === "AbortError");
   assert.equal(requests, 1);
 });
