@@ -40,7 +40,15 @@ export type MarketClient = {
   getTop100: (options?: RequestOptions) => Promise<Coin[]>;
   getMarkets: (ids: string[], options?: RequestOptions) => Promise<Coin[]>;
   getGlobal: (options?: RequestOptions) => Promise<GlobalMetrics>;
-  getHistory: (id: string, days: HistoryDays, options?: RequestOptions) => Promise<Array<[number, number]>>;
-  getPrices: (ids: string[], currencies: Currency[], options?: RequestOptions) => Promise<Record<string, Quotes>>;
+  getHistory: (
+    id: string,
+    days: HistoryDays,
+    options?: RequestOptions
+  ) => Promise<Array<[number, number]>>;
+  getPrices: (
+    ids: string[],
+    currencies: Currency[],
+    options?: RequestOptions
+  ) => Promise<Record<string, Quotes>>;
   getExchangeRates: (options?: RequestOptions) => Promise<Quotes>;
 };

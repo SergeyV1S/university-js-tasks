@@ -8,7 +8,12 @@ const byName = new Intl.Collator("ru", { sensitivity: "base" });
 
 export const selectRows = (
   rows: Coin[],
-  { min, max, sort, includeUnranked = false }: PriceRange & { sort: Sort; includeUnranked?: boolean },
+  {
+    min,
+    max,
+    sort,
+    includeUnranked = false
+  }: PriceRange & { sort: Sort; includeUnranked?: boolean }
 ): Coin[] => {
   const lower = Math.min(min ?? -Infinity, max ?? Infinity);
   const upper = Math.max(min ?? -Infinity, max ?? Infinity);
@@ -17,7 +22,8 @@ export const selectRows = (
 
   return rows
     .filter((row) => {
-      if (hasPriceFilter && (row.price === null || row.price < lower || row.price > upper)) return false;
+      if (hasPriceFilter && (row.price === null || row.price < lower || row.price > upper))
+        return false;
       return row[sort.key] !== null || (includeUnranked && sort.key === "rank");
     })
     .sort((first, second) => {

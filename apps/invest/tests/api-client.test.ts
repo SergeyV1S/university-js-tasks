@@ -9,7 +9,8 @@ import { createApiClient } from "../src/shared/api/client.ts";
 const baseUrl = "https://example.test/api/v3/";
 const row = { id: "bitcoin", name: "Bitcoin", market_cap_rank: 1 };
 
-const mockAdapter = (respond: (url: URL, config: InternalAxiosRequestConfig) => Response): AxiosAdapter =>
+const mockAdapter =
+  (respond: (url: URL, config: InternalAxiosRequestConfig) => Response): AxiosAdapter =>
   async (config) => {
     const response = respond(new URL(axios.getUri(config)), config);
     const reply = {
@@ -17,7 +18,7 @@ const mockAdapter = (respond: (url: URL, config: InternalAxiosRequestConfig) => 
       status: response.status,
       statusText: response.statusText,
       headers: Object.fromEntries(response.headers),
-      config,
+      config
     };
     if (!response.ok) throw new AxiosError("HTTP error", undefined, config, undefined, reply);
     return reply;
@@ -35,32 +36,52 @@ test("normalizes_market_payloads_and_errors", async (context) => {
     adapter: mockAdapter((url, config) => {
       requests.push({ url, config });
       return respond(url);
-    }),
+    })
   });
 
   respond.mock.mockImplementation(() => Response.json([{ ...row, platforms: {} }]));
   assert.deepEqual(await client.getCatalog(), [{ id: "bitcoin", name: "Bitcoin" }]);
   assert.equal(requests.at(-1)?.url.searchParams.get("include_platform"), "false");
 
-  respond.mock.mockImplementation(() => Response.json([
-    { ...row, current_price: 0, price_change_percentage_24h: -2, market_cap: 0 },
-    { id: "outside-top", name: "Outside top", market_cap: null },
-  ]));
+  respond.mock.mockImplementation(() =>
+    Response.json([
+      { ...row, current_price: 0, price_change_percentage_24h: -2, market_cap: 0 },
+      { id: "outside-top", name: "Outside top", market_cap: null }
+    ])
+  );
   assert.equal((await client.getTop100())[0].rank, 1);
   assert.deepEqual(Object.fromEntries(requests.at(-1)!.url.searchParams), {
-    vs_currency: "usd", order: "market_cap_desc", per_page: "100", page: "1",
+    vs_currency: "usd",
+    order: "market_cap_desc",
+    per_page: "100",
+    page: "1"
   });
   const markets = await client.getMarkets(["bitcoin", "outside-top", "bitcoin"]);
   assert.deepEqual(markets, [
     { id: "bitcoin", name: "Bitcoin", rank: 1, price: 0, marketCap: 0, change24h: -2 },
-    { id: "outside-top", name: "Outside top", rank: null, price: null, marketCap: null, change24h: null },
+    {
+      id: "outside-top",
+      name: "Outside top",
+      rank: null,
+      price: null,
+      marketCap: null,
+      change24h: null
+    }
   ]);
   assert.equal(requests.at(-1)?.url.searchParams.get("ids"), "bitcoin,outside-top");
 
-  respond.mock.mockImplementation(() => Response.json({
-    data: { total_market_cap: { usd: 100 }, market_cap_change_percentage_24h_usd: -1 },
-  }));
-  assert.deepEqual(await client.getGlobal(), { marketCap: 100, marketCapChange24h: -1, volume24h: null, bitcoinShare: null, ethereumShare: null });
+  respond.mock.mockImplementation(() =>
+    Response.json({
+      data: { total_market_cap: { usd: 100 }, market_cap_change_percentage_24h_usd: -1 }
+    })
+  );
+  assert.deepEqual(await client.getGlobal(), {
+    marketCap: 100,
+    marketCapChange24h: -1,
+    volume24h: null,
+    bitcoinShare: null,
+    ethereumShare: null
+  });
 
   respond.mock.mockImplementation(() => Response.json({ prices: [[now, 0]] }));
   assert.deepEqual(await client.getHistory("bitcoin", 365), [[now, 0]]);
@@ -71,27 +92,49 @@ test("normalizes_market_payloads_and_errors", async (context) => {
   assert.deepEqual(await client.getHistory("bitcoin", 7), []);
 
   respond.mock.mockImplementation(() => Response.json({ bitcoin: { usd: 0, eur: null, jpy: 20 } }));
-  assert.deepEqual(await client.getPrices(["bitcoin", "bitcoin", "missing"], ["USD", "EUR", "USD", "BTC", "RUB"]), {
-    bitcoin: { USD: 0 },
-  });
+  assert.deepEqual(
+    await client.getPrices(["bitcoin", "bitcoin", "missing"], ["USD", "EUR", "USD", "BTC", "RUB"]),
+    {
+      bitcoin: { USD: 0 }
+    }
+  );
   assert.deepEqual(Object.fromEntries(requests.at(-1)!.url.searchParams), {
-    ids: "bitcoin,missing", vs_currencies: "usd,eur,btc,rub",
+    ids: "bitcoin,missing",
+    vs_currencies: "usd,eur,btc,rub"
   });
 
-  respond.mock.mockImplementation(() => Response.json({ rates: {
-    usd: { value: 100 }, rub: { value: 9_000 }, btc: { value: 1 }, jpy: { value: 20 },
-  } }));
+  respond.mock.mockImplementation(() =>
+    Response.json({
+      rates: {
+        usd: { value: 100 },
+        rub: { value: 9_000 },
+        btc: { value: 1 },
+        jpy: { value: 20 }
+      }
+    })
+  );
   const rates = await client.getExchangeRates();
   assert.deepEqual(rates, { USD: 100, BTC: 1, RUB: 9_000 });
   assert.equal(rates.RUB! / rates.USD!, 90);
 
   for (const retryAfter of ["45", new Date(now + 45_000).toUTCString()]) {
-    respond.mock.mockImplementation(() => new Response(null, { status: 429, headers: { "Retry-After": retryAfter } }));
-    await assert.rejects(client.getGlobal(), { kind: "rate-limit", status: 429, retryAt: now + 45_000 });
+    respond.mock.mockImplementation(
+      () => new Response(null, { status: 429, headers: { "Retry-After": retryAfter } })
+    );
+    await assert.rejects(client.getGlobal(), {
+      kind: "rate-limit",
+      status: 429,
+      retryAt: now + 45_000
+    });
   }
-  respond.mock.mockImplementation(() => new Response(null, { status: 429, headers: { "Retry-After": "1.5" } }));
-  await assert.rejects(client.getGlobal(), (error: { kind: string; retryAt?: number }) =>
-    error.kind === "rate-limit" && error.retryAt === undefined);
+  respond.mock.mockImplementation(
+    () => new Response(null, { status: 429, headers: { "Retry-After": "1.5" } })
+  );
+  await assert.rejects(
+    client.getGlobal(),
+    (error: { kind: string; retryAt?: number }) =>
+      error.kind === "rate-limit" && error.retryAt === undefined
+  );
   respond.mock.mockImplementation(() => new Response(null, { status: 404 }));
   await assert.rejects(client.getHistory("missing", 7), { kind: "not-found", status: 404 });
   respond.mock.mockImplementation(() => new Response(null, { status: 503 }));
@@ -100,13 +143,20 @@ test("normalizes_market_payloads_and_errors", async (context) => {
   await assert.rejects(client.getGlobal(), { kind: "invalid-response" });
   respond.mock.mockImplementation(() => Response.json({ prices: [[now, "broken"]] }));
   await assert.rejects(client.getHistory("bitcoin", 7), { kind: "invalid-response" });
-  respond.mock.mockImplementation(() => { throw new TypeError("Network unavailable"); });
+  respond.mock.mockImplementation(() => {
+    throw new TypeError("Network unavailable");
+  });
   await assert.rejects(client.getGlobal(), { kind: "network" });
 
   const controller = new AbortController();
   const abortError = new DOMException("Aborted", "AbortError");
-  respond.mock.mockImplementation(() => { throw abortError; });
-  await assert.rejects(client.getGlobal({ signal: controller.signal }), (error) => error === abortError);
+  respond.mock.mockImplementation(() => {
+    throw abortError;
+  });
+  await assert.rejects(
+    client.getGlobal({ signal: controller.signal }),
+    (error) => error === abortError
+  );
   assert.equal(requests.at(-1)?.config.signal, controller.signal);
 
   for (const { url, config } of requests) {
@@ -131,11 +181,14 @@ test("batches unique IDs without truncating long searches or requesting empty li
       return url.pathname.endsWith("/markets")
         ? Response.json(ids.map((id) => ({ id, name: id })))
         : Response.json(Object.fromEntries(ids.map((id) => [id, { usd: 0 }])));
-    }),
+    })
   });
 
   const ids = [...makeIds(300), ...makeIds(60, "long-id".repeat(14))];
-  assert.deepEqual((await client.getMarkets([...ids, ids[0]])).map(({ id }) => id), ids);
+  assert.deepEqual(
+    (await client.getMarkets([...ids, ids[0]])).map(({ id }) => id),
+    ids
+  );
   for (const url of requests) {
     const requestedIds = url.searchParams.get("ids")!.split(",");
     const pageSize = Number(url.searchParams.get("per_page"));
@@ -163,11 +216,13 @@ test("stops a multi-request lookup when the signal is aborted", async () => {
       requests += 1;
       controller.abort();
       return Response.json([]);
-    }),
+    })
   });
 
   const ids = Array.from({ length: 300 }, (_, index) => `coin-${index}`);
-  await assert.rejects(client.getMarkets(ids, { signal: controller.signal }), (error) =>
-    error === controller.signal.reason && (error as Error).name === "AbortError");
+  await assert.rejects(
+    client.getMarkets(ids, { signal: controller.signal }),
+    (error) => error === controller.signal.reason && (error as Error).name === "AbortError"
+  );
   assert.equal(requests, 1);
 });

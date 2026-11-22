@@ -2,5 +2,5 @@ export const PATHS = {
   HOME: "/",
   COIN: "/coin/:coinId",
   PORTFOLIO: "/portfolio",
-  FALLBACK: "*",
+  FALLBACK: "*"
 } as const;

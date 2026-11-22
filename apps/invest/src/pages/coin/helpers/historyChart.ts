@@ -1,4 +1,12 @@
-import { Chart, Filler, LineController, LineElement, LinearScale, PointElement, Tooltip } from "chart.js";
+import {
+  Chart,
+  Filler,
+  LineController,
+  LineElement,
+  LinearScale,
+  PointElement,
+  Tooltip
+} from "chart.js";
 
 import type { HistoryDays } from "../../../shared/api/type";
 import { formatMoney } from "../../../shared/helpers/format";
@@ -23,7 +31,12 @@ const formatTick = (timestamp: number, period: HistoryDays, edge: boolean) => {
   return edge ? `${label} ${value.getUTCFullYear()}` : label;
 };
 
-export const createHistoryChart = (canvas: HTMLCanvasElement, prices: HistoryPoints, period: HistoryDays, desktop: boolean) => {
+export const createHistoryChart = (
+  canvas: HTMLCanvasElement,
+  prices: HistoryPoints,
+  period: HistoryDays,
+  desktop: boolean
+) => {
   const css = getComputedStyle(canvas);
   const token = (name: string) => css.getPropertyValue(`--${name}`).trim();
   const accent = token("color-invest-accent");
@@ -34,7 +47,7 @@ export const createHistoryChart = (canvas: HTMLCanvasElement, prices: HistoryPoi
   const axisFont = {
     family: token(desktop ? "font-invest-numeric" : "font-invest-ui"),
     size: desktop ? 12 : 11,
-    weight: 500,
+    weight: 500
   };
   const first = prices[0][0];
   const last = prices[prices.length - 1][0];
@@ -42,24 +55,31 @@ export const createHistoryChart = (canvas: HTMLCanvasElement, prices: HistoryPoi
   return new Chart(canvas, {
     type: "line",
     data: {
-      datasets: [{
-        data: prices.map(([x, y]) => ({ x, y })),
-        borderColor: accent,
-        borderWidth: 2,
-        clip: 4,
-        fill: "start",
-        backgroundColor: ({ chart }) => {
-          if (!chart.chartArea) return "transparent";
-          const gradient = chart.ctx.createLinearGradient(0, chart.chartArea.top, 0, chart.chartArea.bottom);
-          gradient.addColorStop(0, fillTop);
-          gradient.addColorStop(1, fillBottom);
-          return gradient;
-        },
-        pointRadius: ({ dataIndex }) => dataIndex === prices.length - 1 ? 3.5 : 0,
-        pointBackgroundColor: accent,
-        pointBorderWidth: 0,
-        pointHoverRadius: 4,
-      }],
+      datasets: [
+        {
+          data: prices.map(([x, y]) => ({ x, y })),
+          borderColor: accent,
+          borderWidth: 2,
+          clip: 4,
+          fill: "start",
+          backgroundColor: ({ chart }) => {
+            if (!chart.chartArea) return "transparent";
+            const gradient = chart.ctx.createLinearGradient(
+              0,
+              chart.chartArea.top,
+              0,
+              chart.chartArea.bottom
+            );
+            gradient.addColorStop(0, fillTop);
+            gradient.addColorStop(1, fillBottom);
+            return gradient;
+          },
+          pointRadius: ({ dataIndex }) => (dataIndex === prices.length - 1 ? 3.5 : 0),
+          pointBackgroundColor: accent,
+          pointBorderWidth: 0,
+          pointHoverRadius: 4
+        }
+      ]
     },
     options: {
       animation: false,
@@ -70,10 +90,10 @@ export const createHistoryChart = (canvas: HTMLCanvasElement, prices: HistoryPoi
       plugins: {
         tooltip: {
           callbacks: {
-            title: ([point]) => point ? formatTick(point.parsed.x ?? first, period, true) : "",
-            label: (point) => formatMoney(point.parsed.y),
-          },
-        },
+            title: ([point]) => (point ? formatTick(point.parsed.x ?? first, period, true) : ""),
+            label: (point) => formatMoney(point.parsed.y)
+          }
+        }
       },
       scales: {
         x: {
@@ -81,8 +101,11 @@ export const createHistoryChart = (canvas: HTMLCanvasElement, prices: HistoryPoi
           min: first === last ? first - 60_000 : first,
           max: last === first ? last + 60_000 : last,
           afterBuildTicks: (axis) => {
-            axis.ticks = (first === last ? [first] : [first, first + (last - first) / 3, first + (last - first) * 2 / 3, last])
-              .map((value) => ({ value }));
+            axis.ticks = (
+              first === last
+                ? [first]
+                : [first, first + (last - first) / 3, first + ((last - first) * 2) / 3, last]
+            ).map((value) => ({ value }));
           },
           border: { display: false },
           grid: { display: false },
@@ -93,12 +116,15 @@ export const createHistoryChart = (canvas: HTMLCanvasElement, prices: HistoryPoi
             color,
             font: axisFont,
             padding: 4,
-            callback: (value, index, ticks) => formatTick(Number(value), period, index === 0 || index === ticks.length - 1),
-          },
+            callback: (value, index, ticks) =>
+              formatTick(Number(value), period, index === 0 || index === ticks.length - 1)
+          }
         },
         y: {
           type: "linear",
-          afterFit: (axis) => { axis.width = Math.max(axis.width, desktop ? 55 : 52); },
+          afterFit: (axis) => {
+            axis.width = Math.max(axis.width, desktop ? 55 : 52);
+          },
           border: { display: false },
           grid: { color: divider, drawTicks: false },
           ticks: {
@@ -106,10 +132,11 @@ export const createHistoryChart = (canvas: HTMLCanvasElement, prices: HistoryPoi
             color,
             font: axisFont,
             padding: desktop ? 6 : 8,
-            callback: (value) => (Math.abs(Number(value)) >= 1e6 ? compactPrice : axisPrice).format(Number(value)),
-          },
-        },
-      },
-    },
+            callback: (value) =>
+              (Math.abs(Number(value)) >= 1e6 ? compactPrice : axisPrice).format(Number(value))
+          }
+        }
+      }
+    }
   });
 };

@@ -6,20 +6,28 @@ import type { FixtureResponse } from "./market-fixture";
 
 const catalog = [
   { id: "bitcoin", name: "Bitcoin", symbol: "btc", market_cap_rank: 1, current_price: 100 },
-  { id: "ethereum", name: "Ethereum", symbol: "eth", market_cap_rank: 2, current_price: 12 },
+  { id: "ethereum", name: "Ethereum", symbol: "eth", market_cap_rank: 2, current_price: 12 }
 ];
 const start = Date.UTC(2026, 5, 17);
 
 const history = (last = 100): FixtureResponse => ({
   status: 200,
-  json: { prices: [[start, last / 2], [start + 86_400_000, last]] },
+  json: {
+    prices: [
+      [start, last / 2],
+      [start + 86_400_000, last]
+    ]
+  }
 });
 
 const respond = (url: URL): FixtureResponse => {
   if (url.pathname.endsWith("/coins/list")) return { status: 200, json: catalog };
   if (url.pathname.endsWith("/global")) return { status: 200, json: { data: {} } };
   if (url.pathname.endsWith("/simple/price")) {
-    return { status: 200, json: { bitcoin: { usd: 100, btc: 1 }, ethereum: { usd: 12, eur: 1.246, btc: 0.125 } } };
+    return {
+      status: 200,
+      json: { bitcoin: { usd: 100, btc: 1 }, ethereum: { usd: 12, eur: 1.246, btc: 0.125 } }
+    };
   }
   if (url.pathname.endsWith("/exchange_rates")) {
     return { status: 200, json: { rates: { usd: { value: 100 }, eur: { value: 80 } } } };
@@ -31,7 +39,9 @@ const respond = (url: URL): FixtureResponse => {
 
 const defer = () => {
   let resolve = () => {};
-  const promise = new Promise<void>((release) => { resolve = release; });
+  const promise = new Promise<void>((release) => {
+    resolve = release;
+  });
   return { promise, resolve };
 };
 
@@ -68,7 +78,9 @@ test("opens_known_and_unknown_urls", async ({ context, page }) => {
   await page.goto("/coin/unknown");
   await expect(page.getByRole("heading", { name: "Монета не найдена" })).toBeVisible();
   await expect(page).toHaveURL("/coin/unknown");
-  expect(requests.some(({ url }) => url.includes("/unknown/market_chart") || url.includes("ids=unknown"))).toBe(false);
+  expect(
+    requests.some(({ url }) => url.includes("/unknown/market_chart") || url.includes("ids=unknown"))
+  ).toBe(false);
   await page.getByRole("button", { name: "На главную" }).click();
   await expect(page).toHaveURL("/");
 
@@ -106,15 +118,27 @@ test("shows_selected_history", async ({ context, page }) => {
   await page.goto("/coin/bitcoin");
   await expect(period(page, "7 д")).toHaveAttribute("aria-pressed", "true");
   await expect(graph(page)).toHaveAccessibleName(/\$70,00/);
-  await expect.poll(() => graph(page).evaluate((element) => {
-    if (!(element instanceof HTMLCanvasElement)) return false;
-    const pixels = element.getContext("2d")?.getImageData(0, 0, element.width, element.height).data;
-    if (!pixels) return false;
-    for (let index = 0; index < pixels.length; index += 4) {
-      if (pixels[index] === 255 && pixels[index + 1] === 198 && pixels[index + 2] === 122 && pixels[index + 3] === 255) return true;
-    }
-    return false;
-  })).toBe(true);
+  await expect
+    .poll(() =>
+      graph(page).evaluate((element) => {
+        if (!(element instanceof HTMLCanvasElement)) return false;
+        const pixels = element
+          .getContext("2d")
+          ?.getImageData(0, 0, element.width, element.height).data;
+        if (!pixels) return false;
+        for (let index = 0; index < pixels.length; index += 4) {
+          if (
+            pixels[index] === 255 &&
+            pixels[index + 1] === 198 &&
+            pixels[index + 2] === 122 &&
+            pixels[index + 3] === 255
+          )
+            return true;
+        }
+        return false;
+      })
+    )
+    .toBe(true);
   await period(page, "1 д").click();
   await expect(page.getByText("За этот период нет данных")).toBeVisible();
   await expect(graph(page)).toHaveCount(0);
@@ -145,7 +169,8 @@ test("converts_loaded_prices", async ({ context, page }) => {
     if (thresholdCase && url.pathname.endsWith("/exchange_rates")) {
       return { status: 200, json: { rates: { usd: { value: 79_800 }, eur: { value: 70_000 } } } };
     }
-    if (url.pathname.endsWith("/exchange_rates") && !ratesAvailable) return { status: 200, json: { rates: {} } };
+    if (url.pathname.endsWith("/exchange_rates") && !ratesAvailable)
+      return { status: 200, json: { rates: {} } };
     if (url.pathname.endsWith("/simple/price") && !pricesAvailable) return { status: 429 };
     return respond(url);
   });
@@ -177,7 +202,11 @@ test("converts_loaded_prices", async ({ context, page }) => {
 
   for (const raw of ["", "текст", "0", "-1"]) {
     await quantity(page).fill(raw);
-    for (const [currency, expected] of [["USD", "0,00 USD"], ["EUR", "0,00 EUR"], ["BTC", "0,00000000 BTC"]]) {
+    for (const [currency, expected] of [
+      ["USD", "0,00 USD"],
+      ["EUR", "0,00 EUR"],
+      ["BTC", "0,00000000 BTC"]
+    ]) {
       await chooseCurrency(page, currency);
       await expect(conversion(page)).toHaveText(expected);
     }
@@ -233,7 +262,9 @@ test("ignores_late_history", async ({ context, page }) => {
     stale.resolve();
   }
 
-  await expect.poll(() => requests.find(({ url }) => new URL(url).searchParams.get("days") === "1")?.status).toBe(200);
+  await expect
+    .poll(() => requests.find(({ url }) => new URL(url).searchParams.get("days") === "1")?.status)
+    .toBe(200);
   await expect(period(page, "30 д")).toHaveAttribute("aria-pressed", "true");
   await expect(graph(page)).toHaveAccessibleName(/\$300,00/);
 });

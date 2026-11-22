@@ -8,23 +8,29 @@ export const loadHome = async (signal: AbortSignal) => {
   const options = { signal };
   const [top, metrics] = await Promise.allSettled([
     apiClient.getTop100(options),
-    apiClient.getGlobal(options),
+    apiClient.getGlobal(options)
   ]);
   signal.throwIfAborted();
 
   return {
-    top: top.status === "fulfilled"
-      ? selectRows(top.value, { min: null, max: null, sort: initialSort, includeUnranked: true })
-      : null,
+    top:
+      top.status === "fulfilled"
+        ? selectRows(top.value, { min: null, max: null, sort: initialSort, includeUnranked: true })
+        : null,
     metrics: metrics.status === "fulfilled" ? metrics.value : null,
-    updatedAt: Date.now(),
+    updatedAt: Date.now()
   };
 };
 
 export type HomeInitialData = Awaited<ReturnType<typeof loadHome>>;
 export type Catalog = Awaited<ReturnType<typeof apiClient.getCatalog>>;
 
-export const loadMatches = async (catalog: Catalog, query: string, top: Coin[], signal: AbortSignal) => {
+export const loadMatches = async (
+  catalog: Catalog,
+  query: string,
+  top: Coin[],
+  signal: AbortSignal
+) => {
   signal.throwIfAborted();
   const matches = catalog.filter(({ name }) => name.toLowerCase().includes(query));
   const quotes = new Map(top.map((coin) => [coin.id, coin]));
@@ -41,6 +47,6 @@ export const loadMatches = async (catalog: Catalog, query: string, top: Coin[], 
     change24h: null,
     marketCap: null,
     ...quotes.get(coin.id),
-    ...coin,
+    ...coin
   }));
 };

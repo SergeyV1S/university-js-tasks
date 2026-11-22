@@ -8,11 +8,11 @@ export default defineConfig({
   use: { baseURL },
   projects: [
     { name: "chromium", use: { browserName: "chromium" } },
-    { name: "firefox", use: { browserName: "firefox" } },
+    { name: "firefox", use: { browserName: "firefox" } }
   ],
   webServer: {
     command: "npm run dev",
     url: baseURL,
-    env: { VITE_INVEST_MARKET_BASE: "/api/v3/" },
-  },
+    env: { VITE_INVEST_MARKET_BASE: "/api/v3/" }
+  }
 });

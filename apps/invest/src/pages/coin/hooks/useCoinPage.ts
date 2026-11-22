@@ -16,7 +16,9 @@ export const useCoinPage = () => {
     return stop;
   }, [data]);
 
-  const openMarket = () => { void navigate(PATHS.HOME); };
+  const openMarket = () => {
+    void navigate(PATHS.HOME);
+  };
 
   return { data: initial === data ? data : null, openMarket };
 };

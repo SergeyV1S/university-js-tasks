@@ -12,7 +12,8 @@ test("switches_screens_in_one_document", async ({ context, page }) => {
   await installMarketFixture(context, (url) => {
     if (url.pathname.endsWith("/global")) return { status: 200, json: { data: {} } };
     if (url.pathname.endsWith("/market_chart")) return { status: 200, json: { prices: [] } };
-    if (url.pathname.endsWith("/simple/price")) return { status: 200, json: { bitcoin: { usd: 100, eur: 80, btc: 1 } } };
+    if (url.pathname.endsWith("/simple/price"))
+      return { status: 200, json: { bitcoin: { usd: 100, eur: 80, btc: 1 } } };
     return { status: 200, json: [{ id: "bitcoin", name: "Bitcoin", symbol: "btc" }] };
   });
   await page.goto("/coin/bitcoin");

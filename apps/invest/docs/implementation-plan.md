@@ -42,15 +42,15 @@
 
 Пути в таблице относительно `apps/invest`. Вертикальные этапы объединены общей навигацией и одним рыночным клиентом. После каждого этапа его сценарий доступен для проверки в рабочем приложении или через HTTP-контракт.
 
-| Файлы | Ответственность |
-| --- | --- |
-| `package.json`, `index.html`, `tsconfig.json`, `vite.config.ts`, `playwright.config.ts` | npm workspace, HTML-вход, проверка типов, сборка и запуск браузерных проверок. Корневой `package-lock.json` обновляется при установке зависимостей. |
-| `src/main.tsx`, `src/app/{App.tsx,router.tsx,styles.css}`, `src/shared/constants/router-paths.ts`, `src/shared/ui/ApiText.tsx` | Запуск SPA, сборка маршрутов, навигация, общие стили и буквальный вывод строк поставщика. |
-| `src/shared/market/client.ts`, `src/shared/market/resource.ts` | Контракт с поставщиком, затем единый жизненный цикл рыночного блока и политика повторов. |
-| `src/pages/home/{page.tsx,route.ts,index.ts,homeStore.ts,helpers/selectRows.ts,helpers/debounce.ts}` | Таблица, метрики, опрос, управление поиском и отбор строк. |
-| `src/pages/coin/{page.tsx,route.ts,index.ts,coinStore.ts,helpers/converter.ts}` | История цены, состояние деталей и пересчёт количества. |
-| `src/pages/portfolio/{page.tsx,route.ts,index.ts,portfolioStore.ts,storage.ts,helpers/valuation.ts,components/PortfolioSummary.tsx}` | Форма, действия с покупками, запись и согласование вкладок, оценка и круговая диаграмма. |
-| `tests/navigation.spec.ts`, `tests/market-client.test.ts`, `tests/market-fixture.ts`, `tests/home.spec.ts`, `tests/coin.spec.ts`, `tests/portfolio.spec.ts`, `tests/valuation.spec.ts`, `tests/recovery.spec.ts`, `tests/acceptance.spec.ts` | Контракт поставщика, управляемые рыночные ответы, браузерные сценарии и измерения. |
+| Файлы                                                                                                                                                                                                                                        | Ответственность                                                                                                                                     |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `package.json`, `index.html`, `tsconfig.json`, `vite.config.ts`, `playwright.config.ts`                                                                                                                                                      | npm workspace, HTML-вход, проверка типов, сборка и запуск браузерных проверок. Корневой `package-lock.json` обновляется при установке зависимостей. |
+| `src/main.tsx`, `src/app/{App.tsx,router.tsx,styles.css}`, `src/shared/constants/router-paths.ts`, `src/shared/ui/ApiText.tsx`                                                                                                               | Запуск SPA, сборка маршрутов, навигация, общие стили и буквальный вывод строк поставщика.                                                           |
+| `src/shared/market/client.ts`, `src/shared/market/resource.ts`                                                                                                                                                                               | Контракт с поставщиком, затем единый жизненный цикл рыночного блока и политика повторов.                                                            |
+| `src/pages/home/{page.tsx,route.ts,index.ts,homeStore.ts,helpers/selectRows.ts,helpers/debounce.ts}`                                                                                                                                         | Таблица, метрики, опрос, управление поиском и отбор строк.                                                                                          |
+| `src/pages/coin/{page.tsx,route.ts,index.ts,coinStore.ts,helpers/converter.ts}`                                                                                                                                                              | История цены, состояние деталей и пересчёт количества.                                                                                              |
+| `src/pages/portfolio/{page.tsx,route.ts,index.ts,portfolioStore.ts,storage.ts,helpers/valuation.ts,components/PortfolioSummary.tsx}`                                                                                                         | Форма, действия с покупками, запись и согласование вкладок, оценка и круговая диаграмма.                                                            |
+| `tests/navigation.spec.ts`, `tests/market-client.test.ts`, `tests/market-fixture.ts`, `tests/home.spec.ts`, `tests/coin.spec.ts`, `tests/portfolio.spec.ts`, `tests/valuation.spec.ts`, `tests/recovery.spec.ts`, `tests/acceptance.spec.ts` | Контракт поставщика, управляемые рыночные ответы, браузерные сценарии и измерения.                                                                  |
 
 Команды запускаются из корня. В `apps/invest/package.json` задать `dev` как `vite --host 127.0.0.1 --port 4174 --strictPort`, `build` как `npm run typecheck && vite build`, `typecheck` как `tsc --noEmit`, `test:market` как `node --test tests/market-client.test.ts`, `test:e2e` как `playwright test`. Коммит каждого этапа включает только перечисленные в его разделе изменения. Проверки используют данные из тестов, а реальный API используется при проверках подключения и фактического расхода квоты.
 
@@ -66,10 +66,10 @@
 - [ ] Написать `switches_screens_in_one_document`.
 
   ```ts
-  await expect(page.getByRole('heading', { name: 'Главная' })).toBeVisible()
-  await expect(page.getByRole('heading', { name: 'Портфель' })).toBeVisible()
-  await expect(page.getByRole('heading', { name: 'Детали монеты' })).toBeVisible()
-  expect(await page.evaluate(() => window.navigationMarker)).toBe('same-document')
+  await expect(page.getByRole("heading", { name: "Главная" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Портфель" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Детали монеты" })).toBeVisible();
+  expect(await page.evaluate(() => window.navigationMarker)).toBe("same-document");
   ```
 
   Открыть `/coin/bitcoin` напрямую. Установить маркер, перейти между экранами с клавиатуры и вернуться через историю браузера. Сверить адреса, сохранность маркера и доступные имена ссылок.
@@ -90,27 +90,27 @@
 
 `installMarketFixture(context: BrowserContext, respond: (url: URL) => FixtureResponse | Promise<FixtureResponse>): Promise<{requests: RecordedRequest[]}>`. `FixtureResponse` содержит `{status: number, json?: unknown, headers?: Record<string, string>}` или `{abort: true}`. `RecordedRequest` содержит `{url: string, method: string, body: string|null, atMs: number, status: number|null}`. Перехват действует в обеих вкладках контекста.
 
-| Метод и результат | Запрос |
-| --- | --- |
-| `getCatalog(options?): Promise<Array<{id: string, name: string}>>` | `/coins/list` с активным каталогом, без платформ. |
-| `getTop100(options?): Promise<Coin[]>` | `/coins/markets` в USD, по капитализации, `per_page=100`, `page=1`. |
-| `getMarkets(ids: string[], options?): Promise<Coin[]>` | `/coins/markets` в USD по ID, партии в пределах подтверждённых ограничений параметра и URL. |
-| `getGlobal(options?): Promise<{marketCap: number|null, marketCapChange24h: number|null, volume24h: number|null}>` | `/global`, поля `total_market_cap.usd`, `market_cap_change_percentage_24h_usd`, `total_volume.usd`. |
-| `getHistory(id: string, days: 1\|7\|30\|365, options?): Promise<Array<[number, number]>>` | `/coins/{id}/market_chart`, `vs_currency=usd`, `days`, массив `prices`. |
-| `getPrices(ids: string[], currencies: Currency[], options?): Promise<Record<string, Partial<Record<Currency, number>>>>` | `/simple/price`, список ID и валют. `Currency` равен `USD\|EUR\|BTC\|RUB`. |
-| `getExchangeRates(options?): Promise<Partial<Record<Currency, number>>>` | `/exchange_rates`, `rates.*.value` для USD/EUR/BTC/RUB, единиц валюты за 1 BTC. |
+| Метод и результат                                                                                                        | Запрос                                                                                      |
+| ------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------- |
+| `getCatalog(options?): Promise<Array<{id: string, name: string}>>`                                                       | `/coins/list` с активным каталогом, без платформ.                                           |
+| `getTop100(options?): Promise<Coin[]>`                                                                                   | `/coins/markets` в USD, по капитализации, `per_page=100`, `page=1`.                         |
+| `getMarkets(ids: string[], options?): Promise<Coin[]>`                                                                   | `/coins/markets` в USD по ID, партии в пределах подтверждённых ограничений параметра и URL. |
+| `getGlobal(options?): Promise<{marketCap: number                                                                         | null, marketCapChange24h: number                                                            | null, volume24h: number | null}>` | `/global`, поля `total_market_cap.usd`, `market_cap_change_percentage_24h_usd`, `total_volume.usd`. |
+| `getHistory(id: string, days: 1\|7\|30\|365, options?): Promise<Array<[number, number]>>`                                | `/coins/{id}/market_chart`, `vs_currency=usd`, `days`, массив `prices`.                     |
+| `getPrices(ids: string[], currencies: Currency[], options?): Promise<Record<string, Partial<Record<Currency, number>>>>` | `/simple/price`, список ID и валют. `Currency` равен `USD\|EUR\|BTC\|RUB`.                  |
+| `getExchangeRates(options?): Promise<Partial<Record<Currency, number>>>`                                                 | `/exchange_rates`, `rates.*.value` для USD/EUR/BTC/RUB, единиц валюты за 1 BTC.             |
 
 - [x] Проверить подключение из браузера от origin приложения с действующим Demo-ключом и заголовком `x-cg-demo-api-key`. Проверить каталог, поиск по ID вне топ-100, выбранные метрики, историю на 365 дней, `simple/price` в нужных валютах, `rates.usd` и `rates.rub` и доступность `Retry-After` для JavaScript при наличии заголовка в ответе. Зафиксировать CORS, актуальные лимиты и правила учёта. На дату плана опубликованы 100 запросов в минуту и 10 000 кредитов в месяц. Приёмочные пороги на этих лимитах — 80 запросов в минуту и 8 000 кредитов в месяц. Все статусы учитываются в минутном лимите, HTTP 200 — в месячных кредитах. Если прямая интеграция не подтверждается, зафиксировать расхождение до выбора другого допустимого варианта. [Авторизация](https://docs.coingecko.com/demo/reference/authentication) · [Лимиты тарифа](https://www.coingecko.com/en/api/pricing) · [Правила учёта](https://support.coingecko.com/articles/1864417806-how-does-coingecko-api-count-the-api-usage-credit)
 - [x] Написать `normalizes_market_payloads_and_errors` в `market-client.test.ts`. Моделировать HTTP через адаптер Axios, зафиксировать тестовое время для `Retry-After`. В `market-fixture.ts` реализовать `installMarketFixture` с перехватом запросов к `/api/v3/` на тестовом origin.
 
   ```ts
-  assert.equal(top[0].rank, 1)
-  assert.equal(markets[0].price, 0)
-  assert.equal(markets[1].marketCap, null)
-  assert.equal(historyQuery.get('days'), '365')
-  assert.deepEqual(emptyHistory, [])
-  assert.equal(rates.RUB / rates.USD, 90)
-  assert.deepEqual([error.kind, error.status, error.retryAt], ['rate-limit', 429, now + 45_000])
+  assert.equal(top[0].rank, 1);
+  assert.equal(markets[0].price, 0);
+  assert.equal(markets[1].marketCap, null);
+  assert.equal(historyQuery.get("days"), "365");
+  assert.deepEqual(emptyHistory, []);
+  assert.equal(rates.RUB / rates.USD, 90);
+  assert.deepEqual([error.kind, error.status, error.retryAt], ["rate-limit", 429, now + 45_000]);
   ```
 
   Дополнить проверками временной метки HTTP-date, `AbortError`, сетевого сбоя, 404, неполных котировок и повторяющихся ID. Убедиться, что запросы используют только рыночные параметры и что заголовок API не попадает в URL.
@@ -137,14 +137,18 @@ CoinGecko публикует для Demo 100 запросов в минуту и
 - [x] Написать `shows_top_100_and_searches_full_catalog`, `combines_price_and_sort`, `explains_metrics` и `ignores_late_search`. До первого ответа проверить Skeleton. Задать управляемые таймеры и два ответа поиска с обратным порядком завершения.
 
   ```ts
-  await expect(coinRows).toHaveCount(100) // каталог содержит 105 монет с рангами
-  await expect(exampleCoin).toBeVisible() // PLEco находит ранг 120
-  expect(searchRequestsAt299ms).toBe(0)
-  expect(sortedSearchRows).toEqual(expectedFirst100Of120)
-  expect(pricesByFixture).toEqual([[10, 20], [5, 10, 20], [10, 20, 25]])
-  await expect(apiName).toHaveText('<b>Пример</b>')
-  await expect(metricCards).toHaveCount(4)
-  await expect(coinRows).toHaveText(latestQueryNames)
+  await expect(coinRows).toHaveCount(100); // каталог содержит 105 монет с рангами
+  await expect(exampleCoin).toBeVisible(); // PLEco находит ранг 120
+  expect(searchRequestsAt299ms).toBe(0);
+  expect(sortedSearchRows).toEqual(expectedFirst100Of120);
+  expect(pricesByFixture).toEqual([
+    [10, 20],
+    [5, 10, 20],
+    [10, 20, 25]
+  ]);
+  await expect(apiName).toHaveText("<b>Пример</b>");
+  await expect(metricCards).toHaveCount(4);
+  await expect(coinRows).toHaveText(latestQueryNames);
   ```
 
   Проверить очистку поиска при активных фильтре и сортировке, включая очистку до завершения запроса, нечисловые и отрицательные границы, пропуски при фильтрации и сортировке, оба направления на пяти столбцах, знаки и цвета `+2%`, `−2%`, `0%`, состояние «ничего не найдено». Проверить открытие и закрытие пояснений мышью, с клавиатуры и касанием, включая касание вне пояснения.
@@ -165,13 +169,19 @@ CoinGecko публикует для Demo 100 запросов в минуту и
 - [x] Написать `opens_known_and_unknown_urls`, `shows_selected_history`, `converts_loaded_prices` и `ignores_late_history`. Проверить начальный Skeleton, два известных URL, неизменный неизвестный URL и кнопку возврата. Проверить запросы всех четырёх периодов, пустой ответ, ошибку, успешное переключение после обоих состояний и запоздавший ответ предыдущего периода.
 
   ```ts
-  expect(requestedPeriods).toEqual([7, 1, 7, 30, 365])
-  await expect(page.getByText('Монета не найдена')).toBeVisible()
-  await expect(page.getByText('За этот период нет данных')).toBeVisible()
-  await expect(conversion).toHaveText('80,00 EUR') // 100 USD, 1 EUR = 1,25 USD
-  expect(formattedExamples).toEqual(['12,00 USD', '1,25 EUR', '0,12500000 BTC', '< 0,01 USD', '< 0,00000001 BTC'])
-  expect(invalidQuantity).toEqual(['0,00 USD', '0,00 EUR', '0,00000000 BTC'])
-  await expect(conversion).toHaveText('Курс недоступен')
+  expect(requestedPeriods).toEqual([7, 1, 7, 30, 365]);
+  await expect(page.getByText("Монета не найдена")).toBeVisible();
+  await expect(page.getByText("За этот период нет данных")).toBeVisible();
+  await expect(conversion).toHaveText("80,00 EUR"); // 100 USD, 1 EUR = 1,25 USD
+  expect(formattedExamples).toEqual([
+    "12,00 USD",
+    "1,25 EUR",
+    "0,12500000 BTC",
+    "< 0,01 USD",
+    "< 0,00000001 BTC"
+  ]);
+  expect(invalidQuantity).toEqual(["0,00 USD", "0,00 EUR", "0,00000000 BTC"]);
+  await expect(conversion).toHaveText("Курс недоступен");
   ```
 
   Проверить начальное количество 1, ввод 2,5, приоритет прямой котировки, независимость валют и нулевой результат для пустого ввода, текста, нуля и отрицательного значения при загруженных ценах. При загрузке 1 дня и последующем выборе 30 дней задержанный ответ 1 дня не меняет график за 30 дней.
@@ -192,12 +202,14 @@ CoinGecko публикует для Demo 100 запросов в минуту и
 - [ ] Написать `adds_persists_and_retries_purchase` и `recovers_from_storage_error`. Открыть пустой портфель напрямую. Проверить поиск в форме по названию, доступность рангов 1 и 100 и отсутствие ранга 101. Отдельно проверить отсутствие выбора и значения `''`, текст, `0`, отрицательные числа. При отказе сверить сохранность полей и ошибки рядом с полями.
 
   ```ts
-  await expect(page.getByText('Портфель пока пуст')).toBeVisible()
-  await expect(portfolioCurrency).toHaveValue('RUB')
-  expect(saved.purchases).toEqual([{ coinId: 'coin-1', quantity: 0.5, unitPrice: 25.75, currency: 'RUB', rubPerUsd: 90 }])
-  await expect(page.getByText('Курс USD/RUB недоступен')).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Добавить покупку' })).toBeDisabled()
-  expect(restored.purchases).toEqual(confirmed.purchases)
+  await expect(page.getByText("Портфель пока пуст")).toBeVisible();
+  await expect(portfolioCurrency).toHaveValue("RUB");
+  expect(saved.purchases).toEqual([
+    { coinId: "coin-1", quantity: 0.5, unitPrice: 25.75, currency: "RUB", rubPerUsd: 90 }
+  ]);
+  await expect(page.getByText("Курс USD/RUB недоступен")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Добавить покупку" })).toBeDisabled();
+  expect(restored.purchases).toEqual(confirmed.purchases);
   ```
 
   Двойная отправка при задержанном курсе даёт одну запись. После успеха форма очищается, ещё одна такая же отправка даёт вторую запись. При сбое курса после успешной прошлой покупки, отсутствии RUB в успешном ответе и ошибке записи форма и прежние покупки сохраняются, успешный повтор добавляет одну запись. При сбое чтения «Повторить» восстанавливает все подтверждённые записи и доступность формы. Проверить перезагрузку, повторное открытие, отдельный контекст и отсутствие данных покупок в рыночных запросах.
@@ -205,10 +217,10 @@ CoinGecko публикует для Demo 100 запросов в минуту и
 - [ ] Написать `syncs_purchases_in_both_directions` и `preserves_first_purchase_on_conflict`. Открыть две страницы одного контекста. Для конфликта задержать второй ответ курса, начать обе отправки на одной ревизии, дождаться подтверждения первой, затем отпустить второй ответ. Доставку сообщения во вторую вкладку в этом тесте задержать до её попытки записи, сохранив обычный `BroadcastChannel` в тесте синхронизации.
 
   ```ts
-  expect(afterConflict.purchases).toEqual([firstPurchase])
-  await expect(secondTab.getByLabel('Количество')).toHaveValue('0,5')
-  await expect(secondTab.getByRole('status')).toContainText('Повторите добавление')
-  expect(afterRetry.purchases).toEqual([firstPurchase, secondPurchase])
+  expect(afterConflict.purchases).toEqual([firstPurchase]);
+  await expect(secondTab.getByLabel("Количество")).toHaveValue("0,5");
+  await expect(secondTab.getByRole("status")).toContainText("Повторите добавление");
+  expect(afterRetry.purchases).toEqual([firstPurchase, secondPurchase]);
   ```
 
 - [ ] Запустить `npm run test:e2e -w invest -- portfolio.spec.ts`. Ожидание RED — форма и сохранение отсутствуют.
@@ -229,13 +241,13 @@ CoinGecko публикует для Demo 100 запросов в минуту и
 - [ ] Написать `values_purchases_in_both_currencies`, `distinguishes_missing_and_zero_prices` и `handles_200_purchases_across_two_tabs`. Для PnL использовать контрольные покупки 2 × 100 и 3 × 20 и котировки для стоимости 270, 250 и 260. Для долей — позиции 240 и 30. Для валют — покупки на 100 USD по курсу 90 и 10 000 RUB по курсу 100 при текущем курсе 110. Проверить те же затраты после повторного открытия.
 
   ```ts
-  expect(shownPnls).toEqual([10, -10, 0])
-  expect(shownShares[0]).toBeCloseTo(100 * 240 / 270, 2)
-  expect(shownShares[1]).toBeCloseTo(100 * 30 / 270, 2)
-  expect(costsByCurrency).toEqual({ USD: 200, RUB: 19_000 })
-  expect(zeroValuation).toEqual({ total: 0, pnl: -200 })
-  await expect(page.getByText('Доли недоступны при нулевой стоимости портфеля')).toBeVisible()
-  expect([firstTabPurchaseCount, secondTabPurchaseCount]).toEqual([200, 200])
+  expect(shownPnls).toEqual([10, -10, 0]);
+  expect(shownShares[0]).toBeCloseTo((100 * 240) / 270, 2);
+  expect(shownShares[1]).toBeCloseTo((100 * 30) / 270, 2);
+  expect(costsByCurrency).toEqual({ USD: 200, RUB: 19_000 });
+  expect(zeroValuation).toEqual({ total: 0, pnl: -200 });
+  await expect(page.getByText("Доли недоступны при нулевой стоимости портфеля")).toBeVisible();
+  expect([firstTabPurchaseCount, secondTabPurchaseCount]).toEqual([200, 200]);
   ```
 
   Затраты получить из разности показанных стоимости и PnL, доли — из подписей диаграммы. Покупка с ID вне топ-100 сперва остаётся без котировки, затем получает цену 0. До появления цены проверить имя монеты и три недоступных результата, после — известную нулевую цену и сводку. Пустой портфель скрывает сводку и диаграмму. При изменении цены проверить новые доли. В двух вкладках начать со 199 покупок по 20 монетам, добавить 200-ю по уже представленной монете и сверить расчёты с полным набором.
@@ -256,16 +268,16 @@ CoinGecko публикует для Demo 100 запросов в минуту и
 - [ ] Написать `polls_without_hiding_or_resetting_the_table`, `recovers_from_429_and_network_failure` и `stops_obsolete_retries_on_navigation`. Использовать управляемое время и задержанные HTTP-ответы, проверить таблицу и карточки отдельно. После успешного первого ответа ждать 60 секунд, задержать следующий запрос больше одного интервала и проверить пропуск пересекающегося опроса. На деталях и в портфеле при неизменных параметрах проверить отсутствие периодического опроса.
 
   ```ts
-  expect(pollIntervalMs).toBe(60_000)
-  expect(concurrentUpdates).toBe(1)
-  expect(scrollOffsets).toEqual([600, 400])
-  await expect(table).toBeVisible()
-  await expect(initialSkeleton).toHaveCount(0)
-  await expect(block).toContainText('Данные временно недоступны')
-  await expect(block).toContainText('Могут быть устаревшими')
-  expect(retryAt - received429At).toBeGreaterThanOrEqual(45_000)
-  await expect(block).not.toContainText('Могут быть устаревшими')
-  expect(obsoleteRetriesAfterLeavingHome).toBe(0)
+  expect(pollIntervalMs).toBe(60_000);
+  expect(concurrentUpdates).toBe(1);
+  expect(scrollOffsets).toEqual([600, 400]);
+  await expect(table).toBeVisible();
+  await expect(initialSkeleton).toHaveCount(0);
+  await expect(block).toContainText("Данные временно недоступны");
+  await expect(block).toContainText("Могут быть устаревшими");
+  expect(retryAt - received429At).toBeGreaterThanOrEqual(45_000);
+  await expect(block).not.toContainText("Могут быть устаревшими");
+  expect(obsoleteRetriesAfterLeavingHome).toBe(0);
   ```
 
   Для смещений использовать старое 600 и новые максимумы 800 и 400. Проверить индикатор при видимой таблице и его исчезновение после завершения. Воспроизвести 429 и сетевой сбой при первой загрузке и при наличии данных, включая конвертер и портфель. Проверить уведомление и доступность навигации. История показывает ошибку и оставляет смену периода. После пяти минут отсутствия сети восстановить доступ и дождаться свежих данных без действий пользователя. Во второй вкладке проверить соблюдение общего срока ожидания после полученного в первой вкладке HTTP 429. Уйти с главной во время `Retry-After` и подтвердить, что актуальный экран сохраняется. Задержать начальный запрос loader, сменить маршрут и проверить отмену запроса и сохранность текущего экрана. При успешном входе проверить, что подключение экрана к Zustand не дублирует начальные запросы.
@@ -288,10 +300,10 @@ CoinGecko публикует для Demo 100 запросов в минуту и
 - [ ] Суммировать сетевые запросы обеих вкладок по правилам тарифа. Для минутного лимита проверить пиковый расход в применимом минутном окне, для месячного — кредиты, израсходованные сессией в текущем расчётном месяце. Записать опубликованные пороги, единицы учёта, границы окон и измеренный расход. При проверке месячных кредитов на реальном API снять показания до и после сессии в пределах одного расчётного месяца с ключом, который используется только для этой проверки. Вывод о квоте относится к приёмочной сессии.
 
   ```ts
-  expect(conversionMs).toBeLessThanOrEqual(200)
-  expect(syncMs).toBeLessThanOrEqual(1_000)
-  expect(combinedRequestsPerMinute).toBeLessThanOrEqual(Math.floor(minuteLimit * 0.8))
-  expect(combinedMonthlyCredits).toBeLessThanOrEqual(Math.floor(monthlyLimit * 0.8))
+  expect(conversionMs).toBeLessThanOrEqual(200);
+  expect(syncMs).toBeLessThanOrEqual(1_000);
+  expect(combinedRequestsPerMinute).toBeLessThanOrEqual(Math.floor(minuteLimit * 0.8));
+  expect(combinedMonthlyCredits).toBeLessThanOrEqual(Math.floor(monthlyLimit * 0.8));
   ```
 
 - [ ] Запустить `npm run build -w invest`, `npm run test:market -w invest` и `npm run test:e2e -w invest`. Ожидание — сборка, HTTP-контракт и браузерные сценарии проходят.
@@ -303,13 +315,13 @@ CoinGecko публикует для Demo 100 запросов в минуту и
 
 ## Трассировка требований
 
-| Блок | Требования | Задачи |
-| --- | --- | --- |
-| Цели учебной приёмки | БТ-01–04, В-БТ-01 | 8 |
-| Навигация и рынок | ФТ-01–09, ФТ-29, ФТ-35–36, В-ФТ-01–02 | 1–3, 8 |
-| Детали монеты | ФТ-10–13, ФТ-37–42, В-ФТ-03–04 | 2, 4, 7–8 |
-| Покупки и оценка | ФТ-14–24, ФТ-43–49, ФТ-53–58, В-ФТ-05–06, В-ФТ-09–11 | 2, 5–6, 8 |
-| Загрузка, опрос и сбои | ФТ-25–28, ФТ-30–34, ФТ-50–52, В-ФТ-07–08 | 3–8 |
-| Стек, данные и ограничения реализации | НФТ-01–17, В-НФТ-05–07 | 1–7 |
-| Метрики, нагрузка и восстановление | НФТ-18–20, НФТ-22–26, В-НФТ-01–03 | 2, 5–8 |
-| Удобство, совместимость и доступность | НФТ-21, НФТ-27–31, В-НФТ-04 | 1, 3–6, 8 |
+| Блок                                  | Требования                                           | Задачи    |
+| ------------------------------------- | ---------------------------------------------------- | --------- |
+| Цели учебной приёмки                  | БТ-01–04, В-БТ-01                                    | 8         |
+| Навигация и рынок                     | ФТ-01–09, ФТ-29, ФТ-35–36, В-ФТ-01–02                | 1–3, 8    |
+| Детали монеты                         | ФТ-10–13, ФТ-37–42, В-ФТ-03–04                       | 2, 4, 7–8 |
+| Покупки и оценка                      | ФТ-14–24, ФТ-43–49, ФТ-53–58, В-ФТ-05–06, В-ФТ-09–11 | 2, 5–6, 8 |
+| Загрузка, опрос и сбои                | ФТ-25–28, ФТ-30–34, ФТ-50–52, В-ФТ-07–08             | 3–8       |
+| Стек, данные и ограничения реализации | НФТ-01–17, В-НФТ-05–07                               | 1–7       |
+| Метрики, нагрузка и восстановление    | НФТ-18–20, НФТ-22–26, В-НФТ-01–03                    | 2, 5–8    |
+| Удобство, совместимость и доступность | НФТ-21, НФТ-27–31, В-НФТ-04                          | 1, 3–6, 8 |

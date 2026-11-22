@@ -8,6 +8,6 @@ import { App } from "./App";
 export const router = createBrowserRouter([
   {
     Component: App,
-    children: [homeRoute, coinRoute, portfolioRoute, homeFallbackRoute],
-  },
+    children: [homeRoute, coinRoute, portfolioRoute, homeFallbackRoute]
+  }
 ]);

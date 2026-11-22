@@ -39,7 +39,7 @@ export const useCoinStore = create<CoinState>()((set, get) => {
         history: data.status === "ready" ? data.history : null,
         period: initialPeriod,
         quantity: "1",
-        currency: "USD",
+        currency: "USD"
       });
     },
     setPeriod: async (period) => {
@@ -62,6 +62,6 @@ export const useCoinStore = create<CoinState>()((set, get) => {
     },
     setQuantity: (quantity) => set({ quantity }),
     setCurrency: (currency) => set({ currency }),
-    stop,
+    stop
   };
 });

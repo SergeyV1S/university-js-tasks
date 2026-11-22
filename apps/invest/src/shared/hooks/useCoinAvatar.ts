@@ -10,14 +10,15 @@ const symbols = new Map<string, readonly [string, string, string]>([
   ["ripple", ["#28313a", "#d4dcea", "X"]],
   ["dogecoin", ["#312b1e", "#ebca91", "Ð"]],
   ["the-open-network", ["#1a2b38", "#83d5fb", "T"]],
-  ["cardano", ["#212940", "#aabafe", "A"]],
+  ["cardano", ["#212940", "#aabafe", "A"]]
 ]);
 
 export const useCoinAvatar = (coin: Pick<Coin, "id" | "name" | "symbol" | "image">) => {
   const [failedImage, setFailedImage] = useState<string | null>(null);
   const symbol = symbols.get(coin.id);
   const image = coin.image !== failedImage ? coin.image : null;
-  const fallback = image || symbol ? "" : Array.from(coin.symbol ?? coin.name)[0]?.toUpperCase() ?? "";
+  const fallback =
+    image || symbol ? "" : (Array.from(coin.symbol ?? coin.name)[0]?.toUpperCase() ?? "");
   const handleImageError = () => setFailedImage(coin.image ?? null);
 
   return { symbol, image, fallback, handleImageError };

@@ -5,5 +5,5 @@ import { PortfolioPage } from "./page";
 
 export const portfolioRoute = {
   path: PATHS.PORTFOLIO,
-  Component: PortfolioPage,
+  Component: PortfolioPage
 } satisfies RouteObject;

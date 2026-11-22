@@ -6,7 +6,7 @@ const periods = [
   { days: 1, label: "1 д" },
   { days: 7, label: "7 д" },
   { days: 30, label: "30 д" },
-  { days: 365, label: "1 год" },
+  { days: 365, label: "1 год" }
 ] as const satisfies ReadonlyArray<{ days: HistoryDays; label: string }>;
 
 export const useCoinHistory = (pending: boolean) => {
@@ -18,7 +18,9 @@ export const useCoinHistory = (pending: boolean) => {
   const options = periods.map((option) => ({
     ...option,
     selected: option.days === active,
-    select: () => { void setPeriod(option.days); },
+    select: () => {
+      void setPeriod(option.days);
+    }
   }));
 
   return { options, period: active, history: pending ? null : history };

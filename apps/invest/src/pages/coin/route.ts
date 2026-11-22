@@ -8,5 +8,5 @@ export const coinRoute = {
   path: PATHS.COIN,
   Component: CoinPage,
   HydrateFallback: CoinPending,
-  loader: ({ params, request }: LoaderFunctionArgs) => loadCoin(params.coinId ?? "", request.signal),
+  loader: ({ params, request }: LoaderFunctionArgs) => loadCoin(params.coinId ?? "", request.signal)
 } satisfies RouteObject;

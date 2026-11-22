@@ -1,7 +1,14 @@
 import { marketError } from "./helpers.ts";
 import { createMarketInstance } from "./instance.ts";
 import { createMarketRequests } from "./requests.ts";
-import type { CatalogCoin, Coin, Currency, MarketClient, MarketInstanceOptions, Quotes } from "./type.ts";
+import type {
+  CatalogCoin,
+  Coin,
+  Currency,
+  MarketClient,
+  MarketInstanceOptions,
+  Quotes
+} from "./type.ts";
 
 declare const __INVEST_DEV_MARKET_DEMO_KEY__: string;
 
@@ -27,7 +34,7 @@ const readArray = (value: unknown): unknown[] => {
 const isNumber = (value: unknown): value is number =>
   typeof value === "number" && Number.isFinite(value);
 
-const numberOrNull = (value: unknown) => isNumber(value) ? value : null;
+const numberOrNull = (value: unknown) => (isNumber(value) ? value : null);
 
 const readCoinIdentity = ({ id, name, symbol }: Record<string, unknown>): CatalogCoin => {
   if (typeof id !== "string" || id.length === 0 || typeof name !== "string" || name.length === 0) {
@@ -36,21 +43,23 @@ const readCoinIdentity = ({ id, name, symbol }: Record<string, unknown>): Catalo
   return typeof symbol === "string" && symbol ? { id, name, symbol } : { id, name };
 };
 
-const readCoins = (value: unknown): Coin[] => readArray(value).map((item) => {
-  const coin = readObject(item);
-  return {
-    ...readCoinIdentity(coin),
-    ...(typeof coin.image === "string" && coin.image.startsWith("https://") && { image: coin.image }),
-    rank: numberOrNull(coin.market_cap_rank),
-    price: numberOrNull(coin.current_price),
-    change24h: numberOrNull(coin.price_change_percentage_24h),
-    marketCap: numberOrNull(coin.market_cap),
-  };
-});
+const readCoins = (value: unknown): Coin[] =>
+  readArray(value).map((item) => {
+    const coin = readObject(item);
+    return {
+      ...readCoinIdentity(coin),
+      ...(typeof coin.image === "string" &&
+        coin.image.startsWith("https://") && { image: coin.image }),
+      rank: numberOrNull(coin.market_cap_rank),
+      price: numberOrNull(coin.current_price),
+      change24h: numberOrNull(coin.price_change_percentage_24h),
+      marketCap: numberOrNull(coin.market_cap)
+    };
+  });
 
 const readQuotes = (
   currencies: readonly Currency[],
-  readValue: (code: string) => unknown,
+  readValue: (code: string) => unknown
 ): Quotes => {
   const quotes: Quotes = {};
   for (const currency of currencies) {
@@ -64,7 +73,7 @@ const batchByUrl = <Params>(
   ids: string[],
   maxIds: number,
   buildParams: (ids: string[]) => Params,
-  getUri: (params: Params) => string,
+  getUri: (params: Params) => string
 ) => {
   const batches: Array<{ ids: string[]; params: Params }> = [];
   let batch: string[] = [];
@@ -95,15 +104,19 @@ export const createApiClient = (config: MarketInstanceOptions): MarketClient => 
       const payload = await requests.getCoinsList(options);
       return readArray(payload).map((coin) => readCoinIdentity(readObject(coin)));
     },
-    getTop100: async (options) => readCoins(await requests.getCoinsMarkets(
-      { ...USD_MARKETS, per_page: 100 }, options,
-    )),
+    getTop100: async (options) =>
+      readCoins(await requests.getCoinsMarkets({ ...USD_MARKETS, per_page: 100 }, options)),
     getMarkets: async (ids, options) => {
-      const batches = batchByUrl(ids, MARKETS_PAGE_SIZE, (batch) => ({
-        ...USD_MARKETS,
-        per_page: batch.length,
-        ids: batch.join(","),
-      }), requests.getCoinsMarketsUri);
+      const batches = batchByUrl(
+        ids,
+        MARKETS_PAGE_SIZE,
+        (batch) => ({
+          ...USD_MARKETS,
+          per_page: batch.length,
+          ids: batch.join(",")
+        }),
+        requests.getCoinsMarketsUri
+      );
       const coins: Coin[] = [];
       for (const { params } of batches) {
         coins.push(...readCoins(await requests.getCoinsMarkets(params, options)));
@@ -115,11 +128,13 @@ export const createApiClient = (config: MarketInstanceOptions): MarketClient => 
       const data = readObject(payload.data);
       const shares = isRecord(data.market_cap_percentage) ? data.market_cap_percentage : {};
       return {
-        marketCap: numberOrNull(isRecord(data.total_market_cap) ? data.total_market_cap.usd : undefined),
+        marketCap: numberOrNull(
+          isRecord(data.total_market_cap) ? data.total_market_cap.usd : undefined
+        ),
         marketCapChange24h: numberOrNull(data.market_cap_change_percentage_24h_usd),
         volume24h: numberOrNull(isRecord(data.total_volume) ? data.total_volume.usd : undefined),
         bitcoinShare: numberOrNull(shares.btc),
-        ethereumShare: numberOrNull(shares.eth),
+        ethereumShare: numberOrNull(shares.eth)
       };
     },
     getHistory: async (id, days, options) => {
@@ -136,10 +151,15 @@ export const createApiClient = (config: MarketInstanceOptions): MarketClient => 
       if (requestedCurrencies.length === 0) return {};
 
       const vsCurrencies = requestedCurrencies.map((currency) => currency.toLowerCase()).join(",");
-      const batches = batchByUrl(ids, SIMPLE_PRICE_MAX_IDS, (batch) => ({
-        ids: batch.join(","),
-        vs_currencies: vsCurrencies,
-      }), requests.getSimplePriceUri);
+      const batches = batchByUrl(
+        ids,
+        SIMPLE_PRICE_MAX_IDS,
+        (batch) => ({
+          ids: batch.join(","),
+          vs_currencies: vsCurrencies
+        }),
+        requests.getSimplePriceUri
+      );
       const prices: Array<[string, Quotes]> = [];
       for (const { ids: batch, params } of batches) {
         const payload = readObject(await requests.getSimplePrice(params, options));
@@ -159,7 +179,7 @@ export const createApiClient = (config: MarketInstanceOptions): MarketClient => 
         const rate = rates[code];
         return isRecord(rate) ? rate.value : undefined;
       });
-    },
+    }
   };
 };
 
@@ -168,8 +188,7 @@ const baseUrl = import.meta.env?.VITE_INVEST_MARKET_BASE || "https://api.coingec
 export const apiClient = createApiClient({
   baseUrl,
   get apiKey() {
-    if (typeof __INVEST_DEV_MARKET_DEMO_KEY__ !== "undefined"
-      && __INVEST_DEV_MARKET_DEMO_KEY__) {
+    if (typeof __INVEST_DEV_MARKET_DEMO_KEY__ !== "undefined" && __INVEST_DEV_MARKET_DEMO_KEY__) {
       return __INVEST_DEV_MARKET_DEMO_KEY__;
     }
     try {
@@ -177,5 +196,5 @@ export const apiClient = createApiClient({
     } catch {
       return undefined;
     }
-  },
+  }
 });

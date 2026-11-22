@@ -40,7 +40,7 @@ export const useHomeStore = create<HomeState>()((set, get) => {
   const search = async (query: string, controller: AbortController) => {
     const { signal } = controller;
     try {
-      const entries = catalog ?? await apiClient.getCatalog({ signal });
+      const entries = catalog ?? (await apiClient.getCatalog({ signal }));
       if (searchRequest !== controller || signal.aborted) return;
 
       catalog = entries;
@@ -100,7 +100,7 @@ export const useHomeStore = create<HomeState>()((set, get) => {
         refreshing: false,
         range: emptyRange,
         sort: initialSort,
-        sortedByUser: false,
+        sortedByUser: false
       });
     },
 
@@ -133,9 +133,14 @@ export const useHomeStore = create<HomeState>()((set, get) => {
 
     sortBy: (key) => {
       const { sort } = get();
-      const direction = sort.key === key
-        ? (sort.direction === "asc" ? "desc" : "asc")
-        : (key === "price" ? "desc" : "asc");
+      const direction =
+        sort.key === key
+          ? sort.direction === "asc"
+            ? "desc"
+            : "asc"
+          : key === "price"
+            ? "desc"
+            : "asc";
       set({ sort: { key, direction }, sortedByUser: true });
     },
 
@@ -153,7 +158,7 @@ export const useHomeStore = create<HomeState>()((set, get) => {
           top: data.top ?? top,
           metrics: data.metrics ?? metrics,
           marketError: data.top === null || data.metrics === null,
-          updatedAt: data.top !== null || data.metrics !== null ? data.updatedAt : updatedAt,
+          updatedAt: data.top !== null || data.metrics !== null ? data.updatedAt : updatedAt
         });
 
         if (!searching && query.trim()) {
@@ -172,6 +177,6 @@ export const useHomeStore = create<HomeState>()((set, get) => {
       }
     },
 
-    stop,
+    stop
   };
 });

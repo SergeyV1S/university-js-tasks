@@ -16,7 +16,8 @@ export const useMarketMetrics = (metrics: HomeInitialData["metrics"]) => {
     if (openIndex === undefined) return;
 
     const dismissOutside = (event: PointerEvent) => {
-      if (event.target instanceof Node && !activeCard.current?.contains(event.target)) setOpen(null);
+      if (event.target instanceof Node && !activeCard.current?.contains(event.target))
+        setOpen(null);
     };
 
     const dismissOnEscape = (event: KeyboardEvent) => {
@@ -41,28 +42,33 @@ export const useMarketMetrics = (metrics: HomeInitialData["metrics"]) => {
   const cards = buildCards(metrics).map(({ title, description, value, change }, index) => {
     const handlePointerLeave = (event: ReactPointerEvent<HTMLElement>) => {
       if (event.pointerType !== "mouse") return;
-      setOpen((current) => current?.index === index && !current.pinned ? null : current);
+      setOpen((current) => (current?.index === index && !current.pinned ? null : current));
     };
 
     const handlePointerEnter = (event: ReactPointerEvent<HTMLButtonElement>) => {
       if (event.pointerType !== "mouse") return;
-      setOpen((current) => current?.pinned ? current : { index, pinned: false });
+      setOpen((current) => (current?.pinned ? current : { index, pinned: false }));
     };
 
     const toggleExplanation = () => {
-      setOpen((current) => current?.index === index && current.pinned ? null : { index, pinned: true });
+      setOpen((current) =>
+        current?.index === index && current.pinned ? null : { index, pinned: true }
+      );
     };
 
     return {
       title,
       description,
       value: value || "—",
-      change: change == null ? null : { label: `${formatPercent(change, true)} за 24 ч`, color: percentColor(change) },
+      change:
+        change == null
+          ? null
+          : { label: `${formatPercent(change, true)} за 24 ч`, color: percentColor(change) },
       visible: openIndex === index,
       explanationId: `market-metric-${index}`,
       handlePointerLeave,
       handlePointerEnter,
-      toggleExplanation,
+      toggleExplanation
     };
   });
 

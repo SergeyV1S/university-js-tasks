@@ -4,16 +4,24 @@ import type { Page } from "@playwright/test";
 import { installMarketFixture } from "./market-fixture";
 import type { FixtureResponse } from "./market-fixture";
 
-const coin = (rank: number, name: string, price: number | null, change = 0, cap: number | null = rank * 10) => ({
+const coin = (
+  rank: number,
+  name: string,
+  price: number | null,
+  change = 0,
+  cap: number | null = rank * 10
+) => ({
   id: `coin-${rank}`,
   name,
   market_cap_rank: rank,
   current_price: price,
   price_change_percentage_24h: change,
-  market_cap: cap,
+  market_cap: cap
 });
 
-const catalog = Array.from({ length: 120 }, (_, index) => coin(index + 1, `Market ${index + 1}`, index + 1));
+const catalog = Array.from({ length: 120 }, (_, index) =>
+  coin(index + 1, `Market ${index + 1}`, index + 1)
+);
 catalog[104] = coin(105, "<b>Пример</b>", 12);
 catalog[119] = coin(120, "ExampleCoin", 25);
 
@@ -21,7 +29,7 @@ const globalMetrics = {
   total_market_cap: { usd: 2.51e12 },
   total_volume: { usd: 76.4e9 },
   market_cap_change_percentage_24h_usd: 1.86,
-  market_cap_percentage: { btc: 53.2, eth: 17.1 },
+  market_cap_percentage: { btc: 53.2, eth: 17.1 }
 };
 
 const respond = (url: URL, top = catalog.slice(0, 105), all = catalog): FixtureResponse => {
@@ -33,7 +41,9 @@ const respond = (url: URL, top = catalog.slice(0, 105), all = catalog): FixtureR
 
 const defer = () => {
   let resolve = () => {};
-  const promise = new Promise<void>((release) => { resolve = release; });
+  const promise = new Promise<void>((release) => {
+    resolve = release;
+  });
   return { promise, resolve };
 };
 
@@ -43,7 +53,8 @@ const search = (page: Page) => page.getByRole("searchbox", { name: "Поиск �
 test("shows_top_100_and_searches_full_catalog", async ({ context, page }) => {
   const initial = defer();
   const fixture = await installMarketFixture(context, async (url) => {
-    if (!url.searchParams.has("ids") && url.pathname.endsWith("/coins/markets")) await initial.promise;
+    if (!url.searchParams.has("ids") && url.pathname.endsWith("/coins/markets"))
+      await initial.promise;
     return respond(url);
   });
 
@@ -52,13 +63,17 @@ test("shows_top_100_and_searches_full_catalog", async ({ context, page }) => {
   initial.resolve();
   await expect(coinLinks(page)).toHaveCount(100);
   await expect(coinLinks(page).last()).toHaveText("Market 100");
-  expect(fixture.requests.some(({ url }) => url.endsWith("/coins/list?include_platform=false"))).toBe(false);
+  expect(
+    fixture.requests.some(({ url }) => url.endsWith("/coins/list?include_platform=false"))
+  ).toBe(false);
 
   await page.clock.install();
   await page.clock.pauseAt(new Date(Date.now() + 1000));
   await search(page).fill("PLEco");
   await page.clock.runFor(299);
-  expect(fixture.requests.filter(({ url }) => new URL(url).searchParams.has("ids"))).toHaveLength(0);
+  expect(fixture.requests.filter(({ url }) => new URL(url).searchParams.has("ids"))).toHaveLength(
+    0
+  );
   await page.clock.runFor(1);
   await expect(coinLinks(page)).toHaveText(["ExampleCoin"]);
 
@@ -79,7 +94,12 @@ test("sorts all matches before taking the first 100", async ({ context, page }) 
   await search(page).fill("match");
   await expect(coinLinks(page)).toHaveCount(100);
   await page.getByRole("button", { name: "Сортировать по цене" }).click();
-  await expect(coinLinks(page)).toHaveText(all.slice(20).reverse().map(({ name }) => name));
+  await expect(coinLinks(page)).toHaveText(
+    all
+      .slice(20)
+      .reverse()
+      .map(({ name }) => name)
+  );
 });
 
 test("combines_price_and_sort", async ({ context, page }) => {
@@ -88,9 +108,11 @@ test("combines_price_and_sort", async ({ context, page }) => {
     coin(2, "Example B", 10, -2, 100),
     coin(3, "Example C", 20, 0, null),
     coin(4, "Example D", 25, 1, 200),
-    coin(5, "Example E", null, 3, 300),
+    coin(5, "Example E", null, 3, 300)
   ];
-  await installMarketFixture(context, (url) => respond(url, rows, [...rows, coin(120, "Example Extra", 12)]));
+  await installMarketFixture(context, (url) =>
+    respond(url, rows, [...rows, coin(120, "Example Extra", 12)])
+  );
   await page.goto("/");
   await expect(coinLinks(page)).toHaveCount(5);
   await expect(page.getByText("+2%", { exact: true })).toHaveCSS("color", "rgb(116, 216, 171)");
@@ -102,7 +124,7 @@ test("combines_price_and_sort", async ({ context, page }) => {
     { name: "по названию", asc: [0, 1, 2, 3, 4] },
     { name: "по цене", asc: [0, 1, 2, 3] },
     { name: "по изменению за сутки", asc: [1, 2, 3, 0, 4] },
-    { name: "по капитализации", asc: [1, 3, 4, 0] },
+    { name: "по капитализации", asc: [1, 3, 4, 0] }
   ];
   for (const { name, asc } of sortCases) {
     const button = page.getByRole("table").getByRole("button", { name: `Сортировать ${name}` });
@@ -128,7 +150,7 @@ test("combines_price_and_sort", async ({ context, page }) => {
   for (const [from, to, expected] of [
     ["20", "10", ["Example B", "Example C"]],
     ["", "20", ["Example A", "Example B", "Example C"]],
-    ["10", "", ["Example B", "Example C", "Example D"]],
+    ["10", "", ["Example B", "Example C", "Example D"]]
   ] as const) {
     if (await min.isHidden()) await page.getByRole("button", { name: "Диапазон цен" }).click();
     await min.fill(from);
@@ -138,7 +160,12 @@ test("combines_price_and_sort", async ({ context, page }) => {
   }
 
   await search(page).fill("example");
-  await expect(coinLinks(page)).toHaveText(["Example B", "Example Extra", "Example C", "Example D"]);
+  await expect(coinLinks(page)).toHaveText([
+    "Example B",
+    "Example Extra",
+    "Example C",
+    "Example D"
+  ]);
   await search(page).fill("");
   await expect(coinLinks(page)).toHaveText(["Example B", "Example C", "Example D"]);
 });
@@ -165,13 +192,18 @@ test("explains_metrics", async ({ browser, context, page }) => {
   await expect(explanation).toBeHidden();
   await expect(help).toBeFocused();
 
-  const mobile = await browser.newContext({ hasTouch: true, viewport: { width: 390, height: 844 } });
+  const mobile = await browser.newContext({
+    hasTouch: true,
+    viewport: { width: 390, height: 844 }
+  });
   try {
     await installMarketFixture(mobile, (url) => respond(url));
     const touchPage = await mobile.newPage();
     await touchPage.goto("http://127.0.0.1:4174/");
     const touchHelp = touchPage.getByRole("button", { name: "Подробнее: Капитализация рынка" });
-    const touchExplanation = touchPage.getByText("Суммарная стоимость криптовалют по рыночным ценам.");
+    const touchExplanation = touchPage.getByText(
+      "Суммарная стоимость криптовалют по рыночным ценам."
+    );
     await touchHelp.tap();
     await expect(touchExplanation).toBeVisible();
     await touchHelp.tap();
@@ -187,7 +219,12 @@ test("explains_metrics", async ({ browser, context, page }) => {
 test("ignores_late_search", async ({ context, page }) => {
   const older = defer();
   const cleared = defer();
-  const all = [...catalog, coin(121, "Older result", 3), coin(122, "Latest result", 2), coin(123, "Cleared result", 1)];
+  const all = [
+    ...catalog,
+    coin(121, "Older result", 3),
+    coin(122, "Latest result", 2),
+    coin(123, "Cleared result", 1)
+  ];
   const fixture = await installMarketFixture(context, async (url) => {
     if (url.searchParams.get("ids") === "coin-121") await older.promise;
     if (url.searchParams.get("ids") === "coin-123") await cleared.promise;
@@ -196,20 +233,27 @@ test("ignores_late_search", async ({ context, page }) => {
   await page.goto("/");
   await expect(coinLinks(page)).toHaveCount(100);
   await search(page).fill("older");
-  await expect.poll(() => fixture.requests.some(({ url }) => url.endsWith("ids=coin-121"))).toBe(true);
+  await expect
+    .poll(() => fixture.requests.some(({ url }) => url.endsWith("ids=coin-121")))
+    .toBe(true);
   await search(page).fill("latest");
   await expect(coinLinks(page)).toHaveText(["Latest result"]);
   older.resolve();
   await expect(coinLinks(page)).toHaveText(["Latest result"]);
   await search(page).fill("cleared");
-  await expect.poll(() => fixture.requests.some(({ url }) => url.endsWith("ids=coin-123"))).toBe(true);
+  await expect
+    .poll(() => fixture.requests.some(({ url }) => url.endsWith("ids=coin-123")))
+    .toBe(true);
   await search(page).fill("");
   cleared.resolve();
   await expect(coinLinks(page)).toHaveCount(100);
   await expect(coinLinks(page).first()).toHaveText("Market 1");
 });
 
-test("keeps catalog matches without quotes and independent market blocks available", async ({ context, page }) => {
+test("keeps catalog matches without quotes and independent market blocks available", async ({
+  context,
+  page
+}) => {
   const extra = coin(121, "Catalog Only", 7);
   let failTop = true;
 
@@ -253,6 +297,8 @@ test("switches the last mobile column and sorts by capitalization", async ({ con
   await expect(coinLinks(page)).toHaveText(["Ethereum", "Bitcoin"]);
   await toggle.click();
   await expect(page.getByText("+2%")).toBeVisible();
-  const horizontallyFits = await page.evaluate(() => document.documentElement.scrollWidth === window.innerWidth);
+  const horizontallyFits = await page.evaluate(
+    () => document.documentElement.scrollWidth === window.innerWidth
+  );
   expect(horizontallyFits).toBe(true);
 });

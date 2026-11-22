@@ -1,8 +1,7 @@
 import type { BrowserContext } from "@playwright/test";
 
 export type FixtureResponse =
-  | { status: number; json?: unknown; headers?: Record<string, string> }
-  | { abort: true };
+  { status: number; json?: unknown; headers?: Record<string, string> } | { abort: true };
 
 export type RecordedRequest = {
   url: string;
@@ -14,7 +13,7 @@ export type RecordedRequest = {
 
 export const installMarketFixture = async (
   context: BrowserContext,
-  respond: (url: URL) => FixtureResponse | Promise<FixtureResponse>,
+  respond: (url: URL) => FixtureResponse | Promise<FixtureResponse>
 ): Promise<{ requests: RecordedRequest[] }> => {
   const requests: RecordedRequest[] = [];
   const origin = "http://127.0.0.1:4174";
@@ -28,7 +27,7 @@ export const installMarketFixture = async (
         method: request.method(),
         body: request.postData(),
         atMs: Date.now(),
-        status: null,
+        status: null
       };
       requests.push(recorded);
 
@@ -40,7 +39,7 @@ export const installMarketFixture = async (
 
       await route.fulfill(result);
       recorded.status = result.status;
-    },
+    }
   );
 
   return { requests };

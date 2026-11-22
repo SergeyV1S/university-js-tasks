@@ -14,19 +14,28 @@ type PricesParams = { ids: string; vs_currencies: string };
 const marketsRequest = (params: MarketsParams) => ({ url: "coins/markets", method: "GET", params });
 const pricesRequest = (params: PricesParams) => ({ url: "simple/price", method: "GET", params });
 
-export const createMarketRequests = ({ request, getUri }: ReturnType<typeof createMarketInstance>) => ({
+export const createMarketRequests = ({
+  request,
+  getUri
+}: ReturnType<typeof createMarketInstance>) => ({
   getCoinsList: (options?: RequestOptions) =>
-    request<unknown>({ url: "coins/list", method: "GET", params: { include_platform: false } }, options),
+    request<unknown>(
+      { url: "coins/list", method: "GET", params: { include_platform: false } },
+      options
+    ),
 
   getCoinsMarkets: (params: MarketsParams, options?: RequestOptions) =>
     request<unknown>(marketsRequest(params), options),
 
   getCoinMarketChart: (id: string, days: number, options?: RequestOptions) =>
-    request<unknown>({
-      url: `coins/${encodeURIComponent(id)}/market_chart`,
-      method: "GET",
-      params: { vs_currency: "usd", days },
-    }, options),
+    request<unknown>(
+      {
+        url: `coins/${encodeURIComponent(id)}/market_chart`,
+        method: "GET",
+        params: { vs_currency: "usd", days }
+      },
+      options
+    ),
 
   getGlobalMarketData: (options?: RequestOptions) =>
     request<unknown>({ url: "global", method: "GET" }, options),
@@ -38,5 +47,5 @@ export const createMarketRequests = ({ request, getUri }: ReturnType<typeof crea
     request<unknown>({ url: "exchange_rates", method: "GET" }, options),
 
   getCoinsMarketsUri: (params: MarketsParams) => getUri(marketsRequest(params)),
-  getSimplePriceUri: (params: PricesParams) => getUri(pricesRequest(params)),
+  getSimplePriceUri: (params: PricesParams) => getUri(pricesRequest(params))
 });

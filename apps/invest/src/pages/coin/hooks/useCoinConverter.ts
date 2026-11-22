@@ -3,7 +3,12 @@ import type { ChangeEvent, SubmitEvent } from "react";
 
 import type { ConverterData } from "../api";
 import { useCoinStore } from "../coinStore";
-import { converterCurrencies, formatConversion, isQuote, unavailableRate } from "../helpers/converter";
+import {
+  converterCurrencies,
+  formatConversion,
+  isQuote,
+  unavailableRate
+} from "../helpers/converter";
 
 export const useCoinConverter = (data: ConverterData | undefined) => {
   const inputId = useId();
@@ -16,16 +21,29 @@ export const useCoinConverter = (data: ConverterData | undefined) => {
   const options = converterCurrencies.map((code) => ({
     code,
     selected: code === (data ? currency : "USD"),
-    select: () => setCurrency(code),
+    select: () => setCurrency(code)
   }));
 
-  const hasError = data?.quotes === null || (data?.rates === null && !isQuote(data.quotes?.[currency]));
-  const result = hasError ? "Данные временно недоступны" : data?.quotes
-    ? formatConversion(quantity, currency, data.quotes, data.rates ?? {})
-    : "";
+  const hasError =
+    data?.quotes === null || (data?.rates === null && !isQuote(data.quotes?.[currency]));
+  const result = hasError
+    ? "Данные временно недоступны"
+    : data?.quotes
+      ? formatConversion(quantity, currency, data.quotes, data.rates ?? {})
+      : "";
   const resultUnavailable = hasError || result === unavailableRate;
-  const changeQuantity = (event: ChangeEvent<HTMLInputElement>) => setQuantity(event.currentTarget.value);
+  const changeQuantity = (event: ChangeEvent<HTMLInputElement>) =>
+    setQuantity(event.currentTarget.value);
   const preventSubmit = (event: SubmitEvent<HTMLFormElement>) => event.preventDefault();
 
-  return { inputId, currencyLabelId, quantity, options, result, resultUnavailable, changeQuantity, preventSubmit };
+  return {
+    inputId,
+    currencyLabelId,
+    quantity,
+    options,
+    result,
+    resultUnavailable,
+    changeQuantity,
+    preventSubmit
+  };
 };

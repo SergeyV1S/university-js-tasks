@@ -7,8 +7,8 @@ export default defineConfig(({ command, mode, isPreview }) => ({
   define: {
     __INVEST_DEV_MARKET_DEMO_KEY__: JSON.stringify(
       command === "serve" && !isPreview
-        ? loadEnv(mode, process.cwd(), "INVEST_").INVEST_MARKET_DEMO_KEY ?? ""
-        : "",
-    ),
-  },
+        ? (loadEnv(mode, process.cwd(), "INVEST_").INVEST_MARKET_DEMO_KEY ?? "")
+        : ""
+    )
+  }
 }));

@@ -9,10 +9,10 @@ export const homeRoute = {
   path: PATHS.HOME,
   Component: HomePage,
   HydrateFallback: HomePending,
-  loader: ({ request }: LoaderFunctionArgs) => loadHome(request.signal),
+  loader: ({ request }: LoaderFunctionArgs) => loadHome(request.signal)
 } satisfies RouteObject;
 
 export const homeFallbackRoute = {
   path: PATHS.FALLBACK,
-  loader: () => replace(PATHS.HOME),
+  loader: () => replace(PATHS.HOME)
 } satisfies RouteObject;

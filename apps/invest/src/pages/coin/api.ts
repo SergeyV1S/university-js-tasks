@@ -13,12 +13,15 @@ export const loadHistory = async (id: string, days: HistoryDays, signal: AbortSi
 };
 
 const loadConverter = async (id: string, signal: AbortSignal) => {
-  const quotesByCoin = await apiClient.getPrices([id], [...converterCurrencies], { signal }).catch(() => null);
+  const quotesByCoin = await apiClient
+    .getPrices([id], [...converterCurrencies], { signal })
+    .catch(() => null);
   signal.throwIfAborted();
   if (quotesByCoin === null) return { quotes: null, rates: {} };
 
   const quotes = Object.hasOwn(quotesByCoin, id) ? quotesByCoin[id] : {};
-  const needsRates = isQuote(quotes.USD) && converterCurrencies.some((currency) => !isQuote(quotes[currency]));
+  const needsRates =
+    isQuote(quotes.USD) && converterCurrencies.some((currency) => !isQuote(quotes[currency]));
   const rates = needsRates ? await apiClient.getExchangeRates({ signal }).catch(() => null) : {};
   signal.throwIfAborted();
   return { quotes, rates };
@@ -35,7 +38,7 @@ export const loadCoin = async (id: string, signal: AbortSignal) => {
   const [history, converter, markets] = await Promise.all([
     loadHistory(id, initialPeriod, signal),
     loadConverter(id, signal),
-    apiClient.getMarkets([id], { signal }).catch(() => null),
+    apiClient.getMarkets([id], { signal }).catch(() => null)
   ]);
   signal.throwIfAborted();
 
@@ -47,7 +50,7 @@ export const loadCoin = async (id: string, signal: AbortSignal) => {
     change24h: market?.change24h ?? null,
     marketCap: market?.marketCap ?? null,
     ...identity,
-    symbol: identity.symbol ?? market?.symbol,
+    symbol: identity.symbol ?? market?.symbol
   };
 
   return { status: "ready", coin, history, converter, marketError: markets === null } as const;

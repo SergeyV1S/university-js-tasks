@@ -8,6 +8,6 @@ export const useCoinHeader = (coin: Coin | undefined) => {
   return {
     price: formatMoney(coin?.price ?? null) || "—",
     change: formatPercent(change24h, true),
-    changeColor: percentColor(change24h),
+    changeColor: percentColor(change24h)
   };
 };

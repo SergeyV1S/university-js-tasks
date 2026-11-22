@@ -11,8 +11,10 @@ export const usePriceFilter = (range: PriceRange, onApply: (min: string, max: st
   const malformedMin = Number.isNaN(parsePrice(min));
   const malformedMax = Number.isNaN(parsePrice(max));
 
-  const handleMinChange = (event: ChangeEvent<HTMLInputElement>) => setMin(event.currentTarget.value);
-  const handleMaxChange = (event: ChangeEvent<HTMLInputElement>) => setMax(event.currentTarget.value);
+  const handleMinChange = (event: ChangeEvent<HTMLInputElement>) =>
+    setMin(event.currentTarget.value);
+  const handleMaxChange = (event: ChangeEvent<HTMLInputElement>) =>
+    setMax(event.currentTarget.value);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -24,7 +26,12 @@ export const usePriceFilter = (range: PriceRange, onApply: (min: string, max: st
   const resetRange = () => onApply("", "");
 
   return {
-    state: { min, max, invalidMin: submitted && malformedMin, invalidMax: submitted && malformedMax },
-    functions: { handleMinChange, handleMaxChange, handleSubmit, resetRange },
+    state: {
+      min,
+      max,
+      invalidMin: submitted && malformedMin,
+      invalidMax: submitted && malformedMax
+    },
+    functions: { handleMinChange, handleMaxChange, handleSubmit, resetRange }
   };
 };
