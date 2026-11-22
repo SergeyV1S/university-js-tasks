@@ -1,47 +1,13 @@
 import { marketError } from "./helpers.ts";
 import { createMarketInstance } from "./instance.ts";
 import { createMarketRequests } from "./requests.ts";
-import type { MarketInstanceOptions, RequestOptions } from "./type.ts";
-
-
-export type Currency = "USD" | "EUR" | "BTC" | "RUB";
-type HistoryDays = 1 | 7 | 30 | 365;
-type CatalogCoin = { id: string; name: string; symbol?: string };
-type Quotes = Partial<Record<Currency, number>>;
-
-export type Coin = CatalogCoin & {
-  image?: string;
-  rank: number | null;
-  price: number | null;
-  change24h: number | null;
-  marketCap: number | null;
-};
-
-type GlobalMetrics = {
-  marketCap: number | null;
-  marketCapChange24h: number | null;
-  volume24h: number | null;
-  bitcoinShare: number | null;
-  ethereumShare: number | null;
-};
-
-export type MarketClient = {
-  getCatalog: (options?: RequestOptions) => Promise<CatalogCoin[]>;
-  getTop100: (options?: RequestOptions) => Promise<Coin[]>;
-  getMarkets: (ids: string[], options?: RequestOptions) => Promise<Coin[]>;
-  getGlobal: (options?: RequestOptions) => Promise<GlobalMetrics>;
-  getHistory: (id: string, days: HistoryDays, options?: RequestOptions) => Promise<Array<[number, number]>>;
-  getPrices: (ids: string[], currencies: Currency[], options?: RequestOptions) => Promise<Record<string, Quotes>>;
-  getExchangeRates: (options?: RequestOptions) => Promise<Quotes>;
-};
+import type { CatalogCoin, Coin, Currency, MarketClient, MarketInstanceOptions, Quotes } from "./type.ts";
 
 declare const __INVEST_DEV_MARKET_DEMO_KEY__: string;
 
-const DEMO_API_BASE = "https://api.coingecko.com/api/v3/";
 const CURRENCIES: readonly Currency[] = ["USD", "EUR", "BTC", "RUB"];
 const MARKETS_PAGE_SIZE = 250;
 const SIMPLE_PRICE_MAX_IDS = 515;
-// Budget for the encoded URL, including the base and all query parameters.
 const REQUEST_URL_BUDGET = 2_000;
 const USD_MARKETS = { vs_currency: "usd", order: "market_cap_desc", page: 1 } as const;
 
@@ -197,13 +163,12 @@ export const createApiClient = (config: MarketInstanceOptions): MarketClient => 
   };
 };
 
-const baseUrl = import.meta.env?.VITE_INVEST_MARKET_BASE ?? DEMO_API_BASE;
+const baseUrl = import.meta.env?.VITE_INVEST_MARKET_BASE ?? '';
 
 export const apiClient = createApiClient({
   baseUrl: baseUrl,
   get apiKey() {
-    if (baseUrl === DEMO_API_BASE
-      && typeof __INVEST_DEV_MARKET_DEMO_KEY__ !== "undefined"
+    if (typeof __INVEST_DEV_MARKET_DEMO_KEY__ !== "undefined"
       && __INVEST_DEV_MARKET_DEMO_KEY__) {
       return __INVEST_DEV_MARKET_DEMO_KEY__;
     }
