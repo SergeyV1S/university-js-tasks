@@ -1,15 +1,31 @@
-import type { Coin } from "../../../shared/api/client";
-import { ApiText } from "../../../shared/ui/ApiText";
+import type { Coin } from "../api/type";
+import bitcoinMark from "../assets/bitcoin.svg";
 import { useCoinAvatar } from "../hooks/useCoinAvatar";
+import { ApiText } from "./ApiText";
 
-const avatarClass = "grid size-7.25 shrink-0 place-items-center overflow-hidden rounded-full text-[15px] font-bold lg:size-8.5 lg:text-lg";
+type CoinAvatarProps = {
+  coin: Pick<Coin, "id" | "name" | "symbol" | "image">;
+  size?: "small" | "large";
+};
 
-export const CoinAvatar = ({ coin }: { coin: Coin }) => {
+const sizes = {
+  small: "size-7.25 text-invest-body font-bold lg:size-8.5 lg:text-lg",
+  large: "size-10.5 text-invest-section lg:size-13.5",
+};
+
+export const CoinAvatar = ({ coin, size = "small" }: CoinAvatarProps) => {
   const { symbol, image, fallback, handleImageError } = useCoinAvatar(coin);
+  const avatarClass = `grid shrink-0 place-items-center overflow-hidden rounded-full ${sizes[size]}`;
 
   if (symbol) {
     const [backgroundColor, color, character] = symbol;
-    return <span aria-hidden="true" className={avatarClass} style={{ backgroundColor, color }}>{character}</span>;
+    return (
+      <span aria-hidden="true" className={avatarClass} style={{ backgroundColor, color }}>
+        {coin.id === "bitcoin" && size === "large"
+          ? <img src={bitcoinMark} alt="" className="h-5.25 w-3" />
+          : character}
+      </span>
+    );
   }
   if (coin.id === "ethereum") {
     return (

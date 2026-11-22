@@ -1,5 +1,5 @@
 import { apiClient } from "../../shared/api/client";
-import type { Coin } from "../../shared/api/client";
+import type { Coin } from "../../shared/api/type";
 import { selectRows } from "./helpers/selectRows";
 
 export const initialSort = { key: "rank", direction: "asc" } as const;

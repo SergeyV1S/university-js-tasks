@@ -1,12 +1,12 @@
 import { Link } from "react-router";
 
-import type { Coin } from "../../../shared/api/client";
+import type { Coin } from "../../../shared/api/type";
 import { ApiText } from "../../../shared/ui/ApiText";
+import { CoinAvatar } from "../../../shared/ui/CoinAvatar";
 import { Icon } from "../../../shared/ui/Icon";
 import { Skeleton } from "../../../shared/ui/Skeleton";
 import type { Sort, SortKey } from "../helpers/selectRows";
 import { useMarketTable } from "../hooks/useMarketTable";
-import { CoinAvatar } from "./CoinAvatar";
 
 type MarketTableProps = {
   rows: Coin[];

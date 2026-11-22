@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import type { Coin } from "../../../shared/api/client";
+import type { Coin } from "../api/type";
 
 const symbols = new Map<string, readonly [string, string, string]>([
   ["bitcoin", ["#19130e", "#f9a33e", "₿"]],
@@ -13,7 +13,7 @@ const symbols = new Map<string, readonly [string, string, string]>([
   ["cardano", ["#212940", "#aabafe", "A"]],
 ]);
 
-export const useCoinAvatar = (coin: Coin) => {
+export const useCoinAvatar = (coin: Pick<Coin, "id" | "name" | "symbol" | "image">) => {
   const [failedImage, setFailedImage] = useState<string | null>(null);
   const symbol = symbols.get(coin.id);
   const image = coin.image !== failedImage ? coin.image : null;

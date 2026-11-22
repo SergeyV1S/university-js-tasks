@@ -163,10 +163,10 @@ export const createApiClient = (config: MarketInstanceOptions): MarketClient => 
   };
 };
 
-const baseUrl = import.meta.env?.VITE_INVEST_MARKET_BASE ?? '';
+const baseUrl = import.meta.env?.VITE_INVEST_MARKET_BASE || "https://api.coingecko.com/api/v3/";
 
 export const apiClient = createApiClient({
-  baseUrl: baseUrl,
+  baseUrl,
   get apiKey() {
     if (typeof __INVEST_DEV_MARKET_DEMO_KEY__ !== "undefined"
       && __INVEST_DEV_MARKET_DEMO_KEY__) {

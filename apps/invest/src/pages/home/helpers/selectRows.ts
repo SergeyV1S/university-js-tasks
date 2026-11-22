@@ -1,4 +1,4 @@
-import type { Coin } from "../../../shared/api/client";
+import type { Coin } from "../../../shared/api/type";
 
 export type SortKey = "rank" | "name" | "price" | "change24h" | "marketCap";
 export type Sort = { key: SortKey; direction: "asc" | "desc" };

@@ -9,10 +9,14 @@ declare global {
 }
 
 test("switches_screens_in_one_document", async ({ context, page }) => {
-  await installMarketFixture(context, (url) => ({ status: 200, json: url.pathname.endsWith("/global") ? { data: {} } : [] }));
+  await installMarketFixture(context, (url) => {
+    if (url.pathname.endsWith("/global")) return { status: 200, json: { data: {} } };
+    if (url.pathname.endsWith("/market_chart")) return { status: 200, json: { prices: [] } };
+    if (url.pathname.endsWith("/simple/price")) return { status: 200, json: { bitcoin: { usd: 100, eur: 80, btc: 1 } } };
+    return { status: 200, json: [{ id: "bitcoin", name: "Bitcoin", symbol: "btc" }] };
+  });
   await page.goto("/coin/bitcoin");
-  await expect(page.getByRole("heading", { name: "Детали монеты" })).toBeVisible();
-  await expect(page.getByText("bitcoin", { exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Bitcoin", exact: true })).toBeVisible();
 
   await page.evaluate(() => {
     window.navigationMarker = "same-document";
