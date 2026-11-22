@@ -4,7 +4,7 @@ const baseURL = "http://127.0.0.1:4174";
 
 export default defineConfig({
   testDir: "./tests",
-  testMatch: "**/*.spec.js",
+  testMatch: "**/*.spec.ts",
   use: { baseURL },
   projects: [
     { name: "chromium", use: { browserName: "chromium" } },

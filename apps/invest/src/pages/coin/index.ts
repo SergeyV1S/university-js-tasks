@@ -1,0 +1,1 @@
+export { coinRoute } from "./route";
