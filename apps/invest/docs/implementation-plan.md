@@ -84,9 +84,9 @@
 
 **Требования** ФТ-02, ФТ-05, ФТ-08, ФТ-11, ФТ-23, ФТ-40, ФТ-57, НФТ-05, НФТ-26.
 
-**Файлы** Создать `apps/invest/src/shared/market/{client.ts,instance.ts,requests.ts}`, `apps/invest/tests/market-client.test.ts`, `apps/invest/tests/market-fixture.ts`.
+**Файлы** Создать `apps/invest/src/shared/api/{client.ts,instance.ts,requests.ts}`, `apps/invest/tests/api-client.test.ts`, `apps/invest/tests/market-fixture.ts`.
 
-**Интерфейсы** `createMarketClient({ baseUrl, apiKey, adapter? }): MarketClient` создаёт экземпляр Axios. Все методы получают последним аргументом опциональный `{signal: AbortSignal}`. `Coin` содержит `{id: string, name: string, rank: number|null, price: number|null, change24h: number|null, marketCap: number|null}`. `MarketError` содержит `{kind: 'rate-limit'|'network'|'not-found'|'http'|'invalid-response', status?: number, retryAt?: number}`. Отмена сохраняет `AbortError`.
+**Интерфейсы** `createApiClient({ baseUrl, apiKey, adapter? }): MarketClient` создаёт экземпляр Axios. Все методы получают последним аргументом опциональный `{signal: AbortSignal}`. `Coin` содержит `{id: string, name: string, rank: number|null, price: number|null, change24h: number|null, marketCap: number|null}`. `MarketError` содержит `{kind: 'rate-limit'|'network'|'not-found'|'http'|'invalid-response', status?: number, retryAt?: number}`. Отмена сохраняет `AbortError`.
 
 `installMarketFixture(context: BrowserContext, respond: (url: URL) => FixtureResponse | Promise<FixtureResponse>): Promise<{requests: RecordedRequest[]}>`. `FixtureResponse` содержит `{status: number, json?: unknown, headers?: Record<string, string>}` или `{abort: true}`. `RecordedRequest` содержит `{url: string, method: string, body: string|null, atMs: number, status: number|null}`. Перехват действует в обеих вкладках контекста.
 

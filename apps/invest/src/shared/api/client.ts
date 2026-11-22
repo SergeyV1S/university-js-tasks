@@ -117,7 +117,7 @@ const batchByUrl = <Params>(
   return batches;
 };
 
-export const createMarketClient = (config: MarketInstanceOptions): MarketClient => {
+export const createApiClient = (config: MarketInstanceOptions): MarketClient => {
   const requests = createMarketRequests(createMarketInstance(config));
 
   return {
@@ -190,12 +190,12 @@ export const createMarketClient = (config: MarketInstanceOptions): MarketClient 
   };
 };
 
-const marketBase = import.meta.env?.VITE_INVEST_MARKET_BASE ?? DEMO_API_BASE;
+const baseUrl = import.meta.env?.VITE_INVEST_MARKET_BASE ?? DEMO_API_BASE;
 
-export const marketClient = createMarketClient({
-  baseUrl: marketBase,
+export const apiClient = createApiClient({
+  baseUrl: baseUrl,
   get apiKey() {
-    if (marketBase === DEMO_API_BASE
+    if (baseUrl === DEMO_API_BASE
       && typeof __INVEST_DEV_MARKET_DEMO_KEY__ !== "undefined"
       && __INVEST_DEV_MARKET_DEMO_KEY__) {
       return __INVEST_DEV_MARKET_DEMO_KEY__;
