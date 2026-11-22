@@ -4,7 +4,7 @@ import { test } from "node:test";
 import axios, { AxiosError } from "axios";
 import type { AxiosAdapter, InternalAxiosRequestConfig } from "axios";
 
-import { createMarketClient } from "../src/shared/api/client.ts";
+import { createApiClient } from "../src/shared/api/client.ts";
 
 const baseUrl = "https://example.test/api/v3/";
 const row = { id: "bitcoin", name: "Bitcoin", market_cap_rank: 1 };
@@ -29,7 +29,7 @@ test("normalizes_market_payloads_and_errors", async (context) => {
 
   const requests: Array<{ url: URL; config: InternalAxiosRequestConfig }> = [];
   const respond = context.mock.fn((_url: URL): Response => Response.json(null));
-  const client = createMarketClient({
+  const client = createApiClient({
     baseUrl,
     apiKey: "test-key",
     adapter: mockAdapter((url, config) => {
@@ -60,7 +60,7 @@ test("normalizes_market_payloads_and_errors", async (context) => {
   respond.mock.mockImplementation(() => Response.json({
     data: { total_market_cap: { usd: 100 }, market_cap_change_percentage_24h_usd: -1 },
   }));
-  assert.deepEqual(await client.getGlobal(), { marketCap: 100, marketCapChange24h: -1, volume24h: null });
+  assert.deepEqual(await client.getGlobal(), { marketCap: 100, marketCapChange24h: -1, volume24h: null, bitcoinShare: null, ethereumShare: null });
 
   respond.mock.mockImplementation(() => Response.json({ prices: [[now, 0]] }));
   assert.deepEqual(await client.getHistory("bitcoin", 365), [[now, 0]]);
@@ -123,7 +123,7 @@ test("batches unique IDs without truncating long searches or requesting empty li
   const makeIds = (count: number, prefix = "coin") =>
     Array.from({ length: count }, (_, index) => `${prefix}-${index}`);
   const requests: URL[] = [];
-  const client = createMarketClient({
+  const client = createApiClient({
     baseUrl,
     adapter: mockAdapter((url) => {
       requests.push(url);
@@ -157,7 +157,7 @@ test("batches unique IDs without truncating long searches or requesting empty li
 test("stops a multi-request lookup when the signal is aborted", async () => {
   const controller = new AbortController();
   let requests = 0;
-  const client = createMarketClient({
+  const client = createApiClient({
     baseUrl,
     adapter: mockAdapter(() => {
       requests += 1;

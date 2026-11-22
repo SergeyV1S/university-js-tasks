@@ -134,7 +134,7 @@ CoinGecko публикует для Demo 100 запросов в минуту и
 
 **Интерфейсы** `HomePage(): JSX.Element`. `selectRows(rows: Coin[], {min: number|null, max: number|null, sort: {key: 'rank'|'name'|'price'|'change24h'|'marketCap', direction: 'asc'|'desc'}}): Coin[]`. `debounce(fn, delayMs: number)` возвращает вызываемую функцию с методом `cancel(): void`. `useHomeStore` предоставляет `setInitialData(data: HomeInitialData): void`, `setQuery(value: string): void`, `setRange(min: string, max: string): void`, `sortBy(key): void`, `refresh(): Promise<void>` и `stop(): void`. `ApiText({value}: {value: string}): JSX.Element` создаёт текстовый узел назначением `textContent` элементу через ref.
 
-- [ ] Написать `shows_top_100_and_searches_full_catalog`, `combines_price_and_sort`, `explains_metrics` и `ignores_late_search`. До первого ответа проверить Skeleton. Задать управляемые таймеры и два ответа поиска с обратным порядком завершения.
+- [x] Написать `shows_top_100_and_searches_full_catalog`, `combines_price_and_sort`, `explains_metrics` и `ignores_late_search`. До первого ответа проверить Skeleton. Задать управляемые таймеры и два ответа поиска с обратным порядком завершения.
 
   ```ts
   await expect(coinRows).toHaveCount(100) // каталог содержит 105 монет с рангами
@@ -143,16 +143,16 @@ CoinGecko публикует для Demo 100 запросов в минуту и
   expect(sortedSearchRows).toEqual(expectedFirst100Of120)
   expect(pricesByFixture).toEqual([[10, 20], [5, 10, 20], [10, 20, 25]])
   await expect(apiName).toHaveText('<b>Пример</b>')
-  await expect(metricCards).toHaveCount(3)
+  await expect(metricCards).toHaveCount(4)
   await expect(coinRows).toHaveText(latestQueryNames)
   ```
 
   Проверить очистку поиска при активных фильтре и сортировке, включая очистку до завершения запроса, нечисловые и отрицательные границы, пропуски при фильтрации и сортировке, оба направления на пяти столбцах, знаки и цвета `+2%`, `−2%`, `0%`, состояние «ничего не найдено». Проверить открытие и закрытие пояснений мышью, с клавиатуры и касанием, включая касание вне пояснения.
 
-- [ ] Запустить `npm run test:e2e -w invest -- home.spec.ts`. Ожидание RED — таблица и поиск отсутствуют.
-- [ ] Подключить loader главной к общему клиенту и передать его результаты в `HomePage` и `useHomeStore`. После 300 мс `setQuery` ищет подстроку по полному каталогу без учёта регистра и запрашивает рыночные поля по всем совпавшим ID, переиспользуя доступные данные. Если записи из каталога нет в рыночном ответе, сохранить название и ID с отсутствующими полями. Фильтр с включёнными границами и сортировка выполняются до ограничения в 100 результатов. При очистке вернуть топ-100 и сохранить фильтр и сортировку. Смена запроса отменяет старую выдачу, а проверка текущего запроса перед записью защищает от уже завершившегося устаревшего ответа. На главной отобразить общую капитализацию, изменение капитализации за сутки и объём торгов за 24 часа. Названия монет ведут в детали.
-- [ ] Повторить `npm run test:e2e -w invest -- home.spec.ts navigation.spec.ts`. Ожидание GREEN — поиск, таблица, метрики и навигация проходят.
-- [ ] Сделать коммит `feat(invest): build market overview and search`.
+- [x] Запустить `npm run test:e2e -w invest -- home.spec.ts`. Ожидание RED — таблица и поиск отсутствуют.
+- [x] Подключить loader главной к общему клиенту и передать его результаты в `HomePage` и `useHomeStore`. После 300 мс `setQuery` ищет подстроку по полному каталогу без учёта регистра и запрашивает рыночные поля по всем совпавшим ID, переиспользуя доступные данные. Если записи из каталога нет в рыночном ответе, сохранить название и ID с отсутствующими полями. Фильтр с включёнными границами и сортировка выполняются до ограничения в 100 результатов. При очистке вернуть топ-100 и сохранить фильтр и сортировку. Смена запроса отменяет старую выдачу, а проверка текущего запроса перед записью защищает от уже завершившегося устаревшего ответа. На главной отобразить четыре карточки по Figma: капитализацию рынка с изменением за сутки, объём торгов за 24 часа, долю Bitcoin и долю Ethereum. Доли берутся из `market_cap_percentage` ответа `/global`. Названия монет ведут в детали.
+- [x] Повторить `npm run test:e2e -w invest -- home.spec.ts navigation.spec.ts`. Ожидание GREEN — поиск, таблица, метрики и навигация проходят.
+- [x] Сделать коммит `feat(invest): build market overview and search`.
 
 ## Задача 4. Детали монеты, история и конвертер
 

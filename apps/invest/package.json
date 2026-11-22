@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite --host 127.0.0.1 --port 4174 --strictPort",
     "build": "npm run typecheck && vite build",
-    "test:market": "node --test tests/market-client.test.ts",
+    "test:market": "node --test tests/api-client.test.ts",
     "test:e2e": "playwright test",
     "typecheck": "tsc --noEmit"
   },

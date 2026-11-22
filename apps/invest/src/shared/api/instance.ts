@@ -1,7 +1,7 @@
 import axios from "axios";
 import type { AxiosRequestConfig } from "axios";
-import { marketError, parseRetryAfter } from "./helpers";
-import type { MarketInstanceOptions, RequestOptions } from "./type";
+import { marketError, parseRetryAfter } from "./helpers.ts";
+import type { MarketInstanceOptions, RequestOptions } from "./type.ts";
 
 export const createMarketInstance = (options: MarketInstanceOptions) => {
   const baseURL = new URL(options.baseUrl, globalThis.location?.href).href;

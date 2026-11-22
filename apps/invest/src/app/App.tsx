@@ -1,24 +1,46 @@
-import { NavLink, Outlet } from "react-router";
+import { NavLink, Outlet, useLocation, useNavigation } from "react-router";
 
+import { HomePending } from "../pages/home";
 import { PATHS } from "../shared/constants/router-paths";
+import { Icon } from "../shared/ui/Icon";
 
-export const App = () => (
-  <>
-    <header className="app-header">
-      <div className="layout header-content">
-        <span className="wordmark">Invest</span>
-        <nav className="app-nav" aria-label="Основная навигация">
-          <NavLink to={PATHS.HOME} end>
-            Главная
-          </NavLink>
-          <NavLink to={PATHS.PORTFOLIO} end>
-            Портфель
-          </NavLink>
-        </nav>
-      </div>
-    </header>
-    <main className="layout screen">
-      <Outlet />
-    </main>
-  </>
-);
+const navLink = "flex h-11 items-center justify-center gap-2.5 rounded-lg text-invest-label text-invest-muted aria-[current=page]:bg-invest-selected aria-[current=page]:text-invest-accent lg:relative lg:h-[72px] lg:justify-start lg:rounded-none lg:px-3.5 lg:aria-[current=page]:bg-transparent lg:aria-[current=page]:after:absolute lg:aria-[current=page]:after:inset-x-2 lg:aria-[current=page]:after:bottom-0 lg:aria-[current=page]:after:h-0.5 lg:aria-[current=page]:after:rounded-full lg:aria-[current=page]:after:bg-invest-accent";
+const gutters = "mx-auto w-full max-w-[1536px] px-4 lg:px-12";
+
+export const App = () => {
+  const { pathname } = useLocation();
+  const navigation = useNavigation();
+  const homePending = pathname !== PATHS.HOME && navigation.location?.pathname === PATHS.HOME;
+
+  return (
+    <>
+      <header className="relative bg-invest-navigation after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:border-b after:border-invest-divider">
+        <div className={`${gutters} flex h-[62px] items-center justify-between lg:h-[72px] lg:justify-start`}>
+          <span className="flex items-center gap-2.5 text-invest-section">
+            <span className="grid size-8 place-items-center rounded-lg bg-invest-accent text-invest-accent-ink"><Icon name="logo" /></span>
+            Invest
+          </span>
+          <nav className="z-10 flex shrink-0 gap-[3px] lg:ml-[34px] lg:gap-1.5" aria-label="Основная навигация">
+            <NavLink to={PATHS.HOME} end className={`${navLink} w-[74px] lg:w-[109px]`}>
+              <Icon name="market" className="hidden lg:block" />
+              Рынок
+            </NavLink>
+            <NavLink to={PATHS.PORTFOLIO} end className={`${navLink} w-[100px] lg:w-[126px]`}>
+              <Icon name="wallet" className="hidden lg:block" />
+              Портфель
+            </NavLink>
+          </nav>
+          {pathname === PATHS.HOME && (
+            <span className="ml-auto hidden h-8 w-[146px] items-center justify-center rounded-[7px] border border-invest-divider bg-invest-surface text-invest-caption text-invest-muted lg:flex"
+              title="Источник котировок: CoinGecko Demo API">
+              Демо-данные
+            </span>
+          )}
+        </div>
+      </header>
+      <main className={gutters}>
+        {homePending ? <HomePending /> : <Outlet />}
+      </main>
+    </>
+  );
+};

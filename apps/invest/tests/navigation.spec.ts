@@ -1,12 +1,15 @@
 import { expect, test } from "@playwright/test";
 
+import { installMarketFixture } from "./market-fixture";
+
 declare global {
   interface Window {
     navigationMarker?: string;
   }
 }
 
-test("switches_screens_in_one_document", async ({ page }) => {
+test("switches_screens_in_one_document", async ({ context, page }) => {
+  await installMarketFixture(context, (url) => ({ status: 200, json: url.pathname.endsWith("/global") ? { data: {} } : [] }));
   await page.goto("/coin/bitcoin");
   await expect(page.getByRole("heading", { name: "Детали монеты" })).toBeVisible();
   await expect(page.getByText("bitcoin", { exact: true })).toBeVisible();
@@ -15,14 +18,14 @@ test("switches_screens_in_one_document", async ({ page }) => {
     window.navigationMarker = "same-document";
   });
 
-  const home = page.getByRole("link", { name: "Главная" });
+  const home = page.getByRole("link", { name: "Рынок" });
   const portfolio = page.getByRole("link", { name: "Портфель" });
 
   await page.keyboard.press("Tab");
   await expect(home).toBeFocused();
   await page.keyboard.press("Enter");
   await expect(page).toHaveURL("/");
-  await expect(page.getByRole("heading", { name: "Главная" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Рынок криптовалют" })).toBeVisible();
 
   await page.keyboard.press("Tab");
   await expect(portfolio).toBeFocused();
@@ -36,7 +39,7 @@ test("switches_screens_in_one_document", async ({ page }) => {
   await expect(home).toBeFocused();
   await page.keyboard.press("Enter");
   await expect(page).toHaveURL("/");
-  await expect(page.getByRole("heading", { name: "Главная" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Рынок криптовалют" })).toBeVisible();
   expect(await page.evaluate(() => window.navigationMarker)).toBe("same-document");
 
   await page.goBack();

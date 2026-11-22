@@ -1,5 +1,5 @@
-import type { RequestOptions } from "./type";
-import type { createMarketInstance } from "./instance";
+import type { RequestOptions } from "./type.ts";
+import type { createMarketInstance } from "./instance.ts";
 
 type MarketsParams = {
   vs_currency: "usd";

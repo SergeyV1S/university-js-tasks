@@ -1,4 +1,4 @@
-import type { MarketError } from "./type";
+import type { MarketError } from "./type.ts";
 
 const marketError = (
   kind: MarketError["kind"],

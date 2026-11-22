@@ -1,15 +1,16 @@
-import { marketError } from "./helpers";
-import { createMarketInstance } from "./instance";
-import { createMarketRequests } from "./requests";
-import type { MarketInstanceOptions, RequestOptions } from "./type";
+import { marketError } from "./helpers.ts";
+import { createMarketInstance } from "./instance.ts";
+import { createMarketRequests } from "./requests.ts";
+import type { MarketInstanceOptions, RequestOptions } from "./type.ts";
 
 
 export type Currency = "USD" | "EUR" | "BTC" | "RUB";
 type HistoryDays = 1 | 7 | 30 | 365;
-type CatalogCoin = { id: string; name: string };
+type CatalogCoin = { id: string; name: string; symbol?: string };
 type Quotes = Partial<Record<Currency, number>>;
 
 export type Coin = CatalogCoin & {
+  image?: string;
   rank: number | null;
   price: number | null;
   change24h: number | null;
@@ -20,6 +21,8 @@ type GlobalMetrics = {
   marketCap: number | null;
   marketCapChange24h: number | null;
   volume24h: number | null;
+  bitcoinShare: number | null;
+  ethereumShare: number | null;
 };
 
 export type MarketClient = {
@@ -60,17 +63,18 @@ const isNumber = (value: unknown): value is number =>
 
 const numberOrNull = (value: unknown) => isNumber(value) ? value : null;
 
-const readCoinIdentity = ({ id, name }: Record<string, unknown>): CatalogCoin => {
+const readCoinIdentity = ({ id, name, symbol }: Record<string, unknown>): CatalogCoin => {
   if (typeof id !== "string" || id.length === 0 || typeof name !== "string" || name.length === 0) {
     throw marketError("invalid-response");
   }
-  return { id, name };
+  return typeof symbol === "string" && symbol ? { id, name, symbol } : { id, name };
 };
 
 const readCoins = (value: unknown): Coin[] => readArray(value).map((item) => {
   const coin = readObject(item);
   return {
     ...readCoinIdentity(coin),
+    ...(typeof coin.image === "string" && coin.image.startsWith("https://") && { image: coin.image }),
     rank: numberOrNull(coin.market_cap_rank),
     price: numberOrNull(coin.current_price),
     change24h: numberOrNull(coin.price_change_percentage_24h),
@@ -143,10 +147,13 @@ export const createApiClient = (config: MarketInstanceOptions): MarketClient => 
     getGlobal: async (options) => {
       const payload = readObject(await requests.getGlobalMarketData(options));
       const data = readObject(payload.data);
+      const shares = isRecord(data.market_cap_percentage) ? data.market_cap_percentage : {};
       return {
         marketCap: numberOrNull(isRecord(data.total_market_cap) ? data.total_market_cap.usd : undefined),
         marketCapChange24h: numberOrNull(data.market_cap_change_percentage_24h_usd),
         volume24h: numberOrNull(isRecord(data.total_volume) ? data.total_volume.usd : undefined),
+        bitcoinShare: numberOrNull(shares.btc),
+        ethereumShare: numberOrNull(shares.eth),
       };
     },
     getHistory: async (id, days, options) => {
