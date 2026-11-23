@@ -55,7 +55,7 @@ export const CoinConverter = ({ coin }: CoinConverterProps) => {
             disabled={!coin}
             value={coin ? quantity : "1"}
             onChange={changeQuantity}
-            className='h-invest-input-height pr-20'
+            className='h-invest-input-height pr-20 font-invest-numeric'
           />
           {coin?.symbol && (
             <span

@@ -60,7 +60,7 @@ export const MarketTable = ({
   const visibility = { rank: "", name: "", price: "", change24h: changeCell, marketCap: capCell };
 
   return (
-    <div className='@container rounded-xl border border-invest-divider bg-invest-surface'>
+    <div className='@container overflow-clip rounded-xl border border-invest-divider bg-invest-surface'>
       {loading && (
         <span role='status' aria-label='Загрузка котировок' className='sr-only'>
           Загрузка котировок
@@ -84,7 +84,7 @@ export const MarketTable = ({
           />
           <col className='hidden w-12.5 lg:table-column' />
         </colgroup>
-        <thead className='border-b border-invest-divider'>
+        <thead className='border-b border-invest-divider bg-invest-table-header'>
           <tr>
             {columns.map(({ key, label, action, active, ariaSort, handleSort }) => (
               <th
@@ -98,7 +98,7 @@ export const MarketTable = ({
                   aria-label={`Сортировать ${action}`}
                   disabled={!sortBy}
                   onClick={handleSort}
-                  className={`inline-flex h-invest-input-height max-w-full items-center gap-0.5 rounded-sm text-invest-caption enabled:cursor-pointer enabled:hover:text-invest-accent lg:h-12 lg:text-invest-label ${active ? "lg:text-invest-accent" : ""} ${key === "rank" || key === "name" ? "" : "lg:translate-x-5"} text-invest-muted`}
+                  className={`inline-flex h-invest-input-height max-w-full items-center gap-0.5 rounded-sm text-invest-caption focus-visible:-outline-offset-2 enabled:cursor-pointer enabled:hover:text-invest-accent lg:h-12 lg:text-invest-label ${active ? "lg:text-invest-accent" : ""} ${key === "rank" || key === "name" ? "" : "lg:translate-x-5"} text-invest-muted`}
                 >
                   {key === "rank" && <span className='lg:hidden'>#</span>}
                   {key === "marketCap" && <span className='lg:hidden'>Капит.</span>}
@@ -137,7 +137,7 @@ export const MarketTable = ({
                 ({ coin, destination, symbol, price, change, changeColor, marketCap }) => (
                   <tr
                     key={coin.id}
-                    className='relative h-15.5 bg-[linear-gradient(var(--color-invest-divider),var(--color-invest-divider))] bg-size-[calc(100%-18px)_1px] bg-top bg-no-repeat first:bg-none hover:bg-invest-raised/50 lg:h-13.5 lg:bg-size-[calc(100%-38px)_1px]'
+                    className='relative h-15.5 bg-[linear-gradient(var(--color-invest-divider),var(--color-invest-divider))] bg-size-[calc(100%-18px)_1px] bg-top bg-no-repeat first:bg-none focus-within:bg-invest-raised hover:bg-invest-raised lg:h-13.5 lg:bg-size-[calc(100%-38px)_1px]'
                   >
                     <td
                       className={`font-invest-numeric text-invest-table-number text-invest-muted ${cellStyles.rank}`}

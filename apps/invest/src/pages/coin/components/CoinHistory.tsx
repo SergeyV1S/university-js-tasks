@@ -21,7 +21,7 @@ export const CoinHistory = ({ pending = false }: { pending?: boolean }) => {
   return (
     <section
       aria-labelledby='coin-history-heading'
-      className='min-h-74.5 min-w-0 rounded-xl border border-invest-divider bg-invest-surface px-3.25 pt-3 pb-3.25 lg:min-h-101.75 lg:px-5.5 lg:pb-4'
+      className='invest-cold-edge relative min-h-74.5 min-w-0 rounded-xl border border-invest-divider bg-invest-surface px-3.25 pt-3 pb-3.25 lg:min-h-101.75 lg:px-5.5 lg:pb-4'
     >
       <div className='flex flex-col gap-2.25 lg:flex-row lg:justify-between'>
         <h2 id='coin-history-heading' className='text-invest-block lg:mt-1.5'>

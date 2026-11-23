@@ -10,20 +10,25 @@
   --color-invest-raised: #22262e;
   --color-invest-divider: #2b303a;
   --color-invest-border: #3b4350;
+  --color-invest-field-border: #626d7a;
+  --color-invest-table-header: #1e2229;
   --color-invest-foreground: #f3f2ee;
   --color-invest-muted: #a7afbc;
   --color-invest-accent: #ffc67a;
+  --color-invest-accent-hover: #ffd39a;
+  --color-invest-accent-pressed: #eaa858;
   --color-invest-accent-ink: #20170d;
   --color-invest-selected: #352a20;
+  --color-invest-selected-border: #8d6442;
   --color-invest-positive: #74d8ab;
   --color-invest-negative: #ff9599;
   --color-invest-warning: #ffd097;
   --color-invest-warning-background: #302620;
-  --color-invest-focus: #a8bfff;
+  --color-invest-focus: #ffb05e;
   --color-invest-blue: #9db6ff;
   --color-invest-lavender: #bc9ff5;
   --color-invest-skeleton: #303641;
-  --color-invest-chart-fill-top: #ffc67a45;
+  --color-invest-chart-fill-top: #ffc67a2b;
   --color-invest-chart-fill-bottom: #ffc67a04;
 
   /* Invest 3 · Палитра */

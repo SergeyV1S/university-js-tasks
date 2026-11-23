@@ -29,7 +29,7 @@ export const PortfolioSummary = ({
     <section
       aria-label='Текущая стоимость и PnL'
       aria-busy={loading}
-      className='relative min-h-45.75 min-w-0 rounded-xl border border-invest-divider bg-invest-surface px-3.25 pt-3.5 pb-3 lg:min-h-40.5 lg:px-5.25'
+      className='invest-cold-edge relative min-h-45.75 min-w-0 rounded-xl border border-invest-divider bg-invest-surface px-3.25 pt-3.5 pb-3 lg:min-h-40.5 lg:px-5.25'
     >
       {loading ? (
         <>
