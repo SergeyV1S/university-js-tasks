@@ -11,7 +11,7 @@ export default defineConfig({
     { name: "firefox", use: { browserName: "firefox" } }
   ],
   webServer: {
-    command: "npm run dev",
+    command: "vite --host 127.0.0.1 --port 4174 --strictPort",
     url: baseURL,
     env: { VITE_INVEST_MARKET_BASE: "/api/v3/" }
   }

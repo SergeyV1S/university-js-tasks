@@ -174,7 +174,7 @@ const HomeContent = ({ state }: { state: ReturnType<typeof useHome> }) => {
             loading={!state}
             unavailable={view.unavailable}
             showCapitalization={view.showCapitalization}
-            pagination={view.pagination}
+            pagination={view.pagination || undefined}
           />
         </div>
       </section>

@@ -2,6 +2,7 @@ import { NavLink, Outlet } from "react-router";
 
 import { CoinPending } from "../pages/coin";
 import { HomePending } from "../pages/home";
+import { PortfolioPending } from "../pages/portfolio";
 import { PATHS } from "../shared/constants/router-paths";
 import { Icon } from "../shared/ui/Icon";
 import { useApp } from "./hooks/useApp";
@@ -13,8 +14,9 @@ const activeNavLink =
 const gutters = "mx-auto w-full max-w-384 px-4 lg:px-12";
 
 export const App = () => {
-  const { isHome, isCoin, homePending, coinPending } = useApp();
-  const showDemoData = isHome || isCoin || homePending || coinPending;
+  const { isHome, isCoin, isPortfolio, homePending, coinPending, portfolioPending } = useApp();
+  const showDemoData =
+    isHome || isCoin || isPortfolio || homePending || coinPending || portfolioPending;
 
   return (
     <>
@@ -36,7 +38,7 @@ export const App = () => {
               to={PATHS.HOME}
               end
               className={({ isActive }) =>
-                `${navLink} w-18.5 lg:w-27.25 ${isActive || isCoin || coinPending ? activeNavLink : "text-invest-muted"}`
+                `${navLink} w-18.5 lg:w-27.25 ${!portfolioPending && (isActive || isCoin || coinPending) ? activeNavLink : "text-invest-muted"}`
               }
             >
               <Icon name='market' className='hidden lg:block' />
@@ -46,7 +48,7 @@ export const App = () => {
               to={PATHS.PORTFOLIO}
               end
               className={({ isActive }) =>
-                `${navLink} w-25 lg:w-31.5 ${isActive && !coinPending ? activeNavLink : "text-invest-muted"}`
+                `${navLink} w-25 lg:w-31.5 ${portfolioPending || (isActive && !coinPending && !homePending) ? activeNavLink : "text-invest-muted"}`
               }
             >
               <Icon name='wallet' className='hidden lg:block' />
@@ -64,7 +66,15 @@ export const App = () => {
         </div>
       </header>
       <main className={gutters}>
-        {coinPending ? <CoinPending /> : homePending ? <HomePending /> : <Outlet />}
+        {coinPending ? (
+          <CoinPending />
+        ) : homePending ? (
+          <HomePending />
+        ) : portfolioPending ? (
+          <PortfolioPending />
+        ) : (
+          <Outlet />
+        )}
       </main>
     </>
   );

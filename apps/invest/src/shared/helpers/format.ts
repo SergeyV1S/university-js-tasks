@@ -19,3 +19,13 @@ export const formatPercent = (value: number | null, signed = false) => {
 };
 
 export const formatTime = (value: number) => time.format(value);
+
+const quantityFormat = new Intl.NumberFormat("ru", { maximumSignificantDigits: 12 });
+const unitPriceFormat = new Intl.NumberFormat("ru", { maximumFractionDigits: 2 });
+
+export const formatQuantity = (value: number) => quantityFormat.format(value);
+
+export const formatUnitPrice = (value: number, currency: "RUB" | "USD") => {
+  const formatted = (value < 0.01 ? smallMoney : unitPriceFormat).format(value);
+  return currency === "RUB" ? `${formatted} ₽` : `$${formatted}`;
+};
