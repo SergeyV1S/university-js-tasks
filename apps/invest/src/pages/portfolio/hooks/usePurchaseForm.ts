@@ -5,7 +5,7 @@ import { usePortfolioStore } from "../portfolioStore";
 
 const emptyDraft = { coinId: "", quantity: "", unitPrice: "" };
 
-export const usePurchaseForm = (onEdit: () => void, onSaved: () => void) => {
+export const usePurchaseForm = (onSaved: () => void) => {
   const id = useId();
   const [draft, setDraft] = useState(emptyDraft);
   const [query, setQuery] = useState("");
@@ -20,13 +20,11 @@ export const usePurchaseForm = (onEdit: () => void, onSaved: () => void) => {
   const saving = saveStatus === "saving";
 
   const handleQuery = (value: string) => {
-    onEdit();
     setQuery(value);
     setDraft((current) => ({ ...current, coinId: "" }));
   };
 
   const handleSelect = (coinId: string) => {
-    onEdit();
     usePortfolioStore.getState().clearFieldError("coinId");
     setQuery("");
     setDraft((current) => ({ ...current, coinId }));
@@ -34,14 +32,12 @@ export const usePurchaseForm = (onEdit: () => void, onSaved: () => void) => {
 
   const handleQuantityChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { value } = event.target;
-    onEdit();
     usePortfolioStore.getState().clearFieldError("quantity");
     setDraft((current) => ({ ...current, quantity: value }));
   };
 
   const handlePriceChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { value } = event.target;
-    onEdit();
     usePortfolioStore.getState().clearFieldError("unitPrice");
     setDraft((current) => ({ ...current, unitPrice: value }));
   };

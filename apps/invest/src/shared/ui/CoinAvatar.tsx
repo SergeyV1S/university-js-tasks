@@ -6,11 +6,12 @@ import { ApiText } from "./ApiText";
 
 type CoinAvatarProps = {
   coin: Pick<Coin, "id" | "name" | "symbol" | "image">;
-  size?: "compact" | "small" | "large";
+  size?: keyof typeof sizes;
 };
 
 const sizes = {
   compact: "size-7 text-invest-label font-bold",
+  base: "size-7.5 text-lg font-bold",
   small: "size-7.25 text-invest-body font-bold lg:size-8.5 lg:text-lg",
   large: "size-10.5 text-invest-section lg:size-13.5"
 };

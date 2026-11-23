@@ -8,6 +8,8 @@ const key = "invest:portfolio";
 const rates = { status: 200, json: { rates: { usd: { value: 100 }, rub: { value: 9000 } } } };
 const first = { coinId: "coin-1", quantity: 0.5, unitPrice: 25.75, currency: "RUB", rubPerUsd: 90 };
 const market = (url: URL) => {
+  if (url.pathname.endsWith("/simple/price")) return { status: 200, json: {} };
+
   const page = Number(url.searchParams.get("page"));
   return {
     status: 200,
@@ -150,7 +152,10 @@ test("adds_persists_and_retries_purchase", async ({ browser, context, page }) =>
     expect(request.body).toBeNull();
     const url = new URL(request.url);
     if (url.pathname.endsWith("/exchange_rates")) expect(url.search).toBe("");
-    else
+    else if (url.pathname.endsWith("/simple/price")) {
+      expect([...url.searchParams.keys()].sort()).toEqual(["ids", "vs_currencies"]);
+      expect(url.searchParams.get("ids")).toBe("coin-1");
+    } else
       expect([...url.searchParams.keys()].sort()).toEqual([
         "order",
         "page",
@@ -271,7 +276,9 @@ test("preserves_first_purchase_on_conflict", async ({ context, page }) => {
     firstRate.release();
     secondRate.release();
   }
-  await expect(secondTab.getByRole("status")).toContainText("Повторите сохранение");
+  await expect(secondTab.getByRole("form").getByRole("status")).toContainText(
+    "Повторите сохранение"
+  );
   await secondTab.evaluate(() => window.dispatchEvent(new Event("release-portfolio-message")));
   await expect(purchases(secondTab)).toHaveCount(1);
   await expect(quantity(secondTab)).toHaveValue("0,5");
@@ -331,7 +338,8 @@ test("opens_purchase_form_on_mobile_and_returns_to_portfolio", async ({ context,
   await fill(page);
   await save(page).click();
   await expect(purchases(page)).toHaveCount(1);
-  await expect(save(page)).toBeHidden();
+  await expect(page.getByRole("heading", { name: "Мой портфель", level: 1 })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Добавить покупку", level: 2 })).toBeVisible();
   await page.getByRole("button", { name: "Добавить покупку", exact: true }).click();
   await expect(page).toHaveURL("/portfolio");
   await expect(page.getByRole("button", { name: "Мой портфель", exact: true })).toBeVisible();
@@ -341,6 +349,11 @@ test("opens_purchase_form_on_mobile_and_returns_to_portfolio", async ({ context,
   await quantity(page).fill("2");
   await page.getByRole("button", { name: "Мой портфель", exact: true }).click();
   await expect(purchases(page)).toHaveCount(1);
+  await fill(page);
+  await save(page).click();
+  await expect(purchases(page)).toHaveCount(2);
+  await expect(page.getByText("Покупка сохранена")).toBeInViewport();
+  await quantity(page).fill("2");
   await page.setViewportSize({ width: 360, height: 844 });
   await page.getByRole("button", { name: "Добавить покупку", exact: true }).click();
   await expect(quantity(page)).toHaveValue("2");

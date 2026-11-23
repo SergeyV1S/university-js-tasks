@@ -1,4 +1,4 @@
-import type { CatalogCoin, Coin } from "@/shared/api/type";
+import type { CatalogCoin } from "@/shared/api/type";
 import { formatQuantity, formatUnitPrice } from "@/shared/helpers/format";
 
 import type { Purchase } from "../types";
@@ -6,8 +6,10 @@ import type { Purchase } from "../types";
 const records = new Intl.PluralRules("ru");
 const recordLabels = { one: "запись", few: "записи", many: "записей" } as const;
 
-export const usePurchaseList = (purchases: Purchase[], coins: Coin[] | null) => {
-  const byId = new Map(coins?.map((coin) => [coin.id, coin]));
+export const usePurchaseList = (
+  purchases: Purchase[],
+  coins: ReadonlyMap<string, CatalogCoin & { image?: string }>
+) => {
   const count = purchases.length;
   const plural = records.select(count);
   const label = plural === "one" || plural === "few" ? recordLabels[plural] : recordLabels.many;
@@ -16,7 +18,7 @@ export const usePurchaseList = (purchases: Purchase[], coins: Coin[] | null) => 
     countLabel: `${count} ${label}`,
     rows: purchases
       .map((purchase, index) => {
-        const coin: CatalogCoin & { image?: string } = byId.get(purchase.coinId) ?? {
+        const coin = coins.get(purchase.coinId) ?? {
           id: purchase.coinId,
           name: purchase.coinId
         };

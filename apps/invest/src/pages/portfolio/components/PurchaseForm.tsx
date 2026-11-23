@@ -21,7 +21,6 @@ type PurchaseFormProps = {
   className: string;
   mobileAdd: boolean;
   mobileHeading: Ref<HTMLHeadingElement>;
-  onEdit: () => void;
   onSaved: () => void;
 };
 
@@ -29,10 +28,9 @@ export const PurchaseForm = ({
   className,
   mobileAdd,
   mobileHeading,
-  onEdit,
   onSaved
 }: PurchaseFormProps) => {
-  const form = usePurchaseForm(onEdit, onSaved);
+  const form = usePurchaseForm(onSaved);
   const coinId = `${form.id}-coin`;
   const quantityId = `${form.id}-quantity`;
   const priceId = `${form.id}-price`;

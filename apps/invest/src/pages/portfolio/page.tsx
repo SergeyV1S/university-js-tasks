@@ -4,18 +4,23 @@ import { Icon } from "@/shared/ui/Icon";
 import { SegmentedControl } from "@/shared/ui/SegmentedControl";
 import { Skeleton } from "@/shared/ui/Skeleton";
 
+import { PortfolioAllocation } from "./components/PortfolioAllocation";
+import { PortfolioSummary } from "./components/PortfolioSummary";
 import { PurchaseForm } from "./components/PurchaseForm";
 import { PurchaseList } from "./components/PurchaseList";
 import { usePortfolioPage } from "./hooks/usePortfolioPage";
 
-const grid = "grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_22.25rem] lg:gap-5";
+const grid = "grid items-start lg:grid-cols-[minmax(0,1fr)_22.25rem] lg:gap-x-5";
 
 export const PortfolioPending = () => (
   <div role='status' aria-label='Загрузка портфеля' aria-busy='true' className='pt-5.5 lg:pt-7.25'>
     <Skeleton className='h-10 w-53 lg:h-12 lg:w-66.5' />
     <Skeleton className='mt-2 h-4.5 w-56' />
-    <div className={`mt-7 ${grid}`}>
-      <Skeleton className='h-25 rounded-xl! lg:h-88.75' />
+    <div className={`mt-7 gap-y-4 ${grid}`}>
+      <div className='space-y-4'>
+        <Skeleton className='h-45.75 rounded-xl! lg:h-40.5' />
+        <Skeleton className='h-81.5 rounded-xl! lg:h-61.25' />
+      </div>
       <section className='h-89.5 space-y-4 rounded-xl border border-invest-divider bg-invest-surface p-4.25'>
         <Skeleton className='h-6.5 w-40' />
         <Skeleton className='mt-8 h-11.5 w-full' />
@@ -132,36 +137,61 @@ export const PortfolioPage = () => {
         )}
 
         <div className={p.readFailed ? "lg:max-w-89" : grid}>
-          {!p.readFailed && (
-            <div className={p.mobileAdd ? "hidden lg:block" : ""}>
-              {p.purchases.length === 0 ? (
+          {!p.readFailed &&
+            (p.purchases.length === 0 ? (
+              <div
+                className={`mb-4 lg:col-start-1 lg:row-start-1 lg:mb-0 ${p.mobileAdd ? "hidden lg:block" : ""}`}
+              >
                 <EmptyPortfolio />
-              ) : (
-                <>
-                  <Button
-                    ref={p.mobileAddButton}
-                    variant='primary'
-                    onClick={p.openPurchase}
-                    disabled={!p.writable}
-                    className='relative mb-4 h-11 w-full lg:hidden'
-                  >
-                    <Icon name='plus' className='absolute left-3' />
-                    Добавить покупку
-                  </Button>
-                  <PurchaseList purchases={p.purchases} coins={p.coins} />
-                </>
-              )}
-            </div>
-          )}
+              </div>
+            ) : (
+              <div className={p.mobileAdd ? "hidden lg:contents" : "contents"}>
+                <div className='lg:col-start-1 lg:row-start-1'>
+                  <PortfolioSummary
+                    valuation={p.valuation}
+                    currency={p.currency}
+                    coins={p.ownedCoins}
+                    loading={p.valuationLoading}
+                  />
+                </div>
+                <Button
+                  ref={p.mobileAddButton}
+                  variant='primary'
+                  onClick={p.openPurchase}
+                  disabled={!p.writable}
+                  className='relative mt-3 h-11 w-full lg:hidden'
+                >
+                  <Icon name='plus' className='absolute left-3' />
+                  Добавить покупку
+                </Button>
+                <div className='mt-3.5 lg:col-start-1 lg:row-start-2 lg:mt-4'>
+                  <PortfolioAllocation
+                    valuation={p.valuation}
+                    coins={p.ownedCoins}
+                    loading={p.valuationLoading}
+                  />
+                </div>
+              </div>
+            ))}
           <PurchaseForm
             className={
-              p.mobileAdd || p.readFailed || p.purchases.length === 0 ? "" : "hidden lg:block"
+              p.readFailed
+                ? ""
+                : p.purchases.length === 0
+                  ? "lg:col-start-2 lg:row-start-1"
+                  : `lg:col-start-2 lg:row-span-3 lg:row-start-1 lg:mt-0 ${p.mobileAdd ? "" : "mt-4.25"}`
             }
             mobileAdd={p.mobileAdd}
             mobileHeading={p.mobileHeading}
-            onEdit={p.editPurchase}
-            onSaved={p.finishPurchase}
+            onSaved={p.closePurchase}
           />
+          {!p.readFailed && p.purchases.length > 0 && (
+            <div
+              className={`mt-4.5 min-w-0 lg:col-start-1 lg:row-start-3 lg:mt-4.75 ${p.mobileAdd ? "hidden lg:block" : ""}`}
+            >
+              <PurchaseList purchases={p.purchases} coins={p.ownedCoins} />
+            </div>
+          )}
         </div>
       </div>
     </div>

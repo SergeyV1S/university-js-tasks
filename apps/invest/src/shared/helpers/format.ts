@@ -25,6 +25,12 @@ const unitPriceFormat = new Intl.NumberFormat("ru", { maximumFractionDigits: 2 }
 
 export const formatQuantity = (value: number) => quantityFormat.format(value);
 
+export const formatFiatAmount = (value: number, currency: "RUB" | "USD", signed = false) => {
+  const sign = value <= -0.005 ? "−" : signed && value >= 0.005 ? "+" : "";
+  const symbol = currency === "RUB" ? "₽\u00a0" : "$";
+  return `${sign}${symbol}${money.format(Math.abs(value))}`;
+};
+
 export const formatUnitPrice = (value: number, currency: "RUB" | "USD") => {
   const formatted = (value < 0.01 ? smallMoney : unitPriceFormat).format(value);
   return currency === "RUB" ? `${formatted} ₽` : `$${formatted}`;

@@ -3,7 +3,13 @@ import { create } from "zustand";
 import { apiClient } from "@/shared/api/client";
 import { isPositiveNumber, parsePositiveDecimal } from "@/shared/helpers/positiveNumber";
 
-import { loadPortfolioCoins } from "./api";
+import {
+  loadPortfolioCatalog,
+  loadPortfolioCoins,
+  loadPortfolioPrices,
+  needsCatalog,
+  portfolioCoinIds
+} from "./api";
 import { appendPurchase, canWritePortfolio, readPortfolio, subscribePortfolio } from "./storage";
 import type {
   PortfolioCurrency,
@@ -21,7 +27,10 @@ type PortfolioState = {
   snapshot: PortfolioSnapshot | null;
   readFailed: boolean;
   coins: PortfolioInitialData["coins"];
+  catalog: PortfolioInitialData["catalog"];
+  prices: PortfolioInitialData["prices"];
   loadingCoins: boolean;
+  loadingQuotes: boolean;
   currency: PortfolioCurrency;
   writable: boolean;
   saveStatus: SaveStatus;
@@ -29,6 +38,7 @@ type PortfolioState = {
   setInitialData: (data: PortfolioInitialData) => void;
   retryRead: () => Promise<void>;
   retryCoins: () => Promise<void>;
+  loadQuotes: () => Promise<void>;
   close: () => void;
   setCurrency: (currency: PortfolioCurrency) => void;
   clearFieldError: (field: keyof PurchaseDraft) => void;
@@ -50,17 +60,57 @@ const readRubPerUsd = async (signal: AbortSignal) => {
 export const usePortfolioStore = create<PortfolioState>((set, get) => {
   let unsubscribe: (() => void) | undefined;
   let lifecycle: AbortController | undefined;
+  let quoteRequest: AbortController | undefined;
+  let loadingCatalog = false;
+
+  const loadQuotes = async () => {
+    if (!lifecycle) return;
+
+    quoteRequest?.abort();
+    const { snapshot, currency, coins, catalog } = get();
+    const ids = portfolioCoinIds(snapshot);
+    if (ids.length === 0) {
+      set({ prices: {}, loadingQuotes: false });
+      return;
+    }
+
+    const request = new AbortController();
+    quoteRequest = request;
+    set({ loadingQuotes: true });
+
+    if (!catalog && !loadingCatalog && needsCatalog(ids, coins)) {
+      const { signal } = lifecycle;
+      loadingCatalog = true;
+      void loadPortfolioCatalog(signal).then((catalog) => {
+        if (signal.aborted) return;
+        loadingCatalog = false;
+        set({ catalog });
+      });
+    }
+
+    const prices = await loadPortfolioPrices(ids, currency, request.signal);
+    if (request.signal.aborted || quoteRequest !== request) return;
+
+    quoteRequest = undefined;
+    set({ prices, loadingQuotes: false });
+  };
+
+  const replaceSnapshot = (snapshot: PortfolioSnapshot) => {
+    set({ snapshot, readFailed: false });
+    void loadQuotes();
+  };
 
   const applySnapshot = (snapshot: PortfolioSnapshot) => {
     const current = get().snapshot;
     if (current === null || snapshot.revision > current.revision) {
-      set({ snapshot, readFailed: false });
+      replaceSnapshot(snapshot);
     }
   };
 
   const retryRead = async () => {
     try {
       set({ snapshot: readPortfolio(), readFailed: false, writable: canWritePortfolio() });
+      await loadQuotes();
     } catch {
       set({ readFailed: true });
     }
@@ -71,6 +121,9 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => {
     unsubscribe = undefined;
     lifecycle?.abort();
     lifecycle = undefined;
+    quoteRequest?.abort();
+    quoteRequest = undefined;
+    loadingCatalog = false;
   };
 
   return {
@@ -78,7 +131,10 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => {
     snapshot: null,
     readFailed: false,
     coins: null,
+    catalog: null,
+    prices: {},
     loadingCoins: false,
+    loadingQuotes: false,
     currency: "RUB",
     writable: false,
     saveStatus: "idle",
@@ -91,7 +147,11 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => {
         snapshot: initial.snapshot,
         readFailed: initial.snapshot === null,
         coins: initial.coins,
+        catalog: initial.catalog,
+        currency: initial.currency,
+        prices: initial.prices,
         loadingCoins: false,
+        loadingQuotes: false,
         writable: canWritePortfolio(),
         saveStatus: "idle",
         errors: {}
@@ -114,8 +174,14 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => {
       const coins = await loadPortfolioCoins(signal).catch(() => null);
       if (!signal.aborted) set({ coins, loadingCoins: false });
     },
+    loadQuotes,
     close,
-    setCurrency: (currency) => set({ currency }),
+    setCurrency: (currency) => {
+      if (currency === get().currency) return;
+
+      set({ currency, prices: {} });
+      void loadQuotes();
+    },
     clearFieldError: (field) => {
       const { errors } = get();
       if (errors[field]) set({ errors: { ...errors, [field]: undefined } });
@@ -160,7 +226,7 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => {
         if (signal.aborted) return result.kind === "saved" ? "saved" : "ignored";
 
         if (result.kind === "conflict" && get().snapshot === snapshot) {
-          set({ snapshot: result.snapshot });
+          replaceSnapshot(result.snapshot);
         } else {
           applySnapshot(result.snapshot);
         }
