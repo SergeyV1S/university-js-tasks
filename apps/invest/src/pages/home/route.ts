@@ -1,7 +1,8 @@
 import { replace } from "react-router";
 import type { LoaderFunctionArgs, RouteObject } from "react-router";
 
-import { PATHS } from "../../shared/constants/router-paths";
+import { PATHS } from "@/shared/constants/router-paths";
+
 import { loadHome } from "./api";
 import { HomePage, HomePending } from "./page";
 

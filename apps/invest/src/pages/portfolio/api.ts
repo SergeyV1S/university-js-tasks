@@ -1,4 +1,5 @@
-import { apiClient } from "../../shared/api/client";
+import { apiClient } from "@/shared/api/client";
+
 import { readPortfolio } from "./storage";
 import type { PortfolioInitialData } from "./types";
 

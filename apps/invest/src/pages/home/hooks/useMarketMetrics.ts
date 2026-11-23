@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent } from "react";
 
-import { formatPercent } from "../../../shared/helpers/format";
-import { percentColor } from "../../../shared/helpers/percentColor";
+import { formatPercent } from "@/shared/helpers/format";
+import { percentColor } from "@/shared/helpers/percentColor";
+
 import type { HomeInitialData } from "../api";
 import { buildCards } from "../helpers/buildCards";
 

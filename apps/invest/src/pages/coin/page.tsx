@@ -1,9 +1,10 @@
 import { Link } from "react-router";
 
-import { PATHS } from "../../shared/constants/router-paths";
-import { Banner } from "../../shared/ui/Banner";
-import { Button } from "../../shared/ui/Button";
-import { Icon } from "../../shared/ui/Icon";
+import { PATHS } from "@/shared/constants/router-paths";
+import { Banner } from "@/shared/ui/Banner";
+import { Button } from "@/shared/ui/Button";
+import { Icon } from "@/shared/ui/Icon";
+
 import { CoinConverter } from "./components/CoinConverter";
 import { CoinHeader } from "./components/CoinHeader";
 import { CoinHistory } from "./components/CoinHistory";

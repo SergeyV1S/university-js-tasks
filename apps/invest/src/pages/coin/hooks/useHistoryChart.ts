@@ -1,7 +1,8 @@
 import { useEffect, useRef } from "react";
 
-import type { HistoryDays } from "../../../shared/api/type";
-import { formatMoney } from "../../../shared/helpers/format";
+import type { HistoryDays } from "@/shared/api/type";
+import { formatMoney } from "@/shared/helpers/format";
+
 import { createHistoryChart } from "../helpers/historyChart";
 
 export const useHistoryChart = (prices: Array<[number, number]>, period: HistoryDays) => {

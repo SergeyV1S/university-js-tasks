@@ -8,8 +8,8 @@ import {
   Tooltip
 } from "chart.js";
 
-import type { HistoryDays } from "../../../shared/api/type";
-import { formatMoney } from "../../../shared/helpers/format";
+import type { HistoryDays } from "@/shared/api/type";
+import { formatMoney } from "@/shared/helpers/format";
 
 Chart.register(Filler, LineController, LineElement, LinearScale, PointElement, Tooltip);
 

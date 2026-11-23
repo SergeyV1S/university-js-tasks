@@ -1,7 +1,8 @@
-import { Banner } from "../../shared/ui/Banner";
-import { Button } from "../../shared/ui/Button";
-import { Icon } from "../../shared/ui/Icon";
-import { Input } from "../../shared/ui/Input";
+import { Banner } from "@/shared/ui/Banner";
+import { Button } from "@/shared/ui/Button";
+import { Icon } from "@/shared/ui/Icon";
+import { Input } from "@/shared/ui/Input";
+
 import { MarketMetrics } from "./components/MarketMetrics";
 import { MarketTable } from "./components/MarketTable";
 import { PriceFilter } from "./components/PriceFilter";

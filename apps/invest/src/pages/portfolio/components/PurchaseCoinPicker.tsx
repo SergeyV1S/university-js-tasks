@@ -1,9 +1,10 @@
-import type { Coin } from "../../../shared/api/type";
-import { ApiText } from "../../../shared/ui/ApiText";
-import { CoinAvatar } from "../../../shared/ui/CoinAvatar";
-import { FormField } from "../../../shared/ui/FormField";
-import { Icon } from "../../../shared/ui/Icon";
-import { Input } from "../../../shared/ui/Input";
+import type { Coin } from "@/shared/api/type";
+import { ApiText } from "@/shared/ui/ApiText";
+import { CoinAvatar } from "@/shared/ui/CoinAvatar";
+import { FormField } from "@/shared/ui/FormField";
+import { Icon } from "@/shared/ui/Icon";
+import { Input } from "@/shared/ui/Input";
+
 import { usePurchaseCoinPicker } from "../hooks/usePurchaseCoinPicker";
 
 type PurchaseCoinPickerProps = {

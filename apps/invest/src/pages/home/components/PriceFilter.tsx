@@ -1,6 +1,7 @@
-import { Button } from "../../../shared/ui/Button";
-import { Form } from "../../../shared/ui/Form";
-import { Input } from "../../../shared/ui/Input";
+import { Button } from "@/shared/ui/Button";
+import { Form } from "@/shared/ui/Form";
+import { Input } from "@/shared/ui/Input";
+
 import type { PriceRange } from "../helpers/selectRows";
 import { usePriceFilter } from "../hooks/usePriceFilter";
 

@@ -1,6 +1,7 @@
 import { create } from "zustand";
 
-import type { HistoryDays } from "../../shared/api/type";
+import type { HistoryDays } from "@/shared/api/type";
+
 import { initialPeriod, loadHistory } from "./api";
 import type { CoinHistory, CoinInitialData } from "./api";
 import type { ConverterCurrency } from "./helpers/converter";

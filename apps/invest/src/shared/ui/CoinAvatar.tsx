@@ -1,6 +1,7 @@
-import type { Coin } from "../api/type";
-import bitcoinMark from "../assets/bitcoin.svg";
-import { useCoinAvatar } from "../hooks/useCoinAvatar";
+import type { Coin } from "@/shared/api/type";
+import bitcoinMark from "@/shared/assets/bitcoin.svg";
+import { useCoinAvatar } from "@/shared/hooks/useCoinAvatar";
+
 import { ApiText } from "./ApiText";
 
 type CoinAvatarProps = {

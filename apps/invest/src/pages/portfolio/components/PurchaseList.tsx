@@ -1,6 +1,7 @@
-import type { Coin } from "../../../shared/api/type";
-import { ApiText } from "../../../shared/ui/ApiText";
-import { CoinAvatar } from "../../../shared/ui/CoinAvatar";
+import type { Coin } from "@/shared/api/type";
+import { ApiText } from "@/shared/ui/ApiText";
+import { CoinAvatar } from "@/shared/ui/CoinAvatar";
+
 import { usePurchaseList } from "../hooks/usePurchaseList";
 import type { Purchase } from "../types";
 

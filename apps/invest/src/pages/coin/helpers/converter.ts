@@ -1,4 +1,4 @@
-import type { Currency, Quotes } from "../../../shared/api/type";
+import type { Currency, Quotes } from "@/shared/api/type";
 
 export const converterCurrencies = ["USD", "EUR", "BTC"] as const satisfies readonly Currency[];
 export type ConverterCurrency = (typeof converterCurrencies)[number];

@@ -1,7 +1,8 @@
 import { create } from "zustand";
 
-import { apiClient } from "../../shared/api/client";
-import { isPositiveNumber, parsePositiveDecimal } from "../../shared/helpers/positiveNumber";
+import { apiClient } from "@/shared/api/client";
+import { isPositiveNumber, parsePositiveDecimal } from "@/shared/helpers/positiveNumber";
+
 import { loadPortfolioCoins } from "./api";
 import { appendPurchase, canWritePortfolio, readPortfolio, subscribePortfolio } from "./storage";
 import type {

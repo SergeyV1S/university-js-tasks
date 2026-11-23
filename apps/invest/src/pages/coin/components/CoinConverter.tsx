@@ -1,10 +1,11 @@
-import type { Coin } from "../../../shared/api/type";
-import { ApiText } from "../../../shared/ui/ApiText";
-import { Button } from "../../../shared/ui/Button";
-import { Form } from "../../../shared/ui/Form";
-import { Input } from "../../../shared/ui/Input";
-import { SegmentedControl } from "../../../shared/ui/SegmentedControl";
-import { Skeleton } from "../../../shared/ui/Skeleton";
+import type { Coin } from "@/shared/api/type";
+import { ApiText } from "@/shared/ui/ApiText";
+import { Button } from "@/shared/ui/Button";
+import { Form } from "@/shared/ui/Form";
+import { Input } from "@/shared/ui/Input";
+import { SegmentedControl } from "@/shared/ui/SegmentedControl";
+import { Skeleton } from "@/shared/ui/Skeleton";
+
 import type { ConverterData } from "../api";
 import { useCoinConverter } from "../hooks/useCoinConverter";
 

@@ -1,12 +1,13 @@
 import { Link } from "react-router";
 
-import type { Coin } from "../../../shared/api/type";
-import { useInfinityScroll } from "../../../shared/hooks/useInfinityScroll";
-import { ApiText } from "../../../shared/ui/ApiText";
-import { Button } from "../../../shared/ui/Button";
-import { CoinAvatar } from "../../../shared/ui/CoinAvatar";
-import { Icon } from "../../../shared/ui/Icon";
-import { Skeleton } from "../../../shared/ui/Skeleton";
+import type { Coin } from "@/shared/api/type";
+import { useInfinityScroll } from "@/shared/hooks/useInfinityScroll";
+import { ApiText } from "@/shared/ui/ApiText";
+import { Button } from "@/shared/ui/Button";
+import { CoinAvatar } from "@/shared/ui/CoinAvatar";
+import { Icon } from "@/shared/ui/Icon";
+import { Skeleton } from "@/shared/ui/Skeleton";
+
 import type { Sort, SortKey } from "../helpers/selectRows";
 import { useMarketTable } from "../hooks/useMarketTable";
 

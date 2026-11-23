@@ -1,7 +1,8 @@
-import type { Coin } from "../../../shared/api/type";
-import { ApiText } from "../../../shared/ui/ApiText";
-import { CoinAvatar } from "../../../shared/ui/CoinAvatar";
-import { Skeleton } from "../../../shared/ui/Skeleton";
+import type { Coin } from "@/shared/api/type";
+import { ApiText } from "@/shared/ui/ApiText";
+import { CoinAvatar } from "@/shared/ui/CoinAvatar";
+import { Skeleton } from "@/shared/ui/Skeleton";
+
 import { useCoinHeader } from "../hooks/useCoinHeader";
 
 type CoinHeaderProps = { coin?: Coin };

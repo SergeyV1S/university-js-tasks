@@ -1,8 +1,9 @@
-import { Banner } from "../../shared/ui/Banner";
-import { Button } from "../../shared/ui/Button";
-import { Icon } from "../../shared/ui/Icon";
-import { SegmentedControl } from "../../shared/ui/SegmentedControl";
-import { Skeleton } from "../../shared/ui/Skeleton";
+import { Banner } from "@/shared/ui/Banner";
+import { Button } from "@/shared/ui/Button";
+import { Icon } from "@/shared/ui/Icon";
+import { SegmentedControl } from "@/shared/ui/SegmentedControl";
+import { Skeleton } from "@/shared/ui/Skeleton";
+
 import { PurchaseForm } from "./components/PurchaseForm";
 import { PurchaseList } from "./components/PurchaseList";
 import { usePortfolioPage } from "./hooks/usePortfolioPage";

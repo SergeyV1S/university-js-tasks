@@ -1,9 +1,10 @@
 import { lazy, Suspense } from "react";
 
-import { Button } from "../../../shared/ui/Button";
-import { Icon } from "../../../shared/ui/Icon";
-import { SegmentedControl } from "../../../shared/ui/SegmentedControl";
-import { Skeleton } from "../../../shared/ui/Skeleton";
+import { Button } from "@/shared/ui/Button";
+import { Icon } from "@/shared/ui/Icon";
+import { SegmentedControl } from "@/shared/ui/SegmentedControl";
+import { Skeleton } from "@/shared/ui/Skeleton";
+
 import { useCoinHistory } from "../hooks/useCoinHistory";
 
 const HistoryChart = lazy(async () => ({ default: (await import("./HistoryChart")).HistoryChart }));

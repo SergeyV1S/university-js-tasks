@@ -1,6 +1,7 @@
-import { Button } from "../../../shared/ui/Button";
-import { Icon } from "../../../shared/ui/Icon";
-import { Skeleton } from "../../../shared/ui/Skeleton";
+import { Button } from "@/shared/ui/Button";
+import { Icon } from "@/shared/ui/Icon";
+import { Skeleton } from "@/shared/ui/Skeleton";
+
 import type { HomeInitialData } from "../api";
 import { useMarketMetrics } from "../hooks/useMarketMetrics";
 

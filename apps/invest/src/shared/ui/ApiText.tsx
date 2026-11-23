@@ -1,4 +1,4 @@
-import { useApiText } from "../hooks/useApiText";
+import { useApiText } from "@/shared/hooks/useApiText";
 
 export const ApiText = ({ value }: { value: string }) => {
   const setTextContent = useApiText(value);

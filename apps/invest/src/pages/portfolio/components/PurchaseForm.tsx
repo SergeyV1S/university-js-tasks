@@ -1,12 +1,13 @@
 import type { Ref } from "react";
 
-import { ApiText } from "../../../shared/ui/ApiText";
-import { Banner } from "../../../shared/ui/Banner";
-import { Button } from "../../../shared/ui/Button";
-import { Form } from "../../../shared/ui/Form";
-import { FormField } from "../../../shared/ui/FormField";
-import { Icon } from "../../../shared/ui/Icon";
-import { Input } from "../../../shared/ui/Input";
+import { ApiText } from "@/shared/ui/ApiText";
+import { Banner } from "@/shared/ui/Banner";
+import { Button } from "@/shared/ui/Button";
+import { Form } from "@/shared/ui/Form";
+import { FormField } from "@/shared/ui/FormField";
+import { Icon } from "@/shared/ui/Icon";
+import { Input } from "@/shared/ui/Input";
+
 import { usePurchaseForm } from "../hooks/usePurchaseForm";
 import { PurchaseCoinPicker } from "./PurchaseCoinPicker";
 

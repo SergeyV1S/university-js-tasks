@@ -1,10 +1,11 @@
 import { NavLink, Outlet } from "react-router";
 
-import { CoinPending } from "../pages/coin";
-import { HomePending } from "../pages/home";
-import { PortfolioPending } from "../pages/portfolio";
-import { PATHS } from "../shared/constants/router-paths";
-import { Icon } from "../shared/ui/Icon";
+import { CoinPending } from "@/pages/coin";
+import { HomePending } from "@/pages/home";
+import { PortfolioPending } from "@/pages/portfolio";
+import { PATHS } from "@/shared/constants/router-paths";
+import { Icon } from "@/shared/ui/Icon";
+
 import { useApp } from "./hooks/useApp";
 
 const navLink =

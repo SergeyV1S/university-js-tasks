@@ -1,4 +1,4 @@
-import type { Coin } from "../../shared/api/type";
+import type { Coin } from "@/shared/api/type";
 
 export type PortfolioCurrency = "RUB" | "USD";
 

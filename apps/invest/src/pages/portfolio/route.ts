@@ -1,6 +1,7 @@
 import type { LoaderFunctionArgs, RouteObject } from "react-router";
 
-import { PATHS } from "../../shared/constants/router-paths";
+import { PATHS } from "@/shared/constants/router-paths";
+
 import { loadPortfolio } from "./api";
 import { PortfolioPage, PortfolioPending } from "./page";
 

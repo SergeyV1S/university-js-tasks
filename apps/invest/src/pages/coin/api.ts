@@ -1,5 +1,6 @@
-import { apiClient } from "../../shared/api/client";
-import type { HistoryDays } from "../../shared/api/type";
+import { apiClient } from "@/shared/api/client";
+import type { HistoryDays } from "@/shared/api/type";
+
 import { converterCurrencies, isQuote } from "./helpers/converter";
 
 export const initialPeriod = 7 satisfies HistoryDays;

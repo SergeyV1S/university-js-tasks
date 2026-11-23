@@ -1,7 +1,8 @@
 import { useLayoutEffect } from "react";
 import { useLoaderData, useNavigate } from "react-router";
 
-import { PATHS } from "../../../shared/constants/router-paths";
+import { PATHS } from "@/shared/constants/router-paths";
+
 import type { loadCoin } from "../api";
 import { useCoinStore } from "../coinStore";
 

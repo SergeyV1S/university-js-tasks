@@ -1,8 +1,9 @@
 import { create } from "zustand";
 
-import { apiClient } from "../../shared/api/client";
-import type { Coin } from "../../shared/api/type";
-import { debounce } from "../../shared/helpers/debounce";
+import { apiClient } from "@/shared/api/client";
+import type { Coin } from "@/shared/api/type";
+import { debounce } from "@/shared/helpers/debounce";
+
 import { initialSort, loadHome, loadMatches } from "./api";
 import type { Catalog, HomeInitialData } from "./api";
 import { parsePrice } from "./helpers/selectRows";

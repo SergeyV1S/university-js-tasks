@@ -1,6 +1,6 @@
 import { matchPath, useLocation, useNavigation } from "react-router";
 
-import { PATHS } from "../../shared/constants/router-paths";
+import { PATHS } from "@/shared/constants/router-paths";
 
 export const useApp = () => {
   const { pathname } = useLocation();

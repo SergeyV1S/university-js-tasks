@@ -1,5 +1,6 @@
-import type { CatalogCoin, Coin } from "../../../shared/api/type";
-import { formatQuantity, formatUnitPrice } from "../../../shared/helpers/format";
+import type { CatalogCoin, Coin } from "@/shared/api/type";
+import { formatQuantity, formatUnitPrice } from "@/shared/helpers/format";
+
 import type { Purchase } from "../types";
 
 const records = new Intl.PluralRules("ru");

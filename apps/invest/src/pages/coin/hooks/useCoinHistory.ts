@@ -1,4 +1,5 @@
-import type { HistoryDays } from "../../../shared/api/type";
+import type { HistoryDays } from "@/shared/api/type";
+
 import { initialPeriod } from "../api";
 import { useCoinStore } from "../coinStore";
 
