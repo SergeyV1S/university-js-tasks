@@ -11,6 +11,7 @@ export const useHome = () => {
   useLayoutEffect(() => {
     const { setInitialData, stop } = useHomeStore.getState();
     setInitialData(data);
+
     return stop;
   }, [data]);
 

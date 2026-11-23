@@ -7,10 +7,14 @@ import { initialSort, loadHome, loadMatches } from "./api";
 import type { Catalog, HomeInitialData } from "./api";
 import { parsePrice } from "./helpers/selectRows";
 import type { PriceRange, Sort, SortKey } from "./helpers/selectRows";
+import { emptyRange, LAST_TOP_PAGE } from "./constants";
 
 type HomeState = {
   initial: HomeInitialData | null;
   top: Coin[] | null;
+  topPage: number;
+  loadingMore: boolean;
+  loadMoreError: boolean;
   metrics: HomeInitialData["metrics"];
   updatedAt: number | null;
   query: string;
@@ -26,15 +30,23 @@ type HomeState = {
   setQuery: (value: string) => void;
   setRange: (min: string, max: string) => void;
   sortBy: (key: SortKey) => void;
+  loadNextPage: () => Promise<void>;
   refresh: () => Promise<void>;
   stop: () => void;
 };
 
-const emptyRange: PriceRange = { min: null, max: null };
+const appendNewCoins = (current: Coin[], next: Coin[]): Coin[] => {
+  const coins = new Map(current.map((coin) => [coin.id, coin]));
+  for (const coin of next) {
+    if (!coins.has(coin.id)) coins.set(coin.id, coin);
+  }
+  return [...coins.values()];
+};
 
 export const useHomeStore = create<HomeState>()((set, get) => {
   let catalog: Catalog | undefined;
   let searchRequest: AbortController | undefined;
+  let pageRequest: AbortController | undefined;
   let refreshRequest: AbortController | undefined;
 
   const search = async (query: string, controller: AbortController) => {
@@ -63,8 +75,14 @@ export const useHomeStore = create<HomeState>()((set, get) => {
     searchRequest = undefined;
   };
 
+  const stopPaging = () => {
+    pageRequest?.abort();
+    pageRequest = undefined;
+  };
+
   const stop = () => {
     stopSearch();
+    stopPaging();
     refreshRequest?.abort();
     refreshRequest = undefined;
   };
@@ -72,6 +90,9 @@ export const useHomeStore = create<HomeState>()((set, get) => {
   return {
     initial: null,
     top: null,
+    topPage: 0,
+    loadingMore: false,
+    loadMoreError: false,
     metrics: null,
     updatedAt: null,
     query: "",
@@ -89,10 +110,13 @@ export const useHomeStore = create<HomeState>()((set, get) => {
       catalog = undefined;
       set({
         initial: data,
-        top: data.top,
+        top: !data.top ? null : appendNewCoins([], data.top),
+        topPage: !data.top ? 0 : 1,
+        loadingMore: false,
+        loadMoreError: false,
         metrics: data.metrics,
         updatedAt: data.updatedAt,
-        marketError: data.top === null || data.metrics === null,
+        marketError: !data.top || !data.metrics,
         query: "",
         results: null,
         searching: false,
@@ -144,21 +168,59 @@ export const useHomeStore = create<HomeState>()((set, get) => {
       set({ sort: { key, direction }, sortedByUser: true });
     },
 
-    refresh: async () => {
-      if (refreshRequest) return;
+    loadNextPage: async () => {
+      const { top, topPage, query } = get();
+      if (pageRequest || refreshRequest || top === null || topPage >= LAST_TOP_PAGE || query.trim())
+        return;
+
+      const page = topPage + 1;
       const controller = new AbortController();
-      refreshRequest = controller;
-      set({ refreshing: true });
+      pageRequest = controller;
+      set({ loadingMore: true, loadMoreError: false });
 
       try {
-        const data = await loadHome(controller.signal);
+        const next = await apiClient.getMarkets(undefined, { page, signal: controller.signal });
+        if (pageRequest !== controller) return;
+        set(({ top }) => ({ top: appendNewCoins(top ?? [], next), topPage: page }));
+      } catch {
+        if (pageRequest === controller) set({ loadMoreError: true });
+      } finally {
+        if (pageRequest === controller) {
+          pageRequest = undefined;
+          set({ loadingMore: false });
+        }
+      }
+    },
+
+    refresh: async () => {
+      if (refreshRequest) return;
+      const currentTop = get().top;
+      const ids = currentTop?.length ? currentTop.map(({ id }) => id) : undefined;
+      const controller = new AbortController();
+      refreshRequest = controller;
+      if (!ids) stopPaging();
+      set({ refreshing: true, loadingMore: Boolean(pageRequest) });
+
+      try {
+        const data = await loadHome(controller.signal, ids);
         if (refreshRequest !== controller) return;
-        const { top, metrics, updatedAt, query, searching } = get();
+        const { top, topPage, loadMoreError, metrics, updatedAt, query, searching } = get();
+        const incoming = data.top;
+        const restartTop = !ids && incoming !== null && (top === null || incoming.length > 0);
+        let refreshedTop = top;
+        if (restartTop) {
+          refreshedTop = appendNewCoins([], incoming);
+        } else if (ids && top && incoming !== null) {
+          const quotes = new Map(incoming.map((coin) => [coin.id, coin]));
+          refreshedTop = top.map((coin) => quotes.get(coin.id) ?? coin);
+        }
         set({
-          top: data.top ?? top,
+          top: refreshedTop,
+          topPage: restartTop ? 1 : topPage,
+          loadMoreError: restartTop ? false : loadMoreError,
           metrics: data.metrics ?? metrics,
-          marketError: data.top === null || data.metrics === null,
-          updatedAt: data.top !== null || data.metrics !== null ? data.updatedAt : updatedAt
+          marketError: incoming === null || data.metrics === null,
+          updatedAt: incoming !== null || data.metrics !== null ? data.updatedAt : updatedAt
         });
 
         if (!searching && query.trim()) {

@@ -37,8 +37,7 @@ export type GlobalMetrics = {
 
 export type MarketClient = {
   getCatalog: (options?: RequestOptions) => Promise<CatalogCoin[]>;
-  getTop100: (options?: RequestOptions) => Promise<Coin[]>;
-  getMarkets: (ids: string[], options?: RequestOptions) => Promise<Coin[]>;
+  getMarkets: (ids?: string[], options?: RequestOptions & { page?: number }) => Promise<Coin[]>;
   getGlobal: (options?: RequestOptions) => Promise<GlobalMetrics>;
   getHistory: (
     id: string,

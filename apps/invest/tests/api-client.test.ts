@@ -49,13 +49,22 @@ test("normalizes_market_payloads_and_errors", async (context) => {
       { id: "outside-top", name: "Outside top", market_cap: null }
     ])
   );
-  assert.equal((await client.getTop100())[0].rank, 1);
+  assert.equal((await client.getMarkets())[0].rank, 1);
   assert.deepEqual(Object.fromEntries(requests.at(-1)!.url.searchParams), {
     vs_currency: "usd",
     order: "market_cap_desc",
-    per_page: "100",
+    per_page: "20",
     page: "1"
   });
+  const pageRequest = new AbortController();
+  await client.getMarkets(undefined, { page: 2, signal: pageRequest.signal });
+  assert.deepEqual(Object.fromEntries(requests.at(-1)!.url.searchParams), {
+    vs_currency: "usd",
+    order: "market_cap_desc",
+    per_page: "20",
+    page: "2"
+  });
+  assert.equal(requests.at(-1)?.config.signal, pageRequest.signal);
   const markets = await client.getMarkets(["bitcoin", "outside-top", "bitcoin"]);
   assert.deepEqual(markets, [
     { id: "bitcoin", name: "Bitcoin", rank: 1, price: 0, marketCap: 0, change24h: -2 },

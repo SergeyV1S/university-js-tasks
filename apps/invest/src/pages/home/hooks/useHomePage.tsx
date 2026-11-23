@@ -1,25 +1,13 @@
 import { useRef, useState } from "react";
 import type { ChangeEvent } from "react";
 
-import { formatTime } from "../../../shared/helpers/format";
 import { initialSort } from "../api";
+import { selectRangeLabel } from "../helpers/selectRangeLabel";
 import { selectRows } from "../helpers/selectRows";
+import { selectStatusLabel } from "../helpers/selectStatusLabel";
+import { LAST_TOP_PAGE } from "../constants";
 import type { useHome } from "./useHome";
-
-const coinCount = new Intl.NumberFormat("ru");
-const plural = new Intl.PluralRules("ru");
-const countNoun: Partial<Record<Intl.LDMLPluralRule, string>> = {
-  one: "монета",
-  few: "монеты",
-  many: "монет"
-};
-const sortLabels = {
-  rank: "По рангу",
-  name: "По названию",
-  price: "По цене",
-  change24h: "По изменению за 24 ч",
-  marketCap: "По капитализации"
-};
+import { coinCount, countNoun, plural, sortLabels } from "../constants";
 
 export const useHomePage = (state: ReturnType<typeof useHome>) => {
   const [filterOpen, setFilterOpen] = useState(false);
@@ -30,6 +18,17 @@ export const useHomePage = (state: ReturnType<typeof useHome>) => {
 
   const { query = "", sort = initialSort } = state ?? {};
   const searchingCatalog = query.trim() !== "";
+  const pagination = state &&
+    !searchingCatalog &&
+    state.topPage > 0 &&
+    state.topPage < LAST_TOP_PAGE && {
+      page: state.topPage,
+      loading: state.loadingMore,
+      failed: state.loadMoreError,
+      paused: state.refreshing,
+      loadNext: state.loadNextPage
+    };
+
   const rows = state
     ? selectRows(state.results ?? (state.searching || !searchingCatalog ? (state.top ?? []) : []), {
         ...state.range,
@@ -37,34 +36,22 @@ export const useHomePage = (state: ReturnType<typeof useHome>) => {
         includeUnranked: searchingCatalog && !state.sortedByUser
       })
     : [];
+
   const hasError = state?.marketError || state?.searchError;
   const showError = hasError && !dismissed;
   const unavailable = Boolean(state && (searchingCatalog ? state.searchError : state.top === null));
   const min = state?.range.min;
   const max = state?.range.max;
   const hasRange = min != null || max != null;
-  const rangeLabel =
-    min != null && max != null
-      ? `$${coinCount.format(min)}–${coinCount.format(max)}`
-      : min != null
-        ? `от $${coinCount.format(min)}`
-        : max != null
-          ? `до $${coinCount.format(max)}`
-          : "";
+  const rangeLabel = selectRangeLabel(coinCount, min, max);
+  const statusLabel = selectStatusLabel(state?.refreshing, hasError, state?.updatedAt);
   const countLabel = state?.searching
     ? "Поиск монет…"
     : `${coinCount.format(rows.length)} ${countNoun[plural.select(rows.length)] ?? "монет"}`;
-  const statusLabel = state?.refreshing
-    ? "Обновляем котировки…"
-    : hasError
-      ? "Обновление приостановлено"
-      : state?.updatedAt
-        ? `Обновлено в ${formatTime(state.updatedAt)}`
-        : "Загрузка котировок…";
 
   const refreshQuotes = () => {
     setDismissed(false);
-    void state?.refresh();
+    state?.refresh();
   };
 
   const dismissError = () => setDismissed(true);
@@ -93,6 +80,7 @@ export const useHomePage = (state: ReturnType<typeof useHome>) => {
       filterOpen,
       hasError,
       hasRange,
+      pagination,
       query,
       rangeLabel,
       rows,

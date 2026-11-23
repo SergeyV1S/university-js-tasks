@@ -34,8 +34,7 @@ export const selectRows = (
       if (a === null) return b === null ? 0 : 1;
       if (b === null) return -1;
       return direction * (a - b);
-    })
-    .slice(0, 100);
+    });
 };
 
 export const parsePrice = (value: string) => {

@@ -1,7 +1,9 @@
 import { Link } from "react-router";
 
 import type { Coin } from "../../../shared/api/type";
+import { useInfinityScroll } from "../../../shared/hooks/useInfinityScroll";
 import { ApiText } from "../../../shared/ui/ApiText";
+import { Button } from "../../../shared/ui/Button";
 import { CoinAvatar } from "../../../shared/ui/CoinAvatar";
 import { Icon } from "../../../shared/ui/Icon";
 import { Skeleton } from "../../../shared/ui/Skeleton";
@@ -16,6 +18,13 @@ type MarketTableProps = {
   loading?: boolean;
   unavailable?: boolean;
   showCapitalization: boolean;
+  pagination?: {
+    page: number;
+    loading: boolean;
+    failed: boolean;
+    paused: boolean;
+    loadNext: () => void;
+  };
 };
 
 const cellStyles = {
@@ -33,9 +42,16 @@ export const MarketTable = ({
   sortedByUser,
   loading,
   unavailable,
-  showCapitalization
+  showCapitalization,
+  pagination
 }: MarketTableProps) => {
   const { columns, rows: tableRows } = useMarketTable(rows, sort, sortBy);
+
+  const loadMoreRef = useInfinityScroll({
+    enabled: Boolean(!pagination?.loading && !pagination?.failed && !pagination?.paused),
+    onLoadMore: pagination?.loadNext
+  });
+
   const changeCell = showCapitalization ? "hidden lg:table-cell" : "";
   const capCell = showCapitalization ? "" : "hidden lg:table-cell";
   const visibility = { rank: "", name: "", price: "", change24h: changeCell, marketCap: capCell };
@@ -50,7 +66,7 @@ export const MarketTable = ({
       <table
         className='w-full table-fixed border-collapse'
         aria-label='Котировки монет'
-        aria-busy={loading || undefined}
+        aria-busy={loading || pagination?.loading}
       >
         <colgroup>
           <col className='w-9.5 lg:w-22.5' />
@@ -177,6 +193,29 @@ export const MarketTable = ({
               : "Проверьте название или измените диапазон цен."}
           </p>
         </div>
+      )}
+      {pagination?.loading && (
+        <p role='status' className='px-3 py-3 text-center text-invest-caption text-invest-muted'>
+          Загружаем ещё монеты...
+        </p>
+      )}
+      {pagination?.failed && (
+        <div className='flex flex-wrap items-center justify-center gap-2 px-3 py-3'>
+          <p role='alert' className='text-invest-caption'>
+            Не удалось загрузить следующую страницу.
+          </p>
+          <Button
+            variant='ghost'
+            disabled={pagination.paused}
+            onClick={pagination.loadNext}
+            className='min-h-11 px-2 underline'
+          >
+            Повторить загрузку
+          </Button>
+        </div>
+      )}
+      {pagination && (
+        <div key={pagination.page} ref={loadMoreRef} aria-hidden='true' className='h-px' />
       )}
     </div>
   );

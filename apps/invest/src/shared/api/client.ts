@@ -13,7 +13,8 @@ import type {
 declare const __INVEST_DEV_MARKET_DEMO_KEY__: string;
 
 const CURRENCIES: readonly Currency[] = ["USD", "EUR", "BTC", "RUB"];
-const MARKETS_PAGE_SIZE = 250;
+const TOP_MARKETS_PAGE_SIZE = 20;
+const MARKETS_MAX_IDS = 250;
 const SIMPLE_PRICE_MAX_IDS = 515;
 const REQUEST_URL_BUDGET = 2_000;
 const USD_MARKETS = { vs_currency: "usd", order: "market_cap_desc", page: 1 } as const;
@@ -104,12 +105,18 @@ export const createApiClient = (config: MarketInstanceOptions): MarketClient => 
       const payload = await requests.getCoinsList(options);
       return readArray(payload).map((coin) => readCoinIdentity(readObject(coin)));
     },
-    getTop100: async (options) =>
-      readCoins(await requests.getCoinsMarkets({ ...USD_MARKETS, per_page: 100 }, options)),
     getMarkets: async (ids, options) => {
+      if (!ids) {
+        const markets = await requests.getCoinsMarkets(
+          { ...USD_MARKETS, per_page: TOP_MARKETS_PAGE_SIZE, page: options?.page ?? 1 },
+          options
+        );
+        return readCoins(markets).slice(0, TOP_MARKETS_PAGE_SIZE);
+      }
+
       const batches = batchByUrl(
         ids,
-        MARKETS_PAGE_SIZE,
+        MARKETS_MAX_IDS,
         (batch) => ({
           ...USD_MARKETS,
           per_page: batch.length,
@@ -117,10 +124,13 @@ export const createApiClient = (config: MarketInstanceOptions): MarketClient => 
         }),
         requests.getCoinsMarketsUri
       );
+
       const coins: Coin[] = [];
+
       for (const { params } of batches) {
         coins.push(...readCoins(await requests.getCoinsMarkets(params, options)));
       }
+
       return coins;
     },
     getGlobal: async (options) => {

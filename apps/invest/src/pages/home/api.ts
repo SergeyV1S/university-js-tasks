@@ -4,10 +4,10 @@ import { selectRows } from "./helpers/selectRows";
 
 export const initialSort = { key: "rank", direction: "asc" } as const;
 
-export const loadHome = async (signal: AbortSignal) => {
+export const loadHome = async (signal: AbortSignal, ids?: string[]) => {
   const options = { signal };
   const [top, metrics] = await Promise.allSettled([
-    apiClient.getTop100(options),
+    apiClient.getMarkets(ids, options),
     apiClient.getGlobal(options)
   ]);
   signal.throwIfAborted();

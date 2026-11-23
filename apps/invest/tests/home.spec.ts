@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
 
 import { installMarketFixture } from "./market-fixture";
-import type { FixtureResponse } from "./market-fixture";
+import type { FixtureResponse, RecordedRequest } from "./market-fixture";
 
 const coin = (
   rank: number,
@@ -36,7 +36,10 @@ const respond = (url: URL, top = catalog.slice(0, 105), all = catalog): FixtureR
   if (url.pathname.endsWith("/global")) return { status: 200, json: { data: globalMetrics } };
   if (url.pathname.endsWith("/coins/list")) return { status: 200, json: all };
   const ids = url.searchParams.get("ids")?.split(",");
-  return { status: 200, json: ids ? all.filter(({ id }) => ids.includes(id)) : top };
+  if (ids) return { status: 200, json: all.filter(({ id }) => ids.includes(id)) };
+  const size = Number(url.searchParams.get("per_page"));
+  const page = Number(url.searchParams.get("page"));
+  return { status: 200, json: top.slice((page - 1) * size, page * size) };
 };
 
 const defer = () => {
@@ -49,8 +52,85 @@ const defer = () => {
 
 const coinLinks = (page: Page) => page.getByRole("table").getByRole("link");
 const search = (page: Page) => page.getByRole("searchbox", { name: "Поиск по названию" });
+const scrollToBottom = (page: Page) =>
+  page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+const getTopPages = (requests: RecordedRequest[]) =>
+  requests
+    .map(({ url }) => new URL(url))
+    .filter((url) => url.pathname.endsWith("/coins/markets") && !url.searchParams.has("ids"))
+    .map((url) => Number(url.searchParams.get("page")));
 
-test("shows_top_100_and_searches_full_catalog", async ({ context, page }) => {
+test("appends 20 coins at a time and stops after page five", async ({ context, page }) => {
+  const fixture = await installMarketFixture(context, (url) => respond(url));
+  await page.goto("/");
+  await expect(coinLinks(page)).toHaveCount(20);
+  expect(getTopPages(fixture.requests)).toEqual([1]);
+
+  for (const count of [40, 60, 80, 100]) {
+    await scrollToBottom(page);
+    await expect(coinLinks(page)).toHaveText(catalog.slice(0, count).map(({ name }) => name));
+  }
+
+  await scrollToBottom(page);
+  await expect(coinLinks(page).last()).toBeInViewport();
+  expect(getTopPages(fixture.requests)).toEqual([1, 2, 3, 4, 5]);
+});
+
+test("retries the same page and keeps existing coins when pages overlap", async ({
+  context,
+  page
+}) => {
+  let failPageTwo = true;
+  const fixture = await installMarketFixture(context, (url) => {
+    if (!url.searchParams.has("ids") && url.searchParams.get("page") === "2") {
+      if (failPageTwo) return { status: 503 };
+      return { status: 200, json: [coin(20, "Changed name", 999), ...catalog.slice(20, 39)] };
+    }
+    return respond(url, [...catalog.slice(0, 39), ...catalog.slice(40)]);
+  });
+
+  await page.goto("/");
+  await expect(coinLinks(page)).toHaveCount(20);
+  await scrollToBottom(page);
+  const retry = page.getByRole("button", { name: "Повторить загрузку" });
+  await expect(retry).toBeVisible();
+  await expect(coinLinks(page)).toHaveCount(20);
+  expect(getTopPages(fixture.requests)).toEqual([1, 2]);
+
+  failPageTwo = false;
+  await retry.click();
+  await expect(coinLinks(page)).toHaveText(catalog.slice(0, 39).map(({ name }) => name));
+  for (const count of [59, 79, 99]) {
+    await scrollToBottom(page);
+    await expect(coinLinks(page)).toHaveCount(count);
+  }
+  await scrollToBottom(page);
+  await expect(coinLinks(page).last()).toBeInViewport();
+  expect(getTopPages(fixture.requests)).toEqual([1, 2, 2, 3, 4, 5]);
+});
+
+test("recovers from an empty top by retrying from the first page", async ({ context, page }) => {
+  let available = false;
+  const fixture = await installMarketFixture(context, (url) => {
+    if (!available && url.pathname.endsWith("/global")) return { status: 503 };
+    return respond(url, available ? catalog : []);
+  });
+
+  await page.goto("/");
+  const retry = page.getByRole("button", { name: "Повторить запрос" });
+  await expect(retry).toBeVisible();
+  await scrollToBottom(page);
+  await expect.poll(() => getTopPages(fixture.requests)).toEqual([1, 2, 3, 4, 5]);
+
+  available = true;
+  await retry.click();
+  await expect(coinLinks(page)).toHaveCount(20);
+  await scrollToBottom(page);
+  await expect(coinLinks(page)).toHaveCount(40);
+  expect(getTopPages(fixture.requests)).toEqual([1, 2, 3, 4, 5, 1, 2]);
+});
+
+test("shows an initial page and searches the full catalog", async ({ context, page }) => {
   const initial = defer();
   const fixture = await installMarketFixture(context, async (url) => {
     if (!url.searchParams.has("ids") && url.pathname.endsWith("/coins/markets"))
@@ -61,8 +141,8 @@ test("shows_top_100_and_searches_full_catalog", async ({ context, page }) => {
   await page.goto("/");
   await expect(page.getByRole("status", { name: "Загрузка котировок" })).toBeVisible();
   initial.resolve();
-  await expect(coinLinks(page)).toHaveCount(100);
-  await expect(coinLinks(page).last()).toHaveText("Market 100");
+  await expect(coinLinks(page)).toHaveCount(20);
+  await expect(coinLinks(page).last()).toHaveText("Market 20");
   expect(
     fixture.requests.some(({ url }) => url.endsWith("/coins/list?include_platform=false"))
   ).toBe(false);
@@ -87,19 +167,22 @@ test("shows_top_100_and_searches_full_catalog", async ({ context, page }) => {
   await expect(page.getByText("Монеты не найдены")).toBeVisible();
 });
 
-test("sorts all matches before taking the first 100", async ({ context, page }) => {
+test("sorts all matches without fetching more top coins while searching", async ({
+  context,
+  page
+}) => {
   const all = Array.from({ length: 120 }, (_, i) => coin(i + 1, `Match ${i + 1}`, i + 1));
-  await installMarketFixture(context, (url) => respond(url, all.slice(0, 100), all));
+  const fixture = await installMarketFixture(context, (url) =>
+    respond(url, all.slice(0, 100), all)
+  );
   await page.goto("/");
   await search(page).fill("match");
-  await expect(coinLinks(page)).toHaveCount(100);
+  await expect(coinLinks(page)).toHaveCount(120);
   await page.getByRole("button", { name: "Сортировать по цене" }).click();
-  await expect(coinLinks(page)).toHaveText(
-    all
-      .slice(20)
-      .reverse()
-      .map(({ name }) => name)
-  );
+  await expect(coinLinks(page)).toHaveText(all.map(({ name }) => name).reverse());
+  await scrollToBottom(page);
+  await expect(coinLinks(page).last()).toBeInViewport();
+  expect(getTopPages(fixture.requests)).toEqual([1]);
 });
 
 test("combines_price_and_sort", async ({ context, page }) => {
@@ -231,7 +314,9 @@ test("ignores_late_search", async ({ context, page }) => {
     return respond(url, catalog.slice(0, 100), all);
   });
   await page.goto("/");
-  await expect(coinLinks(page)).toHaveCount(100);
+  await expect(coinLinks(page)).toHaveCount(20);
+  await scrollToBottom(page);
+  await expect(coinLinks(page)).toHaveCount(40);
   await search(page).fill("older");
   await expect
     .poll(() => fixture.requests.some(({ url }) => url.endsWith("ids=coin-121")))
@@ -246,7 +331,7 @@ test("ignores_late_search", async ({ context, page }) => {
     .toBe(true);
   await search(page).fill("");
   cleared.resolve();
-  await expect(coinLinks(page)).toHaveCount(100);
+  await expect(coinLinks(page)).toHaveCount(40);
   await expect(coinLinks(page).first()).toHaveText("Market 1");
 });
 
@@ -276,7 +361,7 @@ test("keeps catalog matches without quotes and independent market blocks availab
   await search(page).fill("");
   failTop = false;
   await page.getByRole("button", { name: "Повторить запрос" }).click();
-  await expect(coinLinks(page)).toHaveCount(100);
+  await expect(coinLinks(page)).toHaveCount(20);
   await expect(page.getByText("Данные временно недоступны")).toBeHidden();
   await coinLinks(page).first().click();
   await expect(page).toHaveURL("/coin/coin-1");
