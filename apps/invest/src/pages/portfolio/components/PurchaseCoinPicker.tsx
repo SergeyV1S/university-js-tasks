@@ -1,4 +1,4 @@
-import type { Coin } from "@/shared/api/type";
+import type { Coin } from "@/shared/market/type";
 import { ApiText } from "@/shared/ui/ApiText";
 import { CoinAvatar } from "@/shared/ui/CoinAvatar";
 import { FormField } from "@/shared/ui/FormField";

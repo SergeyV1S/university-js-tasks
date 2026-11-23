@@ -1,9 +1,13 @@
 import axios from "axios";
 import type { AxiosRequestConfig } from "axios";
+import type { createMarketCooldown } from "./cooldown.ts";
 import { marketError, parseRetryAfter } from "./helpers.ts";
 import type { MarketInstanceOptions, RequestOptions } from "./type.ts";
 
-export const createMarketInstance = (options: MarketInstanceOptions) => {
+export const createMarketInstance = (
+  options: MarketInstanceOptions,
+  cooldown?: ReturnType<typeof createMarketCooldown>
+) => {
   const baseURL = new URL(options.baseUrl, globalThis.location?.href).href;
   const api = axios.create({ baseURL, adapter: options.adapter });
 
@@ -24,6 +28,7 @@ export const createMarketInstance = (options: MarketInstanceOptions) => {
     const { status } = response;
     if (status === 429) {
       const retryAt = parseRetryAfter(response.headers["retry-after"]);
+      cooldown?.record(retryAt);
       throw marketError("rate-limit", retryAt === undefined ? { status } : { status, retryAt });
     }
     if (status === 404) throw marketError("not-found", { status });
@@ -33,6 +38,7 @@ export const createMarketInstance = (options: MarketInstanceOptions) => {
   const request = async <T>(config: AxiosRequestConfig, options?: RequestOptions): Promise<T> => {
     const signal = options?.signal;
     signal?.throwIfAborted();
+    cooldown?.check();
 
     try {
       const { data } = await api.request<T>({ ...config, signal });

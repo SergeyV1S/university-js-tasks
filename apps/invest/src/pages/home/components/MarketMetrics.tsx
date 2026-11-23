@@ -5,16 +5,37 @@ import { Skeleton } from "@/shared/ui/Skeleton";
 import type { HomeInitialData } from "../api";
 import { useMarketMetrics } from "../hooks/useMarketMetrics";
 
-type MetricsProps = { metrics: HomeInitialData["metrics"]; loading?: boolean };
+type MetricsProps = {
+  metrics: HomeInitialData["metrics"]["data"];
+  loading?: boolean;
+  unavailable?: boolean;
+  stale?: boolean;
+  "aria-describedby"?: string;
+};
 
-export const MarketMetrics = ({ metrics, loading }: MetricsProps) => {
+export const MarketMetrics = ({
+  metrics,
+  loading,
+  unavailable,
+  stale,
+  "aria-describedby": descriptionId
+}: MetricsProps) => {
   const { cards, activeCard, activeHelp, closeExplanation } = useMarketMetrics(metrics);
 
   return (
     <section
       aria-label='Рыночные метрики'
+      aria-describedby={descriptionId}
       className='relative grid grid-cols-2 gap-2 lg:grid-cols-4 lg:gap-4'
     >
+      {stale && (
+        <p
+          id='metrics-stale'
+          className='col-span-full text-right text-invest-caption text-invest-warning'
+        >
+          Могут быть устаревшими
+        </p>
+      )}
       {cards.map(
         (
           {
@@ -54,6 +75,10 @@ export const MarketMetrics = ({ metrics, loading }: MetricsProps) => {
 
             {loading ? (
               <Skeleton className='mt-3 h-5 w-4/5 rounded-md lg:mt-3.5 lg:h-7 lg:w-3/5' />
+            ) : unavailable ? (
+              <p className='mt-3 text-invest-caption text-invest-muted lg:mt-3.75'>
+                Данные временно недоступны
+              </p>
             ) : (
               <>
                 <p className='mt-1.75 truncate text-invest-section lg:mt-1.25 lg:text-invest-metric'>

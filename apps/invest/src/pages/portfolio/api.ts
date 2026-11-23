@@ -1,9 +1,9 @@
-import { apiClient } from "@/shared/api/client";
+import { apiClient } from "@/shared/market/client";
+import { readMarket } from "@/shared/market/resource";
+import type { Coin } from "@/shared/market/type";
 
 import { readPortfolio } from "./storage";
-import type { Coin } from "@/shared/api/type";
-
-import type { PortfolioCurrency, PortfolioInitialData, PortfolioSnapshot } from "./types";
+import type { PortfolioCurrency, PortfolioSnapshot } from "./types";
 
 export const loadPortfolioCoins = async (signal: AbortSignal) => {
   const pages = await Promise.allSettled(
@@ -26,12 +26,8 @@ export const needsCatalog = (ids: string[], coins: Coin[] | null) => {
 };
 
 export const loadPortfolioCatalog = async (signal: AbortSignal) => {
-  try {
-    const catalog = await apiClient.getCatalog({ signal });
-    return new Map(catalog.map((coin) => [coin.id, coin]));
-  } catch {
-    return null;
-  }
+  const catalog = await apiClient.getCatalog({ signal });
+  return new Map(catalog.map((coin) => [coin.id, coin]));
 };
 
 export const loadPortfolioPrices = async (
@@ -40,23 +36,16 @@ export const loadPortfolioPrices = async (
   signal: AbortSignal
 ): Promise<Record<string, number>> => {
   if (ids.length === 0) return {};
-  try {
-    const quotes = await apiClient.getPrices(ids, [currency], { signal });
-    return Object.fromEntries(
-      Object.entries(quotes).flatMap(([id, currencies]) => {
-        const price = currencies[currency];
-        return price === undefined ? [] : [[id, price]];
-      })
-    );
-  } catch {
-    return {};
-  }
+  const quotes = await apiClient.getPrices(ids, [currency], { signal });
+  return Object.fromEntries(
+    Object.entries(quotes).flatMap(([id, currencies]) => {
+      const price = currencies[currency];
+      return price === undefined ? [] : [[id, price]];
+    })
+  );
 };
 
-export const loadPortfolio = async (
-  signal: AbortSignal,
-  currency: PortfolioCurrency
-): Promise<PortfolioInitialData> => {
+export const loadPortfolio = async (signal: AbortSignal, currency: PortfolioCurrency) => {
   let snapshot: PortfolioSnapshot | null = null;
   try {
     snapshot = readPortfolio();
@@ -65,15 +54,18 @@ export const loadPortfolio = async (
   }
   const ids = portfolioCoinIds(snapshot);
   const loadCoinsAndCatalog = async () => {
-    const coins = await loadPortfolioCoins(signal).catch(() => null);
-    const catalog =
-      !signal.aborted && needsCatalog(ids, coins) ? await loadPortfolioCatalog(signal) : null;
+    const coins = await readMarket(signal, () => loadPortfolioCoins(signal));
+    const catalog = needsCatalog(ids, coins.data)
+      ? await readMarket(signal, () => loadPortfolioCatalog(signal))
+      : undefined;
     return { coins, catalog };
   };
 
   const [{ coins, catalog }, prices] = await Promise.all([
     loadCoinsAndCatalog(),
-    loadPortfolioPrices(ids, currency, signal)
+    readMarket(signal, () => loadPortfolioPrices(ids, currency, signal))
   ]);
   return { snapshot, coins, catalog, currency, prices };
 };
+
+export type PortfolioInitialData = Awaited<ReturnType<typeof loadPortfolio>>;

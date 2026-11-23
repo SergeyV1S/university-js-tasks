@@ -1,6 +1,9 @@
 import { create } from "zustand";
 
-import { apiClient } from "@/shared/api/client";
+import { apiClient } from "@/shared/market/client";
+import { createMarketResource } from "@/shared/market/resource";
+import type { MarketResult } from "@/shared/market/resource";
+import type { CatalogCoin, Coin, MarketError } from "@/shared/market/type";
 import { isPositiveNumber, parsePositiveDecimal } from "@/shared/helpers/positiveNumber";
 
 import {
@@ -10,25 +13,25 @@ import {
   needsCatalog,
   portfolioCoinIds
 } from "./api";
+import type { PortfolioInitialData } from "./api";
 import { appendPurchase, canWritePortfolio, readPortfolio, subscribePortfolio } from "./storage";
-import type {
-  PortfolioCurrency,
-  PortfolioInitialData,
-  PortfolioSnapshot,
-  PurchaseDraft,
-  PurchaseErrors
-} from "./types";
+import type { PortfolioCurrency, PortfolioSnapshot, PurchaseDraft, PurchaseErrors } from "./types";
 
 type SaveStatus = "idle" | "saving" | "saved" | "conflict" | "rate-error" | "write-error";
+type Prices = Awaited<ReturnType<typeof loadPortfolioPrices>>;
+type Catalog = Awaited<ReturnType<typeof loadPortfolioCatalog>>;
 type SubmitResult = "saved" | "rejected" | "ignored";
 
 type PortfolioState = {
   initial: PortfolioInitialData | null;
   snapshot: PortfolioSnapshot | null;
   readFailed: boolean;
-  coins: PortfolioInitialData["coins"];
-  catalog: PortfolioInitialData["catalog"];
-  prices: PortfolioInitialData["prices"];
+  coins: Coin[] | null;
+  catalog: Map<string, CatalogCoin> | null;
+  prices: Prices;
+  priceError: MarketError | null;
+  coinsError: MarketError | null;
+  catalogError: MarketError | null;
   loadingCoins: boolean;
   loadingQuotes: boolean;
   currency: PortfolioCurrency;
@@ -60,39 +63,61 @@ const readRubPerUsd = async (signal: AbortSignal) => {
 export const usePortfolioStore = create<PortfolioState>((set, get) => {
   let unsubscribe: (() => void) | undefined;
   let lifecycle: AbortController | undefined;
-  let quoteRequest: AbortController | undefined;
-  let loadingCatalog = false;
+  let quoteResource: ReturnType<typeof createMarketResource<Prices>> | undefined;
+  let coinResource: ReturnType<typeof createMarketResource<Coin[]>> | undefined;
+  let catalogResource: ReturnType<typeof createMarketResource<Catalog>> | undefined;
+  let activeQuoteKey: string | undefined;
+  const lastPrices: Partial<Record<PortfolioCurrency, Prices>> = {};
 
-  const loadQuotes = async () => {
+  const createCatalog = (initial?: MarketResult<Catalog>) =>
+    createMarketResource({
+      initial,
+      retainOnFailure: true,
+      load: loadPortfolioCatalog,
+      onState: ({ data, error }) => set({ catalog: data, catalogError: error })
+    });
+
+  const ensureCatalog = (ids: string[]) => {
+    if (catalogResource || !needsCatalog(ids, get().coins)) return;
+    catalogResource = createCatalog();
+    void catalogResource.run();
+  };
+
+  const loadQuotes = async (initial?: MarketResult<Prices>) => {
     if (!lifecycle) return;
 
-    quoteRequest?.abort();
-    const { snapshot, currency, coins, catalog } = get();
-    const ids = portfolioCoinIds(snapshot);
-    if (ids.length === 0) {
-      set({ prices: {}, loadingQuotes: false });
+    const { snapshot, currency, loadingQuotes, priceError } = get();
+    const ids = portfolioCoinIds(snapshot).sort();
+    const quoteKey = JSON.stringify([currency, ids]);
+    if (activeQuoteKey === quoteKey && loadingQuotes) return;
+    if (activeQuoteKey === quoteKey && priceError && quoteResource) {
+      await quoteResource.run();
       return;
     }
 
-    const request = new AbortController();
-    quoteRequest = request;
-    set({ loadingQuotes: true });
-
-    if (!catalog && !loadingCatalog && needsCatalog(ids, coins)) {
-      const { signal } = lifecycle;
-      loadingCatalog = true;
-      void loadPortfolioCatalog(signal).then((catalog) => {
-        if (signal.aborted) return;
-        loadingCatalog = false;
-        set({ catalog });
-      });
+    quoteResource?.stop();
+    activeQuoteKey = quoteKey;
+    if (ids.length === 0) {
+      set({ prices: {}, priceError: null, loadingQuotes: false });
+      return;
     }
 
-    const prices = await loadPortfolioPrices(ids, currency, request.signal);
-    if (request.signal.aborted || quoteRequest !== request) return;
-
-    quoteRequest = undefined;
-    set({ prices, loadingQuotes: false });
+    ensureCatalog(ids);
+    quoteResource = createMarketResource({
+      initial,
+      previous: lastPrices[currency],
+      retainOnFailure: true,
+      load: (signal) => loadPortfolioPrices(ids, currency, signal),
+      onState: ({ status, data, error }) => {
+        if (status === "ready" && data) lastPrices[currency] = data;
+        set({
+          prices: status === "refreshing" && !error ? get().prices : (data ?? {}),
+          priceError: error,
+          loadingQuotes: status === "initial" || status === "refreshing"
+        });
+      }
+    });
+    if (!initial) await quoteResource.run();
   };
 
   const replaceSnapshot = (snapshot: PortfolioSnapshot) => {
@@ -121,9 +146,11 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => {
     unsubscribe = undefined;
     lifecycle?.abort();
     lifecycle = undefined;
-    quoteRequest?.abort();
-    quoteRequest = undefined;
-    loadingCatalog = false;
+    quoteResource?.stop();
+    coinResource?.stop();
+    catalogResource?.stop();
+    activeQuoteKey = undefined;
+    catalogResource = undefined;
   };
 
   return {
@@ -133,6 +160,9 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => {
     coins: null,
     catalog: null,
     prices: {},
+    priceError: null,
+    coinsError: null,
+    catalogError: null,
     loadingCoins: false,
     loadingQuotes: false,
     currency: "RUB",
@@ -146,16 +176,32 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => {
         initial,
         snapshot: initial.snapshot,
         readFailed: initial.snapshot === null,
-        coins: initial.coins,
-        catalog: initial.catalog,
+        coins: initial.coins.data,
+        catalog: initial.catalog?.data ?? null,
         currency: initial.currency,
-        prices: initial.prices,
+        prices: {},
+        priceError: null,
+        coinsError: null,
+        catalogError: null,
         loadingCoins: false,
         loadingQuotes: false,
         writable: canWritePortfolio(),
         saveStatus: "idle",
         errors: {}
       });
+      coinResource = createMarketResource({
+        initial: initial.coins,
+        retainOnFailure: true,
+        load: loadPortfolioCoins,
+        onState: ({ data, error, status }) =>
+          set({
+            coins: data,
+            coinsError: error,
+            loadingCoins: status === "initial" || status === "refreshing"
+          })
+      });
+      if (initial.catalog) catalogResource = createCatalog(initial.catalog);
+      void loadQuotes(initial.prices);
       unsubscribe = subscribePortfolio(applySnapshot, () => set({ readFailed: true }));
       if (initial.snapshot) {
         try {
@@ -167,19 +213,14 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => {
     },
     retryRead,
     retryCoins: async () => {
-      const signal = lifecycle?.signal;
-      if (!signal || get().loadingCoins) return;
-
-      set({ loadingCoins: true });
-      const coins = await loadPortfolioCoins(signal).catch(() => null);
-      if (!signal.aborted) set({ coins, loadingCoins: false });
+      if (lifecycle) await coinResource?.run();
     },
     loadQuotes,
     close,
     setCurrency: (currency) => {
       if (currency === get().currency) return;
 
-      set({ currency, prices: {} });
+      set({ currency, prices: {}, priceError: null });
       void loadQuotes();
     },
     clearFieldError: (field) => {

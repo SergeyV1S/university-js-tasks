@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 
-import type { HistoryDays } from "@/shared/api/type";
+import type { HistoryDays } from "@/shared/market/type";
 import { formatMoney } from "@/shared/helpers/format";
 
 import { createHistoryChart } from "../helpers/historyChart";

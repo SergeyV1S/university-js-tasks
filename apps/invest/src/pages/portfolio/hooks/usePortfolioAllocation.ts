@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef } from "react";
 
-import type { CatalogCoin } from "@/shared/api/type";
+import type { CatalogCoin } from "@/shared/market/type";
 import { formatPercent } from "@/shared/helpers/format";
 
 import type { Allocation } from "../types";

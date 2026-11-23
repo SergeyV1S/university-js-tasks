@@ -1,7 +1,10 @@
 import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useLoaderData } from "react-router";
 
-import type { CatalogCoin } from "@/shared/api/type";
+import { useNoticeDismissal } from "@/shared/hooks/useNoticeDismissal";
+import { marketNotice, selectMarketError } from "@/shared/market/notice";
+import { isRecoverableMarketError } from "@/shared/market/resource";
+import type { CatalogCoin } from "@/shared/market/type";
 
 import type { loadPortfolio } from "../api";
 import { calculateValuation } from "../helpers/valuation";
@@ -18,6 +21,9 @@ export const usePortfolioPage = () => {
   const catalog = usePortfolioStore((state) => state.catalog);
   const prices = usePortfolioStore((state) => state.prices);
   const loadingQuotes = usePortfolioStore((state) => state.loadingQuotes);
+  const priceError = usePortfolioStore((state) => state.priceError);
+  const coinsError = usePortfolioStore((state) => state.coinsError);
+  const catalogError = usePortfolioStore((state) => state.catalogError);
   const currency = usePortfolioStore((state) => state.currency);
   const writable = usePortfolioStore((state) => state.writable);
   const readFailed = usePortfolioStore((state) => state.readFailed);
@@ -65,12 +71,29 @@ export const usePortfolioPage = () => {
     return results;
   }, [coins, catalog, purchases]);
 
+  const valuationStale = Boolean(priceError && valuation.kind === "ready");
+  const marketError = selectMarketError(priceError, coinsError, catalogError);
+  const { visible, dismiss } = useNoticeDismissal(marketError?.kind);
+  const notice =
+    marketError && visible && isRecoverableMarketError(marketError)
+      ? marketNotice(
+          marketError,
+          "Не удалось загрузить рыночные данные",
+          valuationStale,
+          "Показываем последние полученные котировки."
+        )
+      : undefined;
+
   return {
+    notice,
+    dismissMarketNotice: dismiss,
+    valuationStale,
+    valuationUnavailable: Boolean(priceError && valuation.kind === "missing"),
     pending: data !== initial,
     purchases,
     ownedCoins,
     valuation,
-    valuationLoading: loadingQuotes && valuation.kind === "missing",
+    valuationLoading: loadingQuotes && !priceError && valuation.kind === "missing",
     currency,
     readFailed,
     writable,

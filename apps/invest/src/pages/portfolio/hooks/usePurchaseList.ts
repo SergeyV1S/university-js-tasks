@@ -1,4 +1,4 @@
-import type { CatalogCoin } from "@/shared/api/type";
+import type { CatalogCoin } from "@/shared/market/type";
 import { formatQuantity, formatUnitPrice } from "@/shared/helpers/format";
 
 import type { Purchase } from "../types";

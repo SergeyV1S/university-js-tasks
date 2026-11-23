@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import type { Coin } from "@/shared/api/type";
+import type { Coin } from "@/shared/market/type";
 
 const symbols = new Map<string, readonly [string, string, string]>([
   ["bitcoin", ["#19130e", "#f9a33e", "₿"]],

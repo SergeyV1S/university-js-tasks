@@ -1,4 +1,4 @@
-import type { Coin } from "@/shared/api/type";
+import type { Coin } from "@/shared/market/type";
 import bitcoinMark from "@/shared/assets/bitcoin.svg";
 import { useCoinAvatar } from "@/shared/hooks/useCoinAvatar";
 

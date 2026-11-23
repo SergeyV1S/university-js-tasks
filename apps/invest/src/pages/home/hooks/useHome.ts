@@ -9,8 +9,9 @@ export const useHome = () => {
   const state = useHomeStore();
 
   useLayoutEffect(() => {
-    const { setInitialData, stop } = useHomeStore.getState();
+    const { setInitialData, startPolling, stop } = useHomeStore.getState();
     setInitialData(data);
+    startPolling();
 
     return stop;
   }, [data]);

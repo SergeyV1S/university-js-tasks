@@ -1,26 +1,17 @@
-import { apiClient } from "@/shared/api/client";
-import type { Coin } from "@/shared/api/type";
+import { apiClient } from "@/shared/market/client";
+import { readMarket } from "@/shared/market/resource";
+import type { Coin } from "@/shared/market/type";
 
-import { selectRows } from "./helpers/selectRows";
+export const missingMarketFields = { rank: null, price: null, change24h: null, marketCap: null };
 
 export const initialSort = { key: "rank", direction: "asc" } as const;
 
-export const loadHome = async (signal: AbortSignal, ids?: string[]) => {
-  const options = { signal };
-  const [top, metrics] = await Promise.allSettled([
-    apiClient.getMarkets(ids, options),
-    apiClient.getGlobal(options)
+export const loadHome = async (signal: AbortSignal) => {
+  const [top, metrics] = await Promise.all([
+    readMarket(signal, () => apiClient.getMarkets(undefined, { signal })),
+    readMarket(signal, () => apiClient.getGlobal({ signal }))
   ]);
-  signal.throwIfAborted();
-
-  return {
-    top:
-      top.status === "fulfilled"
-        ? selectRows(top.value, { min: null, max: null, sort: initialSort, includeUnranked: true })
-        : null,
-    metrics: metrics.status === "fulfilled" ? metrics.value : null,
-    updatedAt: Date.now()
-  };
+  return { top, metrics };
 };
 
 export type HomeInitialData = Awaited<ReturnType<typeof loadHome>>;
@@ -32,7 +23,6 @@ export const loadMatches = async (
   top: Coin[],
   signal: AbortSignal
 ) => {
-  signal.throwIfAborted();
   const matches = catalog.filter(({ name }) => name.toLowerCase().includes(query));
   const quotes = new Map(top.map((coin) => [coin.id, coin]));
   const ids = matches.filter(({ id }) => !quotes.has(id)).map(({ id }) => id);
@@ -43,10 +33,7 @@ export const loadMatches = async (
   }
 
   return matches.map((coin) => ({
-    rank: null,
-    price: null,
-    change24h: null,
-    marketCap: null,
+    ...missingMarketFields,
     ...quotes.get(coin.id),
     ...coin
   }));

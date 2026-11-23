@@ -1,7 +1,7 @@
 import { useId, useState } from "react";
 import type { ChangeEvent, KeyboardEvent, MouseEvent } from "react";
 
-import type { Coin } from "@/shared/api/type";
+import type { Coin } from "@/shared/market/type";
 
 export const usePurchaseCoinPicker = (
   coins: Coin[],

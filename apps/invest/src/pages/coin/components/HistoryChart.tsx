@@ -1,4 +1,4 @@
-import type { HistoryDays } from "@/shared/api/type";
+import type { HistoryDays } from "@/shared/market/type";
 
 import { useHistoryChart } from "../hooks/useHistoryChart";
 

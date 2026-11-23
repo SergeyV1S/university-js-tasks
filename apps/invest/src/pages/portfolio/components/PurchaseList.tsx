@@ -1,4 +1,4 @@
-import type { CatalogCoin } from "@/shared/api/type";
+import type { CatalogCoin } from "@/shared/market/type";
 import { ApiText } from "@/shared/ui/ApiText";
 import { CoinAvatar } from "@/shared/ui/CoinAvatar";
 

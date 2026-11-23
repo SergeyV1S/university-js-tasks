@@ -1,29 +1,34 @@
 import { create } from "zustand";
 
-import { apiClient } from "@/shared/api/client";
-import type { Coin } from "@/shared/api/type";
 import { debounce } from "@/shared/helpers/debounce";
+import { apiClient, TOP_MARKETS_PAGE_SIZE } from "@/shared/market/client";
+import { createMarketResource, isRecoverableMarketError } from "@/shared/market/resource";
+import type { MarketResult } from "@/shared/market/resource";
+import type { Coin, GlobalMetrics, MarketError } from "@/shared/market/type";
 
-import { initialSort, loadHome, loadMatches } from "./api";
+import { initialSort, loadMatches, missingMarketFields } from "./api";
 import type { Catalog, HomeInitialData } from "./api";
+import { emptyRange, LAST_TOP_PAGE } from "./constants";
 import { parsePrice } from "./helpers/selectRows";
 import type { PriceRange, Sort, SortKey } from "./helpers/selectRows";
-import { emptyRange, LAST_TOP_PAGE } from "./constants";
 
 type HomeState = {
   initial: HomeInitialData | null;
   top: Coin[] | null;
   topPage: number;
   loadingMore: boolean;
-  loadMoreError: boolean;
-  metrics: HomeInitialData["metrics"];
+  loadMoreError: MarketError | null;
+  metrics: GlobalMetrics | null;
   updatedAt: number | null;
   query: string;
   results: Coin[] | null;
   searching: boolean;
-  searchError: boolean;
-  marketError: boolean;
-  refreshing: boolean;
+  searchError: MarketError | null;
+  topError: MarketError | null;
+  metricsError: MarketError | null;
+  tableRefreshing: boolean;
+  metricsRefreshing: boolean;
+  rowRefresh: number;
   range: PriceRange;
   sort: Sort;
   sortedByUser: boolean;
@@ -33,8 +38,12 @@ type HomeState = {
   sortBy: (key: SortKey) => void;
   loadNextPage: () => Promise<void>;
   refresh: () => Promise<void>;
+  startPolling: () => void;
+  stopPolling: () => void;
   stop: () => void;
 };
+
+const POLL_INTERVAL = 60_000;
 
 const appendNewCoins = (current: Coin[], next: Coin[]): Coin[] => {
   const coins = new Map(current.map((coin) => [coin.id, coin]));
@@ -46,46 +55,73 @@ const appendNewCoins = (current: Coin[], next: Coin[]): Coin[] => {
 
 export const useHomeStore = create<HomeState>()((set, get) => {
   let catalog: Catalog | undefined;
-  let searchRequest: AbortController | undefined;
-  let pageRequest: AbortController | undefined;
-  let refreshRequest: AbortController | undefined;
+  let lastTop: Coin[] | null = null;
+  let lastMetrics: GlobalMetrics | null = null;
+  let lastSearch: { query: string; results: Coin[] } | undefined;
+  let table: ReturnType<typeof createMarketResource<Coin[]>> | undefined;
+  let metrics: ReturnType<typeof createMarketResource<GlobalMetrics>> | undefined;
+  let more: ReturnType<typeof createMarketResource<Coin[]>> | undefined;
+  let pollTimer: ReturnType<typeof setInterval> | undefined;
 
-  const search = async (query: string, controller: AbortController) => {
-    const { signal } = controller;
-    try {
-      const entries = catalog ?? (await apiClient.getCatalog({ signal }));
-      if (searchRequest !== controller || signal.aborted) return;
+  const createTop = (initial?: MarketResult<Coin[]>) =>
+    createMarketResource({
+      initial,
+      previous: get().top,
+      retainOnFailure: true,
+      load: (signal) => {
+        const ids = get().top?.map(({ id }) => id);
+        return apiClient.getMarkets(ids?.length ? ids : undefined, { signal });
+      },
+      onState: (resource) => {
+        const { top, topPage, rowRefresh } = get();
+        const incoming = resource.status === "ready" ? resource.data : null;
+        const refreshStarted = resource.status === "refreshing";
+        const error = resource.error;
+        if (incoming === null) {
+          set({ topError: error, tableRefreshing: refreshStarted });
+          return;
+        }
 
-      catalog = entries;
-      const results = await loadMatches(entries, query, get().top ?? [], signal);
-      if (searchRequest !== controller || signal.aborted) return;
-
-      set({ results, searching: false });
-    } catch {
-      if (searchRequest === controller && !signal.aborted) {
-        set({ results: null, searching: false, searchError: true });
+        const restart = !top?.length;
+        const quotes = new Map(incoming.map((coin) => [coin.id, coin]));
+        const nextTop = restart
+          ? appendNewCoins([], incoming)
+          : top.map((coin) => quotes.get(coin.id) ?? { ...coin, ...missingMarketFields });
+        lastTop = nextTop.slice(0, TOP_MARKETS_PAGE_SIZE);
+        set({
+          top: nextTop,
+          topPage: restart ? (incoming.length > 0 || topPage === 0 ? 1 : topPage) : topPage,
+          topError: null,
+          tableRefreshing: false,
+          updatedAt: Date.now(),
+          rowRefresh: rowRefresh + 1
+        });
       }
-    }
-  };
+    });
 
-  const scheduleSearch = debounce(search, 300);
+  const scheduleSearch = debounce(() => void table?.run(), 300);
 
-  const stopSearch = () => {
-    scheduleSearch.cancel();
-    searchRequest?.abort();
-    searchRequest = undefined;
-  };
-
-  const stopPaging = () => {
-    pageRequest?.abort();
-    pageRequest = undefined;
+  const stopPolling = () => {
+    if (pollTimer !== undefined) clearInterval(pollTimer);
+    pollTimer = undefined;
   };
 
   const stop = () => {
-    stopSearch();
-    stopPaging();
-    refreshRequest?.abort();
-    refreshRequest = undefined;
+    stopPolling();
+    scheduleSearch.cancel();
+    table?.stop();
+    metrics?.stop();
+    more?.stop();
+    table = undefined;
+    metrics = undefined;
+    more = undefined;
+  };
+
+  const refresh = async () => {
+    const { loadingMore, tableRefreshing, metricsRefreshing, searching } = get();
+    if (tableRefreshing || metricsRefreshing) return;
+
+    await Promise.all([loadingMore || searching ? undefined : table?.run(), metrics?.run()]);
   };
 
   return {
@@ -93,15 +129,18 @@ export const useHomeStore = create<HomeState>()((set, get) => {
     top: null,
     topPage: 0,
     loadingMore: false,
-    loadMoreError: false,
+    loadMoreError: null,
     metrics: null,
     updatedAt: null,
     query: "",
     results: null,
     searching: false,
-    searchError: false,
-    marketError: false,
-    refreshing: false,
+    searchError: null,
+    topError: null,
+    metricsError: null,
+    tableRefreshing: false,
+    metricsRefreshing: false,
+    rowRefresh: 0,
     range: emptyRange,
     sort: initialSort,
     sortedByUser: false,
@@ -109,38 +148,95 @@ export const useHomeStore = create<HomeState>()((set, get) => {
     setInitialData: (data) => {
       stop();
       catalog = undefined;
+      const cachedTop = data.top.error ? lastTop : null;
       set({
         initial: data,
-        top: !data.top ? null : appendNewCoins([], data.top),
-        topPage: !data.top ? 0 : 1,
+        top: cachedTop,
+        topPage: cachedTop === null ? 0 : 1,
         loadingMore: false,
-        loadMoreError: false,
-        metrics: data.metrics,
-        updatedAt: data.updatedAt,
-        marketError: !data.top || !data.metrics,
+        loadMoreError: null,
+        metrics: null,
+        updatedAt: null,
         query: "",
         results: null,
         searching: false,
-        searchError: false,
-        refreshing: false,
+        searchError: null,
+        topError: null,
+        metricsError: null,
+        tableRefreshing: false,
+        metricsRefreshing: false,
+        rowRefresh: 0,
         range: emptyRange,
         sort: initialSort,
         sortedByUser: false
       });
+      table = createTop(data.top);
+      metrics = createMarketResource({
+        initial: data.metrics,
+        previous: lastMetrics,
+        retainOnFailure: true,
+        load: (signal) => apiClient.getGlobal({ signal }),
+        onState: ({ status, data, error }) => {
+          if (status === "ready") lastMetrics = data;
+          set({
+            metrics: data,
+            metricsError: error,
+            metricsRefreshing: status === "refreshing",
+            ...(status === "ready" && { updatedAt: Date.now() })
+          });
+        }
+      });
     },
 
     setQuery: (value) => {
-      if (value === get().query) return;
-      stopSearch();
       const query = value.trim().toLowerCase();
-      if (query === "") {
-        set({ query: value, results: null, searching: false, searchError: false });
+      const { query: current, topError } = get();
+      if (query === current.trim().toLowerCase()) {
+        set({ query: value });
+        return;
+      }
+      scheduleSearch.cancel();
+      table?.stop();
+      more?.stop();
+      more = undefined;
+      set({
+        query: value,
+        loadMoreError: null,
+        results: null,
+        searching: Boolean(query),
+        searchError: null,
+        tableRefreshing: false,
+        loadingMore: false
+      });
+      if (!query) {
+        table = createTop(topError ? { data: null, error: topError } : undefined);
         return;
       }
 
-      set({ query: value, searching: true, searchError: false });
-      searchRequest = new AbortController();
-      scheduleSearch(query, searchRequest);
+      const cachedSearch = lastSearch?.query === query ? lastSearch.results : null;
+      table = createMarketResource({
+        previous: cachedSearch,
+        retainOnFailure: true,
+        load: async (signal) => {
+          const entries = catalog ?? (await apiClient.getCatalog({ signal }));
+          signal.throwIfAborted();
+          catalog = entries;
+          const { top, results, topError } = get();
+          const reusableQuotes = results === null && !topError ? (top ?? []) : [];
+          return loadMatches(entries, query, reusableQuotes, signal);
+        },
+        onState: ({ status, data, error }) => {
+          if (status === "ready" && data) lastSearch = { query, results: data };
+          set(({ rowRefresh }) => ({
+            results: data,
+            searching: status === "initial",
+            tableRefreshing: status === "refreshing",
+            searchError: error,
+            ...(status === "ready" && { updatedAt: Date.now(), rowRefresh: rowRefresh + 1 })
+          }));
+        }
+      });
+      scheduleSearch();
     },
 
     setRange: (min, max) => {
@@ -170,76 +266,42 @@ export const useHomeStore = create<HomeState>()((set, get) => {
     },
 
     loadNextPage: async () => {
-      const { top, topPage, query } = get();
-      if (pageRequest || refreshRequest || top === null || topPage >= LAST_TOP_PAGE || query.trim())
-        return;
+      const { top, topPage, query, tableRefreshing } = get();
+      if (top === null || topPage >= LAST_TOP_PAGE || tableRefreshing || query.trim()) return;
+      if (more) return more.run();
 
       const page = topPage + 1;
-      const controller = new AbortController();
-      pageRequest = controller;
-      set({ loadingMore: true, loadMoreError: false });
-
-      try {
-        const next = await apiClient.getMarkets(undefined, { page, signal: controller.signal });
-        if (pageRequest !== controller) return;
-        set(({ top }) => ({ top: appendNewCoins(top ?? [], next), topPage: page }));
-      } catch {
-        if (pageRequest === controller) set({ loadMoreError: true });
-      } finally {
-        if (pageRequest === controller) {
-          pageRequest = undefined;
-          set({ loadingMore: false });
+      more = createMarketResource({
+        retainOnFailure: false,
+        load: (signal) => apiClient.getMarkets(undefined, { page, signal }),
+        onState: ({ status, data, error }) => {
+          if (status === "ready" && data) {
+            set(({ top }) => ({
+              top: appendNewCoins(top ?? [], data),
+              topPage: page,
+              loadMoreError: null,
+              loadingMore: false
+            }));
+            more = undefined;
+          } else {
+            set({
+              loadMoreError: error,
+              loadingMore: status === "initial" || status === "refreshing"
+            });
+            if (error && status === "unavailable" && !isRecoverableMarketError(error)) {
+              more = undefined;
+            }
+          }
         }
-      }
+      });
+      await more.run();
     },
 
-    refresh: async () => {
-      if (refreshRequest) return;
-      const currentTop = get().top;
-      const ids = currentTop?.length ? currentTop.map(({ id }) => id) : undefined;
-      const controller = new AbortController();
-      refreshRequest = controller;
-      if (!ids) stopPaging();
-      set({ refreshing: true, loadingMore: Boolean(pageRequest) });
-
-      try {
-        const data = await loadHome(controller.signal, ids);
-        if (refreshRequest !== controller) return;
-        const { top, topPage, loadMoreError, metrics, updatedAt, query, searching } = get();
-        const incoming = data.top;
-        const restartTop = !ids && incoming !== null && (top === null || incoming.length > 0);
-        let refreshedTop = top;
-        if (restartTop) {
-          refreshedTop = appendNewCoins([], incoming);
-        } else if (ids && top && incoming !== null) {
-          const quotes = new Map(incoming.map((coin) => [coin.id, coin]));
-          refreshedTop = top.map((coin) => quotes.get(coin.id) ?? coin);
-        }
-        set({
-          top: refreshedTop,
-          topPage: restartTop ? 1 : topPage,
-          loadMoreError: restartTop ? false : loadMoreError,
-          metrics: data.metrics ?? metrics,
-          marketError: incoming === null || data.metrics === null,
-          updatedAt: incoming !== null || data.metrics !== null ? data.updatedAt : updatedAt
-        });
-
-        if (!searching && query.trim()) {
-          stopSearch();
-          searchRequest = new AbortController();
-          set({ searching: true, searchError: false });
-          await search(query.trim().toLowerCase(), searchRequest);
-        }
-      } catch (error) {
-        if (!controller.signal.aborted) throw error;
-      } finally {
-        if (refreshRequest === controller) {
-          refreshRequest = undefined;
-          set({ refreshing: false });
-        }
-      }
+    refresh,
+    startPolling: () => {
+      if (pollTimer === undefined) pollTimer = setInterval(refresh, POLL_INTERVAL);
     },
-
+    stopPolling,
     stop
   };
 });

@@ -1,4 +1,4 @@
-import type { Coin } from "@/shared/api/type";
+import type { Coin } from "@/shared/market/type";
 import { formatMoney, formatPercent } from "@/shared/helpers/format";
 import { percentColor } from "@/shared/helpers/percentColor";
 

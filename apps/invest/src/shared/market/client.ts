@@ -1,3 +1,4 @@
+import { createMarketCooldown } from "./cooldown.ts";
 import { marketError } from "./helpers.ts";
 import { createMarketInstance } from "./instance.ts";
 import { createMarketRequests } from "./requests.ts";
@@ -13,7 +14,7 @@ import type {
 declare const __INVEST_DEV_MARKET_DEMO_KEY__: string;
 
 const CURRENCIES: readonly Currency[] = ["USD", "EUR", "BTC", "RUB"];
-const TOP_MARKETS_PAGE_SIZE = 20;
+export const TOP_MARKETS_PAGE_SIZE = 20;
 const MARKETS_MAX_IDS = 250;
 const SIMPLE_PRICE_MAX_IDS = 515;
 const REQUEST_URL_BUDGET = 2_000;
@@ -97,8 +98,11 @@ const batchByUrl = <Params>(
   return batches;
 };
 
-export const createApiClient = (config: MarketInstanceOptions): MarketClient => {
-  const requests = createMarketRequests(createMarketInstance(config));
+export const createApiClient = (
+  config: MarketInstanceOptions,
+  cooldown?: ReturnType<typeof createMarketCooldown>
+): MarketClient => {
+  const requests = createMarketRequests(createMarketInstance(config, cooldown));
 
   return {
     getCatalog: async (options) => {
@@ -195,16 +199,19 @@ export const createApiClient = (config: MarketInstanceOptions): MarketClient => 
 
 const baseUrl = import.meta.env?.VITE_INVEST_MARKET_BASE || "https://api.coingecko.com/api/v3/";
 
-export const apiClient = createApiClient({
-  baseUrl,
-  get apiKey() {
-    if (typeof __INVEST_DEV_MARKET_DEMO_KEY__ !== "undefined" && __INVEST_DEV_MARKET_DEMO_KEY__) {
-      return __INVEST_DEV_MARKET_DEMO_KEY__;
+export const apiClient = createApiClient(
+  {
+    baseUrl,
+    get apiKey() {
+      if (typeof __INVEST_DEV_MARKET_DEMO_KEY__ !== "undefined" && __INVEST_DEV_MARKET_DEMO_KEY__) {
+        return __INVEST_DEV_MARKET_DEMO_KEY__;
+      }
+      try {
+        return globalThis.sessionStorage?.getItem("invest:market-demo-key") ?? undefined;
+      } catch {
+        return undefined;
+      }
     }
-    try {
-      return globalThis.sessionStorage?.getItem("invest:market-demo-key") ?? undefined;
-    } catch {
-      return undefined;
-    }
-  }
-});
+  },
+  typeof window === "undefined" ? undefined : createMarketCooldown()
+);

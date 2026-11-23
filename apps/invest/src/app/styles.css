@@ -45,3 +45,9 @@
     @apply outline-2 outline-solid outline-invest-focus;
   }
 }
+
+@layer components {
+  body:has(.market-page) {
+    overflow-anchor: none;
+  }
+}

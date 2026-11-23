@@ -4,7 +4,7 @@ import { test } from "node:test";
 import axios, { AxiosError } from "axios";
 import type { AxiosAdapter, InternalAxiosRequestConfig } from "axios";
 
-import { createApiClient } from "../src/shared/api/client.ts";
+import { createApiClient } from "../src/shared/market/client.ts";
 
 const baseUrl = "https://example.test/api/v3/";
 const row = { id: "bitcoin", name: "Bitcoin", market_cap_rank: 1 };

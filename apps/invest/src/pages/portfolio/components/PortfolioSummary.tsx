@@ -1,4 +1,4 @@
-import type { CatalogCoin } from "@/shared/api/type";
+import type { CatalogCoin } from "@/shared/market/type";
 import { ApiText } from "@/shared/ui/ApiText";
 import { Skeleton } from "@/shared/ui/Skeleton";
 
@@ -10,13 +10,17 @@ type PortfolioSummaryProps = {
   currency: PortfolioCurrency;
   coins: ReadonlyMap<string, CatalogCoin>;
   loading: boolean;
+  stale: boolean;
+  unavailable: boolean;
 };
 
 export const PortfolioSummary = ({
   valuation,
   currency,
   coins,
-  loading
+  loading,
+  stale,
+  unavailable
 }: PortfolioSummaryProps) => {
   const summary = usePortfolioSummary(valuation, currency, coins);
   if (valuation.kind === "empty") return null;
@@ -25,7 +29,7 @@ export const PortfolioSummary = ({
     <section
       aria-label='Текущая стоимость и PnL'
       aria-busy={loading}
-      className='min-h-45.75 min-w-0 rounded-xl border border-invest-divider bg-invest-surface px-3.25 pt-3.5 pb-3 lg:min-h-40.5 lg:px-5.25'
+      className='relative min-h-45.75 min-w-0 rounded-xl border border-invest-divider bg-invest-surface px-3.25 pt-3.5 pb-3 lg:min-h-40.5 lg:px-5.25'
     >
       {loading ? (
         <>
@@ -38,6 +42,14 @@ export const PortfolioSummary = ({
         </>
       ) : (
         <>
+          {stale && (
+            <p
+              role='status'
+              className='mb-1 text-invest-note text-invest-warning xl:absolute xl:top-3.5 xl:right-3.5 xl:mb-0 xl:w-51.25'
+            >
+              Могут быть устаревшими
+            </p>
+          )}
           <dl className='grid lg:grid-cols-[54.2%_minmax(0,1fr)]'>
             <div className='min-w-0'>
               <dt className='text-invest-label text-invest-muted'>Текущая стоимость</dt>
@@ -62,6 +74,9 @@ export const PortfolioSummary = ({
               </div>
             )}
           </dl>
+          {unavailable && (
+            <p className='mt-3 text-invest-label text-invest-warning'>Данные временно недоступны</p>
+          )}
           {valuation.kind === "missing" && (
             <p className='mt-3.75 border-t border-invest-divider pt-3.5 wrap-anywhere text-invest-label text-invest-muted'>
               Нет котировок для <ApiText value={summary.missingNames} />

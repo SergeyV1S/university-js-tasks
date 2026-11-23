@@ -7,7 +7,7 @@ import { percentColor } from "@/shared/helpers/percentColor";
 import type { HomeInitialData } from "../api";
 import { buildCards } from "../helpers/buildCards";
 
-export const useMarketMetrics = (metrics: HomeInitialData["metrics"]) => {
+export const useMarketMetrics = (metrics: HomeInitialData["metrics"]["data"]) => {
   const [open, setOpen] = useState<{ index: number; pinned: boolean } | null>(null);
   const activeCard = useRef<HTMLElement | null>(null);
   const activeHelp = useRef<HTMLButtonElement | null>(null);

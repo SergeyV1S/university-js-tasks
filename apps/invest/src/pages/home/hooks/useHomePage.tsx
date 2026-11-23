@@ -1,6 +1,11 @@
-import { useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import type { ChangeEvent } from "react";
 
+import { useNoticeDismissal } from "@/shared/hooks/useNoticeDismissal";
+import { marketNotice, selectMarketError } from "@/shared/market/notice";
+import { isRecoverableMarketError } from "@/shared/market/resource";
+
+import { useHomeStore } from "../homeStore";
 import { initialSort } from "../api";
 import { selectRangeLabel } from "../helpers/selectRangeLabel";
 import { selectRows } from "../helpers/selectRows";
@@ -12,9 +17,30 @@ import { coinCount, countNoun, plural, sortLabels } from "../constants";
 export const useHomePage = (state: ReturnType<typeof useHome>) => {
   const [filterOpen, setFilterOpen] = useState(false);
   const [showCapitalization, setShowCapitalization] = useState(false);
-  const [dismissed, setDismissed] = useState(false);
   const filterButton = useRef<HTMLButtonElement>(null);
   const searchInput = useRef<HTMLInputElement>(null);
+
+  const scrollBeforeRefresh = useRef<number>(null);
+  const rowRefresh = state?.rowRefresh;
+  useLayoutEffect(
+    () =>
+      useHomeStore.subscribe((current, previous) => {
+        if (current.rowRefresh !== previous.rowRefresh && previous.tableRefreshing) {
+          scrollBeforeRefresh.current ??= window.scrollY;
+        }
+      }),
+    []
+  );
+  useLayoutEffect(() => {
+    const scroll = scrollBeforeRefresh.current;
+    const viewport = document.scrollingElement;
+    if (scroll === null || !viewport) return;
+    scrollBeforeRefresh.current = null;
+    window.scrollTo({
+      top: Math.min(scroll, viewport.scrollHeight - viewport.clientHeight),
+      behavior: "instant"
+    });
+  }, [rowRefresh]);
 
   const { query = "", sort = initialSort } = state ?? {};
   const searchingCatalog = query.trim() !== "";
@@ -24,8 +50,8 @@ export const useHomePage = (state: ReturnType<typeof useHome>) => {
     state.topPage < LAST_TOP_PAGE && {
       page: state.topPage,
       loading: state.loadingMore,
-      failed: state.loadMoreError,
-      paused: state.refreshing,
+      failed: Boolean(state.loadMoreError),
+      paused: state.tableRefreshing || isRecoverableMarketError(state.loadMoreError),
       loadNext: state.loadNextPage
     };
 
@@ -37,29 +63,46 @@ export const useHomePage = (state: ReturnType<typeof useHome>) => {
       })
     : [];
 
-  const hasError = state?.marketError || state?.searchError;
-  const showError = hasError && !dismissed;
-  const unavailable = Boolean(state && (searchingCatalog ? state.searchError : state.top === null));
+  const tableError = searchingCatalog ? state?.searchError : state?.topError;
+  const tableData = searchingCatalog ? state?.results : state?.top;
+  const paginationError = isRecoverableMarketError(state?.loadMoreError)
+    ? state?.loadMoreError
+    : null;
+  const error = selectMarketError(tableError, state?.metricsError, paginationError);
+  const tableStale = Boolean(tableError && tableData !== null);
+  const metricsStale = Boolean(state?.metricsError && state.metrics);
+  const stale = tableStale || metricsStale;
+  const bothStale = tableStale && metricsStale;
+  const unavailable = Boolean(state && tableError && tableData === null);
+  const refreshing = Boolean(state?.tableRefreshing || state?.metricsRefreshing);
+  const { visible, dismiss } = useNoticeDismissal(error?.kind);
+  const notice =
+    error && visible
+      ? marketNotice(
+          error,
+          state?.searchError
+            ? "Не удалось выполнить поиск"
+            : "Не удалось загрузить рыночные данные",
+          stale
+        )
+      : undefined;
   const min = state?.range.min;
   const max = state?.range.max;
   const hasRange = min != null || max != null;
   const rangeLabel = selectRangeLabel(coinCount, min, max);
-  const statusLabel = selectStatusLabel(state?.refreshing, hasError, state?.updatedAt);
+  const statusLabel = selectStatusLabel(refreshing, bothStale, Boolean(error), state?.updatedAt);
   const countLabel = state?.searching
     ? "Поиск монет…"
     : `${coinCount.format(rows.length)} ${countNoun[plural.select(rows.length)] ?? "монет"}`;
 
   const refreshQuotes = () => {
-    setDismissed(false);
-    state?.refresh();
+    void state?.refresh();
   };
 
-  const dismissError = () => setDismissed(true);
   const toggleCapitalization = () => setShowCapitalization((current) => !current);
   const toggleFilter = () => setFilterOpen((current) => !current);
 
   const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setDismissed(false);
     state?.setQuery(event.currentTarget.value);
   };
 
@@ -78,7 +121,7 @@ export const useHomePage = (state: ReturnType<typeof useHome>) => {
     state: {
       countLabel,
       filterOpen,
-      hasError,
+      hasError: Boolean(error),
       hasRange,
       pagination,
       query,
@@ -86,7 +129,12 @@ export const useHomePage = (state: ReturnType<typeof useHome>) => {
       rows,
       searchingCatalog,
       showCapitalization,
-      showError,
+      notice,
+      refreshing,
+      metricsStale,
+      tableStale,
+      bothStale,
+      retryManually: Boolean(error && !isRecoverableMarketError(error)),
       sort,
       sortLabel: sortLabels[sort.key],
       statusLabel,
@@ -96,7 +144,7 @@ export const useHomePage = (state: ReturnType<typeof useHome>) => {
     functions: {
       applyPriceRange,
       clearSearch,
-      dismissError,
+      dismissError: dismiss,
       handleSearchChange,
       refreshQuotes,
       toggleCapitalization,

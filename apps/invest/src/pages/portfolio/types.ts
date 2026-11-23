@@ -1,5 +1,3 @@
-import type { CatalogCoin, Coin } from "@/shared/api/type";
-
 export type PortfolioCurrency = "RUB" | "USD";
 
 export type Purchase = {
@@ -13,14 +11,6 @@ export type Purchase = {
 export type PortfolioSnapshot = { revision: number; purchases: Purchase[] };
 export type PurchaseDraft = { coinId: string; quantity: string; unitPrice: string };
 export type PurchaseErrors = Partial<Record<keyof PurchaseDraft, string>>;
-export type PortfolioInitialData = {
-  snapshot: PortfolioSnapshot | null;
-  coins: Coin[] | null;
-  catalog: Map<string, CatalogCoin> | null;
-  currency: PortfolioCurrency;
-  prices: Record<string, number>;
-};
-
 export type Allocation = { coinId: string; percent: number };
 export type Valuation =
   | { kind: "empty" }

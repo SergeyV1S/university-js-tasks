@@ -43,23 +43,21 @@ export const CoinHistory = ({ pending = false }: { pending?: boolean }) => {
       </div>
       <p className='mt-3 text-invest-caption text-invest-muted lg:mt-1.75'>Цена в USD</p>
       <div className='mt-3 h-37.5 min-w-0 lg:mt-4 lg:h-68'>
-        {history === null ? (
+        {!history || (!history.data && !history.error) ? (
           <HistoryPending />
-        ) : history.status === "ready" && history.prices.length > 0 ? (
+        ) : history.data && history.data.length > 0 ? (
           <Suspense fallback={<HistoryPending />}>
-            <HistoryChart prices={history.prices} period={period} />
+            <HistoryChart prices={history.data} period={period} />
           </Suspense>
         ) : (
           <div role='status' className='flex flex-col items-center pt-5 text-center lg:pt-11'>
-            {history.status === "error" ? (
+            {history.error ? (
               <Icon name='alert' className='size-5 text-invest-warning' />
             ) : (
               <Icon name='chart' className='text-invest-muted' />
             )}
             <p className='mt-4 text-invest-block'>
-              {history.status === "error"
-                ? "Не удалось загрузить график"
-                : "За этот период нет данных"}
+              {history.error ? "Не удалось загрузить график" : "За этот период нет данных"}
             </p>
             <p className='mt-2.5 text-invest-caption text-invest-muted'>Выберите другой период.</p>
           </div>

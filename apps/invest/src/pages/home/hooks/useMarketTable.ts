@@ -1,6 +1,6 @@
 import { generatePath } from "react-router";
 
-import type { Coin } from "@/shared/api/type";
+import type { Coin } from "@/shared/market/type";
 import { PATHS } from "@/shared/constants/router-paths";
 import { formatCompactMoney, formatMoney, formatPercent } from "@/shared/helpers/format";
 import { percentColor } from "@/shared/helpers/percentColor";

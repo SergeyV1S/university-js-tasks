@@ -55,14 +55,20 @@ export const PurchaseForm = ({
       </div>
       {form.coins === null && (
         <Banner role='status' className='mt-3 grid gap-2 p-3 text-invest-label'>
-          Не удалось загрузить список монет
-          <Button
-            onClick={form.retryCoins}
-            disabled={form.loadingCoins}
-            className='h-11 justify-self-start px-4'
-          >
-            {form.loadingCoins ? "Загрузка…" : "Повторить"}
-          </Button>
+          {form.autoRetryCoins ? (
+            "Данные временно недоступны"
+          ) : (
+            <>
+              Не удалось загрузить список монет
+              <Button
+                onClick={form.retryCoins}
+                disabled={form.loadingCoins}
+                className='h-11 justify-self-start px-4'
+              >
+                {form.loadingCoins ? "Загрузка…" : "Повторить"}
+              </Button>
+            </>
+          )}
         </Banner>
       )}
       <fieldset disabled={form.fieldsDisabled || form.coins === null} className='mt-4.25 min-w-0'>

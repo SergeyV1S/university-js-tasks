@@ -1,6 +1,6 @@
 import { Link } from "react-router";
 
-import type { Coin } from "@/shared/api/type";
+import type { Coin } from "@/shared/market/type";
 import { useInfinityScroll } from "@/shared/hooks/useInfinityScroll";
 import { ApiText } from "@/shared/ui/ApiText";
 import { Button } from "@/shared/ui/Button";
@@ -18,6 +18,7 @@ type MarketTableProps = {
   sortedByUser?: boolean;
   loading?: boolean;
   unavailable?: boolean;
+  "aria-describedby"?: string;
   showCapitalization: boolean;
   pagination?: {
     page: number;
@@ -44,7 +45,8 @@ export const MarketTable = ({
   loading,
   unavailable,
   showCapitalization,
-  pagination
+  pagination,
+  "aria-describedby": descriptionId
 }: MarketTableProps) => {
   const { columns, rows: tableRows } = useMarketTable(rows, sort, sortBy);
 
@@ -67,6 +69,7 @@ export const MarketTable = ({
       <table
         className='w-full table-fixed border-collapse'
         aria-label='Котировки монет'
+        aria-describedby={descriptionId}
         aria-busy={loading || pagination?.loading}
       >
         <colgroup>
@@ -184,7 +187,10 @@ export const MarketTable = ({
       </table>
       {!loading && rows.length === 0 && (
         <div role='status' className='flex h-37.5 flex-col items-center px-3 pt-4 text-center'>
-          <Icon name={unavailable ? "alert" : "search"} className='size-5.5 text-invest-muted' />
+          <Icon
+            name={unavailable ? "alert" : "search"}
+            className={`size-5.5 ${unavailable ? "text-invest-warning" : "text-invest-muted"}`}
+          />
           <p className='mt-2 text-invest-block'>
             {unavailable ? "Данные временно недоступны" : "Монеты не найдены"}
           </p>

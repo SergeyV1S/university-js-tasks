@@ -1,6 +1,8 @@
 import { useId, useState } from "react";
 import type { ChangeEvent, SubmitEvent } from "react";
 
+import { isRecoverableMarketError } from "@/shared/market/resource";
+
 import { usePortfolioStore } from "../portfolioStore";
 
 const emptyDraft = { coinId: "", quantity: "", unitPrice: "" };
@@ -15,6 +17,7 @@ export const usePurchaseForm = (onSaved: () => void) => {
   const readFailed = usePortfolioStore((state) => state.readFailed);
   const saveStatus = usePortfolioStore((state) => state.saveStatus);
   const writable = usePortfolioStore((state) => state.writable);
+  const autoRetryCoins = usePortfolioStore((state) => isRecoverableMarketError(state.coinsError));
   const loadingCoins = usePortfolioStore((state) => state.loadingCoins);
   const retryCoins = usePortfolioStore((state) => state.retryCoins);
   const saving = saveStatus === "saving";
@@ -65,6 +68,7 @@ export const usePurchaseForm = (onSaved: () => void) => {
     saveStatus,
     fieldsDisabled: readFailed || !writable || saving,
     loadingCoins,
+    autoRetryCoins,
     retryCoins,
     handleQuery,
     handleSelect,

@@ -1,7 +1,7 @@
-import { Banner } from "@/shared/ui/Banner";
 import { Button } from "@/shared/ui/Button";
 import { Icon } from "@/shared/ui/Icon";
 import { Input } from "@/shared/ui/Input";
+import { Notice } from "@/shared/ui/Notice";
 
 import { MarketMetrics } from "./components/MarketMetrics";
 import { MarketTable } from "./components/MarketTable";
@@ -20,7 +20,7 @@ const HomeContent = ({ state }: { state: ReturnType<typeof useHome> }) => {
   const { state: view, refs, functions } = useHomePage(state);
 
   return (
-    <div className='pt-5 pb-8 lg:pt-7 lg:pb-12'>
+    <div className='market-page pt-5 pb-8 lg:pt-7 lg:pb-12'>
       <h1 className='text-invest-mobile-title lg:text-invest-title'>Рынок криптовалют</h1>
       <div className='mt-1.25 flex flex-wrap justify-between gap-x-3 text-invest-muted lg:flex-nowrap'>
         <p className='w-full text-invest-body lg:w-auto'>
@@ -36,57 +36,54 @@ const HomeContent = ({ state }: { state: ReturnType<typeof useHome> }) => {
           Демо-данные
         </p>
         <p
+          id='market-refresh-status'
           role='status'
-          className='mt-0.75 flex items-center justify-end w-41 gap-1.25 text-invest-caption lg:mt-0 lg:w-58.5'
+          className={`mt-0.75 flex w-41 items-center justify-end gap-1.25 text-invest-caption lg:mt-0 lg:w-58.5 lg:justify-start ${view.hasError ? "text-invest-warning" : ""}`}
         >
           <Icon
-            name={view.hasError ? "alert" : "check"}
-            className={`shrink-0 ${view.hasError ? "text-invest-warning" : "text-invest-positive"}`}
+            name={view.refreshing ? "refresh" : view.hasError ? "alert" : "check"}
+            className={`shrink-0 ${view.refreshing ? "text-invest-accent motion-safe:animate-spin" : view.hasError ? "text-invest-warning" : "text-invest-positive"}`}
           />
           {view.statusLabel}
         </p>
       </div>
 
-      {view.showError && (
-        <Banner
-          role='alert'
-          className='relative mt-4 flex min-h-18.5 gap-2 px-3 pt-2.75 pb-2.5 pr-12'
-        >
-          <Icon name='alert' className='mt-0.5 size-4.5 shrink-0' />
-          <div>
-            <p className='text-invest-label'>
-              {state?.searchError
-                ? "Не удалось выполнить поиск"
-                : "Не удалось загрузить рыночные данные"}
-            </p>
-            <button
-              type='button'
-              className='mt-1 cursor-pointer rounded-sm text-invest-caption text-invest-foreground underline'
-              disabled={state?.refreshing}
-              onClick={functions.refreshQuotes}
-            >
-              Повторить запрос
-            </button>
-          </div>
-          <Button
-            variant='ghost'
-            aria-label='Закрыть уведомление'
-            className='absolute top-0 right-0 h-11 w-10.75'
-            onClick={functions.dismissError}
-          >
-            <Icon name='close' />
-          </Button>
-        </Banner>
+      {view.notice && (
+        <Notice
+          {...view.notice}
+          className='mt-4'
+          onDismiss={functions.dismissError}
+          onRetry={view.retryManually ? functions.refreshQuotes : undefined}
+        />
       )}
 
-      <div className={view.showError ? "mt-6" : "mt-4 lg:mt-7"}>
-        <MarketMetrics metrics={state?.metrics ?? null} loading={!state} />
+      <div className={view.notice ? "mt-6" : "mt-4 lg:mt-7"}>
+        <MarketMetrics
+          metrics={state?.metrics ?? null}
+          loading={!state}
+          unavailable={Boolean(state?.metricsError && state.metrics === null)}
+          stale={view.metricsStale && !view.bothStale}
+          aria-describedby={
+            view.metricsStale
+              ? view.bothStale
+                ? "market-refresh-status"
+                : "metrics-stale"
+              : undefined
+          }
+        />
       </div>
 
       <section aria-labelledby='market-table-title' className='mt-6.25 lg:mt-9'>
-        <h2 id='market-table-title' className='text-invest-section'>
-          {view.searchingCatalog ? "Результаты поиска" : "Топ-100 криптовалют"}
-        </h2>
+        <div className='flex flex-wrap items-baseline justify-between gap-x-3'>
+          <h2 id='market-table-title' className='text-invest-section'>
+            {view.searchingCatalog ? "Результаты поиска" : "Топ-100 криптовалют"}
+          </h2>
+          {view.tableStale && !view.bothStale && (
+            <p id='table-stale' className='text-invest-caption text-invest-warning'>
+              Могут быть устаревшими
+            </p>
+          )}
+        </div>
         <div className='relative mt-px flex h-4.5 items-center justify-between text-invest-caption text-invest-muted'>
           <p>
             {view.searchingCatalog ? (
@@ -174,6 +171,13 @@ const HomeContent = ({ state }: { state: ReturnType<typeof useHome> }) => {
             sortedByUser={state?.sortedByUser}
             loading={!state}
             unavailable={view.unavailable}
+            aria-describedby={
+              view.tableStale
+                ? view.bothStale
+                  ? "market-refresh-status"
+                  : "table-stale"
+                : undefined
+            }
             showCapitalization={view.showCapitalization}
             pagination={view.pagination || undefined}
           />

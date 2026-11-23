@@ -1,9 +1,9 @@
 import { Link } from "react-router";
 
 import { PATHS } from "@/shared/constants/router-paths";
-import { Banner } from "@/shared/ui/Banner";
 import { Button } from "@/shared/ui/Button";
 import { Icon } from "@/shared/ui/Icon";
+import { Notice } from "@/shared/ui/Notice";
 
 import { CoinConverter } from "./components/CoinConverter";
 import { CoinHeader } from "./components/CoinHeader";
@@ -37,51 +37,35 @@ export const CoinPending = () => (
 );
 
 export const CoinPage = () => {
-  const { data, openMarket } = useCoinPage();
+  const { pending, status, coin, notice, dismiss, openMarket } = useCoinPage();
 
-  if (!data) return <CoinPending />;
+  if (pending) return <CoinPending />;
 
   return (
     <div className='pt-1.75 pb-4 lg:pt-4'>
       <MarketLink />
-      {data.status === "ready" ? (
+      {coin ? (
         <>
-          <CoinHeader coin={data.coin} />
+          <CoinHeader coin={coin} />
           <div className={detailsLayout}>
             <CoinHistory />
-            <CoinConverter coin={data.coin} data={data.converter} />
+            <CoinConverter coin={coin} />
           </div>
-          {(data.marketError ||
-            data.converter.quotes === null ||
-            data.converter.rates === null) && (
-            <Banner
-              role='alert'
-              className='mt-6 flex items-center gap-2.5 px-3 py-2.5 text-invest-label'
-            >
-              <Icon name='alert' />
-              {data.converter.quotes === null || data.converter.rates === null
-                ? "Не удалось загрузить котировки"
-                : "Не удалось загрузить статистику монеты"}
-            </Banner>
-          )}
         </>
       ) : (
-        <section
-          role={data.status === "error" ? "alert" : undefined}
-          className='mt-5.25 flex min-h-68 flex-col items-center justify-center rounded-xl border border-invest-divider bg-invest-surface px-4 pb-2 text-center lg:min-h-97.5'
-        >
+        <section className='mt-5.25 flex min-h-68 flex-col items-center justify-center rounded-xl border border-invest-divider bg-invest-surface px-4 pb-2 text-center lg:min-h-97.5'>
           <span className='grid size-10 place-items-center rounded-invest-button bg-invest-raised text-invest-muted'>
-            {data.status === "not-found" ? (
+            {status === "not-found" ? (
               <Icon name='search' className='size-5.5' />
             ) : (
               <Icon name='alert' className='size-5 text-invest-warning' />
             )}
           </span>
           <h1 className='mt-2.25 text-invest-block'>
-            {data.status === "not-found" ? "Монета не найдена" : "Данные временно недоступны"}
+            {status === "not-found" ? "Монета не найдена" : "Данные временно недоступны"}
           </h1>
           <p className='mt-1.25 text-invest-caption text-invest-muted'>
-            {data.status === "not-found"
+            {status === "not-found"
               ? "Проверьте адрес или выберите монету в списке."
               : "Не удалось загрузить список монет."}
           </p>
@@ -90,6 +74,7 @@ export const CoinPage = () => {
           </Button>
         </section>
       )}
+      {notice && <Notice {...notice} className='mt-6.75' onDismiss={dismiss} />}
     </div>
   );
 };

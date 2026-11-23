@@ -1,6 +1,7 @@
 import { Banner } from "@/shared/ui/Banner";
 import { Button } from "@/shared/ui/Button";
 import { Icon } from "@/shared/ui/Icon";
+import { Notice } from "@/shared/ui/Notice";
 import { SegmentedControl } from "@/shared/ui/SegmentedControl";
 import { Skeleton } from "@/shared/ui/Skeleton";
 
@@ -136,6 +137,8 @@ export const PortfolioPage = () => {
           )
         )}
 
+        {p.notice && <Notice {...p.notice} className='mb-3' onDismiss={p.dismissMarketNotice} />}
+
         <div className={p.readFailed ? "lg:max-w-89" : grid}>
           {!p.readFailed &&
             (p.purchases.length === 0 ? (
@@ -152,6 +155,8 @@ export const PortfolioPage = () => {
                     currency={p.currency}
                     coins={p.ownedCoins}
                     loading={p.valuationLoading}
+                    stale={p.valuationStale}
+                    unavailable={p.valuationUnavailable}
                   />
                 </div>
                 <Button
