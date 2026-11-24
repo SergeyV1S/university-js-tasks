@@ -220,7 +220,8 @@ test("combines_price_and_sort", async ({ context, page }) => {
   await page.getByRole("button", { name: "Сортировать по цене" }).click();
   await page.getByRole("button", { name: "Сортировать по цене" }).click();
 
-  await page.getByRole("button", { name: "Диапазон цен" }).click();
+  const toggle = page.getByRole("button", { name: "Диапазон цен" });
+  await toggle.click();
   const min = page.getByRole("textbox", { name: "Минимальная цена" });
   const max = page.getByRole("textbox", { name: "Максимальная цена" });
   const apply = page.getByRole("button", { name: "Показать", exact: true });
@@ -235,7 +236,7 @@ test("combines_price_and_sort", async ({ context, page }) => {
     ["", "20", ["Example A", "Example B", "Example C"]],
     ["10", "", ["Example B", "Example C", "Example D"]]
   ] as const) {
-    if (await min.isHidden()) await page.getByRole("button", { name: "Диапазон цен" }).click();
+    if ((await toggle.getAttribute("aria-expanded")) === "false") await toggle.click();
     await min.fill(from);
     await max.fill(to);
     await apply.click();
@@ -253,6 +254,41 @@ test("combines_price_and_sort", async ({ context, page }) => {
   await expect(coinLinks(page)).toHaveText(["Example B", "Example C", "Example D"]);
 });
 
+test("animates_opening_and_closing_the_price_filter", async ({ context, page }) => {
+  await installMarketFixture(context, (url) => respond(url));
+  await page.goto("/");
+  const toggle = page.getByRole("button", { name: "Диапазон цен" });
+  const form = page.locator("#market-price-filter");
+  const panel = page.locator(".market-filter");
+  const min = form.getByRole("textbox", { name: "Минимальная цена" });
+  const apply = form.getByRole("button", { name: "Показать" });
+
+  await toggle.click();
+  await expect(panel).toHaveCSS("transition-duration", "0.3s");
+  await expect(apply).toHaveCSS("transition-duration", "0.14s");
+  await min.fill("5");
+  await toggle.click();
+  await expect(toggle).toHaveAttribute("aria-expanded", "false");
+  await expect(panel).toHaveAttribute("inert", "");
+  await expect(panel).toHaveCSS("transition-duration", "0.24s");
+  await expect(form).toBeHidden();
+
+  await toggle.press("Enter");
+  await expect(min).toHaveValue("");
+  await expect(panel).toHaveCSS("transition-duration", "0.3s");
+  await apply.click();
+  await expect(form).toBeHidden();
+  await expect(toggle).toBeFocused();
+
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await toggle.click();
+  await expect(panel).toHaveCSS("transition-duration", "0s");
+  await expect(apply).toHaveCSS("transition-property", "background-color");
+  await toggle.click();
+  await expect(panel).toHaveCSS("transition-delay", "0.08s");
+  await expect(form).toBeHidden();
+});
+
 test("explains_metrics", async ({ browser, context, page }) => {
   await installMarketFixture(context, (url) => respond(url));
   await page.goto("/");
@@ -263,21 +299,33 @@ test("explains_metrics", async ({ browser, context, page }) => {
   await expect(metrics.getByText("17,1%")).toBeVisible();
 
   const help = metrics.getByRole("button", { name: "Подробнее: Капитализация рынка" });
+  const panel = page.locator("#market-metric-0");
   const explanation = metrics.getByText("Суммарная стоимость криптовалют по рыночным ценам.");
   await help.hover();
   await expect(explanation).toBeVisible();
+  await expect(panel).toHaveCSS("transition-duration", "0.22s, 0.22s, 0s");
+  await metrics.getByRole("button", { name: "Подробнее: Объём торгов за 24 ч" }).hover();
+  const nextPanel = metrics.getByRole("region", { name: "Объём торгов за 24 ч" });
+  await expect(nextPanel).toHaveCSS("transition-duration", "0.22s, 0.22s, 0s");
+  await expect(panel).toBeHidden();
   await page.getByRole("heading", { level: 1 }).hover();
-  await expect(explanation).toBeHidden();
+  await expect(page.locator("#market-metric-1")).toHaveCSS(
+    "transition-duration",
+    "0.18s, 0.18s, 0s"
+  );
+  await expect(nextPanel).toBeHidden();
   await help.focus();
   await page.keyboard.press("Enter");
   await expect(explanation).toBeVisible();
   await page.keyboard.press("Escape");
+  await expect(panel).toHaveAttribute("inert", "");
   await expect(explanation).toBeHidden();
   await expect(help).toBeFocused();
 
   const mobile = await browser.newContext({
     hasTouch: true,
-    viewport: { width: 390, height: 844 }
+    viewport: { width: 390, height: 844 },
+    reducedMotion: "reduce"
   });
   try {
     await installMarketFixture(mobile, (url) => respond(url));
@@ -289,6 +337,10 @@ test("explains_metrics", async ({ browser, context, page }) => {
     );
     await touchHelp.tap();
     await expect(touchExplanation).toBeVisible();
+    await expect(touchPage.locator("#market-metric-0")).toHaveCSS(
+      "transition-duration",
+      "0.08s, 0.08s, 0s"
+    );
     await touchHelp.tap();
     await expect(touchExplanation).toBeHidden();
     await touchHelp.tap();

@@ -139,7 +139,7 @@ export const PurchaseForm = ({
           type='submit'
           variant='primary'
           disabled={form.fieldsDisabled || form.coins === null}
-          className={`h-invest-button-height w-full ${notice ? "mt-1" : "mt-3.75"}`}
+          className={`invest-press h-invest-button-height w-full ${notice ? "mt-1" : "mt-3.75"}`}
         >
           {form.saving ? "Сохранение…" : "Сохранить покупку"}
         </Button>

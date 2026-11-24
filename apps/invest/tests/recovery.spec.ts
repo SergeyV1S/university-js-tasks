@@ -92,6 +92,7 @@ test("polls_without_hiding_or_resetting_the_table", async ({ context, page }) =>
   await page.getByRole("textbox", { name: "Максимальная цена" }).fill("150");
   await page.getByRole("button", { name: "Показать" }).click();
   await expect(table(page).getByRole("link")).toHaveCount(32);
+  await expect(page.locator("#market-price-filter")).toBeHidden();
 
   await page.addStyleTag({ content: "tbody tr { height: 50px !important }" });
   const height = await page.evaluate(() => document.documentElement.scrollHeight);

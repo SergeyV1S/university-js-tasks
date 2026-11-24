@@ -26,7 +26,7 @@ export const MarketMetrics = ({
     <section
       aria-label='Рыночные метрики'
       aria-describedby={descriptionId}
-      className='relative grid grid-cols-2 gap-2 lg:grid-cols-4 lg:gap-4'
+      className='market-metrics relative grid grid-cols-2 gap-2 lg:grid-cols-4 lg:gap-4'
     >
       {stale && (
         <p
@@ -50,7 +50,7 @@ export const MarketMetrics = ({
             <Button
               aria-label={`Подробнее: ${card.title}`}
               aria-expanded={card.visible}
-              aria-controls={card.visible ? card.explanationId : undefined}
+              aria-controls={card.explanationId}
               variant='ghost'
               ref={card.visible ? activeHelp : undefined}
               onPointerEnter={card.handlePointerEnter}
@@ -80,25 +80,25 @@ export const MarketMetrics = ({
             </>
           )}
 
-          {card.visible && (
-            <div
-              id={card.explanationId}
-              role='region'
-              aria-label={card.title}
-              className={`absolute inset-x-0 z-10 min-h-25.75 rounded-xl border border-invest-border bg-invest-raised px-3.25 pt-2.75 pb-4 shadow-lg lg:top-12 lg:-right-px lg:left-auto lg:w-68.25 ${index < 2 ? "-top-19" : "top-44.5"}`}
+          <div
+            id={card.explanationId}
+            role='region'
+            aria-label={card.title}
+            data-open={card.visible}
+            inert={!card.visible}
+            className='market-explanation absolute inset-x-0 top-full z-10 mt-1 min-h-25.75 rounded-xl border border-invest-border bg-invest-raised px-3.25 pt-2.75 pb-4 shadow-lg lg:top-12 lg:-right-px lg:left-auto lg:mt-0 lg:w-68.25'
+          >
+            <p className='pr-7 text-invest-label'>{card.title}</p>
+            <Button
+              aria-label='Закрыть пояснение'
+              variant='ghost'
+              className='absolute top-0 right-0 h-11 w-10.75'
+              onClick={closeExplanation}
             >
-              <p className='pr-7 text-invest-label'>{card.title}</p>
-              <Button
-                aria-label='Закрыть пояснение'
-                variant='ghost'
-                className='absolute top-0 right-0 h-11 w-10.75'
-                onClick={closeExplanation}
-              >
-                <Icon name='close' />
-              </Button>
-              <p className='mt-2 text-invest-caption'>{card.description}</p>
-            </div>
-          )}
+              <Icon name='close' />
+            </Button>
+            <p className='mt-2 text-invest-caption'>{card.description}</p>
+          </div>
         </article>
       ))}
     </section>

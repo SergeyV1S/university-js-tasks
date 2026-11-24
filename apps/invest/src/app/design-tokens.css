@@ -2,6 +2,7 @@
 @theme static {
   --font-invest-ui: "Manrope", sans-serif;
   --font-invest-numeric: "IBM Plex Mono", monospace;
+  --ease-invest-out: cubic-bezier(0.23, 1, 0.32, 1);
 
   /* Invest / цвет */
   --color-invest-background: #101216;

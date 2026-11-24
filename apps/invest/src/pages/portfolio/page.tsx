@@ -99,7 +99,7 @@ export const PortfolioPage = () => {
           <Banner
             variant='success'
             role='status'
-            className={`mb-3 min-h-11.5 items-center gap-2.25 pl-3 text-invest-label ${p.mobileAdd ? "hidden lg:flex" : "flex"}`}
+            className={`purchase-saved-enter mb-3 min-h-11.5 items-center gap-2.25 pl-3 text-invest-label ${p.mobileAdd ? "hidden lg:flex" : "flex"}`}
           >
             <Icon name='check' className='size-4.5 shrink-0' />
             <span className='flex-1'>Покупка сохранена</span>
@@ -179,13 +179,13 @@ export const PortfolioPage = () => {
               </div>
             ))}
           <PurchaseForm
-            className={
+            className={`${p.animateMobilePurchase ? "mobile-purchase-enter" : ""} ${
               p.readFailed
                 ? ""
                 : p.purchases.length === 0
                   ? "lg:col-start-2 lg:row-start-1"
                   : `lg:col-start-2 lg:row-span-3 lg:row-start-1 lg:mt-0 ${p.mobileAdd ? "" : "mt-4.25"}`
-            }
+            }`}
             mobileAdd={p.mobileAdd}
             mobileHeading={p.mobileHeading}
             onSaved={p.closePurchase}

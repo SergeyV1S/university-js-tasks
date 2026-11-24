@@ -51,6 +51,50 @@ const holdResponse = () => {
   return { wait, release };
 };
 
+test("animates_the_coin_list_and_preserves_matches_during_close", async ({ context, page }) => {
+  await installMarketFixture(context, market);
+  await page.goto("/portfolio");
+  const coin = search(page);
+  const panel = page.locator(".invest-disclosure");
+  const listbox = panel.getByRole("listbox");
+
+  await coin.click();
+  await expect(panel).toHaveCSS("transition-duration", "0.24s");
+  await coin.fill("Монета 100");
+  await expect(listbox.getByRole("option")).toHaveCount(1);
+  await panel.evaluate(async (element: HTMLDivElement) => {
+    await Promise.all(element.getAnimations().map((animation) => animation.finished));
+    element.addEventListener("transitionrun", (event) => {
+      if (
+        event.target === element &&
+        event.propertyName === "grid-template-rows" &&
+        element.dataset.open === "false"
+      )
+        element.dataset.closingOptions = String(element.querySelectorAll("[role=option]").length);
+    });
+  });
+
+  await coin.press("ArrowDown");
+  await expect(option(page, 100)).toHaveAttribute("aria-selected", "true");
+  await coin.press("Enter");
+  await expect(coin).toHaveAttribute("aria-expanded", "false");
+  await expect(coin).toHaveAccessibleDescription("Монета 100 (C100)");
+  await expect(panel).toHaveAttribute("inert", "");
+  await expect(panel).toHaveCSS("transition-duration", "0.18s");
+  await expect(panel).toHaveAttribute("data-closing-options", "1");
+  await expect(panel.locator("[role=option]")).toHaveCount(0);
+
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await coin.press("ArrowUp");
+  await expect(option(page, 100)).toHaveAttribute("aria-selected", "true");
+  await expect(panel).toHaveCSS("transition-duration", "0s");
+  await expect(panel.locator(":scope > div")).toHaveCSS("transition-duration", "0.08s, 0s");
+  await coin.press("Escape");
+  await expect(coin).toBeFocused();
+  await expect(listbox).toBeHidden();
+  await expect(panel.locator("[role=option]")).toHaveCount(0);
+});
+
 test("adds_persists_and_retries_purchase", async ({ browser, context, page }) => {
   const gate = holdResponse();
   let rateCalls = 0;
@@ -344,6 +388,7 @@ test("opens_purchase_form_on_mobile_and_returns_to_portfolio", async ({ context,
   await expect(page).toHaveURL("/portfolio");
   await expect(page.getByRole("button", { name: "Мой портфель", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Добавить покупку", level: 1 })).toBeFocused();
+  await expect(page.locator("form")).toHaveCSS("animation-duration", "0.22s");
   await expect(save(page)).toBeVisible();
   await expect(quantity(page)).toHaveValue("");
   await quantity(page).fill("2");
@@ -353,9 +398,12 @@ test("opens_purchase_form_on_mobile_and_returns_to_portfolio", async ({ context,
   await save(page).click();
   await expect(purchases(page)).toHaveCount(2);
   await expect(page.getByText("Покупка сохранена")).toBeInViewport();
+  await expect(page.locator(".purchase-saved-enter")).toHaveCSS("animation-duration", "0.2s");
   await quantity(page).fill("2");
   await page.setViewportSize({ width: 360, height: 844 });
+  await page.emulateMedia({ reducedMotion: "reduce" });
   await page.getByRole("button", { name: "Добавить покупку", exact: true }).click();
+  await expect(page.locator("form")).toHaveCSS("animation-name", "invest-fade");
   await expect(quantity(page)).toHaveValue("2");
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(360);
 });

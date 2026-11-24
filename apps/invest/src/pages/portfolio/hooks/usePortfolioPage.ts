@@ -1,4 +1,5 @@
 import { useLayoutEffect, useMemo, useRef, useState } from "react";
+import type { MouseEvent } from "react";
 import { useLoaderData } from "react-router";
 
 import { useNoticeDismissal } from "@/shared/hooks/useNoticeDismissal";
@@ -31,7 +32,7 @@ export const usePortfolioPage = () => {
   const saved = usePortfolioStore((state) => state.saveStatus === "saved");
   const retryRead = usePortfolioStore((state) => state.retryRead);
   const dismissSuccess = usePortfolioStore((state) => state.dismissSuccess);
-  const [mobileView, setMobileView] = useState<{ add: boolean } | null>(null);
+  const [mobileView, setMobileView] = useState<{ add: boolean; animate?: boolean } | null>(null);
   const mobileHeading = useRef<HTMLHeadingElement>(null);
   const mobileAddButton = useRef<HTMLButtonElement>(null);
 
@@ -53,7 +54,8 @@ export const usePortfolioPage = () => {
 
   const chooseRub = () => usePortfolioStore.getState().setCurrency("RUB");
   const chooseUsd = () => usePortfolioStore.getState().setCurrency("USD");
-  const openPurchase = () => setMobileView({ add: true });
+  const openPurchase = (event: MouseEvent<HTMLButtonElement>) =>
+    setMobileView({ add: true, animate: event.detail > 0 });
   const closePurchase = () => setMobileView({ add: false });
 
   const purchases = snapshot?.purchases ?? emptyPurchases;
@@ -100,6 +102,7 @@ export const usePortfolioPage = () => {
     saving,
     saved,
     mobileAdd: mobileView?.add ?? false,
+    animateMobilePurchase: mobileView?.animate ?? false,
     mobileHeading,
     mobileAddButton,
     retryRead,

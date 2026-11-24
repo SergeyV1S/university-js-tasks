@@ -15,7 +15,7 @@ import type { useHome } from "./useHome";
 import { coinCount, countNoun, plural, sortLabels } from "../constants";
 
 export const useHomePage = (state: ReturnType<typeof useHome>) => {
-  const [filterOpen, setFilterOpen] = useState(false);
+  const [filter, setFilter] = useState({ open: false, session: 0 });
   const [showCapitalization, setShowCapitalization] = useState(false);
   const filterButton = useRef<HTMLButtonElement>(null);
   const searchInput = useRef<HTMLInputElement>(null);
@@ -100,7 +100,10 @@ export const useHomePage = (state: ReturnType<typeof useHome>) => {
   };
 
   const toggleCapitalization = () => setShowCapitalization((current) => !current);
-  const toggleFilter = () => setFilterOpen((current) => !current);
+  const toggleFilter = () =>
+    setFilter((current) =>
+      current.open ? { ...current, open: false } : { open: true, session: current.session + 1 }
+    );
 
   const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
     state?.setQuery(event.currentTarget.value);
@@ -113,14 +116,15 @@ export const useHomePage = (state: ReturnType<typeof useHome>) => {
 
   const applyPriceRange = (min: string, max: string) => {
     state?.setRange(min, max);
-    setFilterOpen(false);
+    setFilter((current) => ({ ...current, open: false }));
     filterButton.current?.focus();
   };
 
   return {
     state: {
       countLabel,
-      filterOpen,
+      filterOpen: filter.open,
+      filterSession: filter.session,
       hasError: Boolean(error),
       hasRange,
       pagination,

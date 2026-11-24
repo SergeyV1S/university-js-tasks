@@ -152,7 +152,7 @@ const HomeContent = ({ state }: { state: ReturnType<typeof useHome> }) => {
               aria-label='Диапазон цен'
               aria-expanded={view.filterOpen}
               variant={view.hasRange ? "selected" : "secondary"}
-              aria-controls={view.filterOpen ? "market-price-filter" : undefined}
+              aria-controls={state ? "market-price-filter" : undefined}
               onClick={functions.toggleFilter}
               className={`h-11 w-11 lg:justify-start lg:px-2.75 ${view.hasRange ? "lg:w-auto lg:min-w-52" : "lg:w-38.5"}`}
             >
@@ -167,9 +167,21 @@ const HomeContent = ({ state }: { state: ReturnType<typeof useHome> }) => {
             </p>
           </div>
 
-          <div className='mt-3 space-y-3'>
-            {view.filterOpen && state && (
-              <PriceFilter range={state.range} onApply={functions.applyPriceRange} />
+          <div className='mt-3'>
+            {state && (
+              <div
+                className='invest-disclosure market-filter'
+                data-open={view.filterOpen}
+                inert={!view.filterOpen}
+              >
+                <div className='flow-root'>
+                  <PriceFilter
+                    key={view.filterSession}
+                    range={state.range}
+                    onApply={functions.applyPriceRange}
+                  />
+                </div>
+              </div>
             )}
             <MarketTable
               rows={view.rows}

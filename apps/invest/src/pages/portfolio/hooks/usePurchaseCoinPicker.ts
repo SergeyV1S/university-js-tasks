@@ -1,5 +1,5 @@
 import { useId, useState } from "react";
-import type { ChangeEvent, KeyboardEvent, MouseEvent } from "react";
+import type { ChangeEvent, KeyboardEvent, MouseEvent, TransitionEvent } from "react";
 
 import type { Coin } from "@/shared/market/type";
 
@@ -11,7 +11,10 @@ export const usePurchaseCoinPicker = (
   onSelect: (id: string) => void
 ) => {
   const listId = useId();
-  const [open, setOpen] = useState(false);
+  const [list, setList] = useState<{ open: true } | { open: false; closingMatches: Coin[] | null }>(
+    { open: false, closingMatches: null }
+  );
+  const { open } = list;
   const [highlighted, setHighlighted] = useState(-1);
   const selected = coins.find((coin) => coin.id === coinId);
   const coinLabel = selected?.symbol
@@ -22,8 +25,23 @@ export const usePurchaseCoinPicker = (
   );
 
   const close = () => {
-    setOpen(false);
+    if (!open) return;
+    setList({ open: false, closingMatches: matches });
     setHighlighted(-1);
+  };
+
+  const finishClosing = (event: TransitionEvent<HTMLDivElement>) => {
+    if (
+      event.target !== event.currentTarget ||
+      event.propertyName !== "grid-template-rows" ||
+      event.currentTarget.getBoundingClientRect().height !== 0
+    )
+      return;
+    setList((current) =>
+      current.open || current.closingMatches === null
+        ? current
+        : { open: false, closingMatches: null }
+    );
   };
 
   const select = (id: string) => {
@@ -32,10 +50,10 @@ export const usePurchaseCoinPicker = (
   };
 
   const handleMouseDown = (event: MouseEvent) => event.preventDefault();
-  const handleClick = () => setOpen(true);
+  const show = () => setList((current) => (current.open ? current : { open: true }));
   const search = (value: string) => {
     onQuery(value);
-    setOpen(true);
+    show();
     setHighlighted(-1);
   };
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => search(event.target.value);
@@ -58,7 +76,7 @@ export const usePurchaseCoinPicker = (
     if (event.key !== "ArrowDown" && event.key !== "ArrowUp") return;
 
     event.preventDefault();
-    setOpen(true);
+    show();
     if (matches.length === 0) return;
     const index =
       event.key === "ArrowDown"
@@ -67,29 +85,31 @@ export const usePurchaseCoinPicker = (
           ? matches.length - 1
           : Math.max(0, highlighted - 1);
     setHighlighted(index);
-    requestAnimationFrame(() =>
-      document.getElementById(optionId(index))?.scrollIntoView({ block: "nearest" })
-    );
+    requestAnimationFrame(() => {
+      const option = document.getElementById(optionId(index));
+      if (option && !option.closest("[inert]")) option.scrollIntoView({ block: "nearest" });
+    });
   };
 
-  const options = open
-    ? matches.map((coin, index) => ({
-        coin,
-        id: optionId(index),
-        active: index === highlighted,
-        select: () => select(coin.id)
-      }))
-    : [];
+  const visibleMatches = list.open ? matches : (list.closingMatches ?? []);
+  const options = visibleMatches.map((coin, index) => ({
+    coin,
+    id: optionId(index),
+    active: index === highlighted,
+    select: () => select(coin.id)
+  }));
 
   return {
     open,
     listId,
     options,
+    noMatches: (list.open || list.closingMatches !== null) && options.length === 0,
     activeId: open && matches[highlighted] ? optionId(highlighted) : undefined,
     coinLabel,
     close,
+    finishClosing,
     handleChange,
-    handleClick,
+    show,
     handleKeyDown,
     handleMouseDown
   };

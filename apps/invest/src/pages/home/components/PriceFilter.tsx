@@ -19,7 +19,7 @@ export const PriceFilter = ({ range, onApply }: PriceFilterProps) => {
   return (
     <Form
       id='market-price-filter'
-      className='rounded-[10px] border border-invest-border bg-invest-surface px-2.75 pt-2.5 pb-1.25 lg:pb-3.5'
+      className='mb-3 rounded-[10px] border border-invest-border bg-invest-surface px-2.75 pt-2.5 pb-1.25 lg:pb-3.5'
       onSubmit={functions.handleSubmit}
     >
       <fieldset>
@@ -66,7 +66,7 @@ export const PriceFilter = ({ range, onApply }: PriceFilterProps) => {
           <Button
             type='submit'
             variant='primary'
-            className='col-start-2 row-start-2 h-10 w-30 justify-self-end'
+            className='invest-press col-start-2 row-start-2 h-10 w-30 justify-self-end'
           >
             Показать
           </Button>
