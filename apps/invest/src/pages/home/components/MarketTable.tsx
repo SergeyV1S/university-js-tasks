@@ -120,7 +120,6 @@ export const MarketTable = ({
             ? Array.from({ length: 10 }, (_, index) => (
                 <tr
                   key={index}
-                  aria-hidden='true'
                   className='h-15.5 border-b border-invest-divider last:border-b-0 lg:h-13.5'
                 >
                   {columns.map(({ key }) => (

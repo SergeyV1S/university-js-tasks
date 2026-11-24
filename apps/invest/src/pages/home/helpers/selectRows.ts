@@ -40,8 +40,8 @@ export const selectRows = (
 export const parsePrice = (value: string) => {
   const input = value.trim();
   if (input === "") return null;
-  if (!/^(?:\d+(?:[.,]\d*)?|[.,]\d+)$/.test(input)) return NaN;
+  if (!/^(?:\d+(?:[.,]\d*)?|[.,]\d+)$/.test(input)) return Number.NaN;
 
   const price = Number(input.replace(",", "."));
-  return Number.isFinite(price) ? price : NaN;
+  return Number.isFinite(price) ? price : Number.NaN;
 };

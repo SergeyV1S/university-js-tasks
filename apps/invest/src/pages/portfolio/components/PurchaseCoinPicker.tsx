@@ -87,6 +87,7 @@ export const PurchaseCoinPicker = ({
                 key={coin.id}
                 id={optionId}
                 role='option'
+                tabIndex={-1}
                 aria-selected={active}
                 onMouseDown={picker.handleMouseDown}
                 onClick={select}

@@ -12,7 +12,7 @@ const parseRetryAfter = (header: unknown) => {
     ? Date.now() + Number(value) * 1_000
     : /[a-z]{3}/i.test(value)
       ? Date.parse(value)
-      : NaN;
+      : Number.NaN;
   return Number.isFinite(retryAt) ? retryAt : undefined;
 };
 

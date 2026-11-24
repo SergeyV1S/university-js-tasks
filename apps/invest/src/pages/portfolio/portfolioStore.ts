@@ -87,7 +87,7 @@ export const usePortfolioStore = create<PortfolioState>((set, get) => {
     if (!lifecycle) return;
 
     const { snapshot, currency, loadingQuotes, priceError } = get();
-    const ids = portfolioCoinIds(snapshot).sort();
+    const ids = portfolioCoinIds(snapshot).sort((left, right) => left.localeCompare(right));
     const quoteKey = JSON.stringify([currency, ids]);
     if (activeQuoteKey === quoteKey && loadingQuotes) return;
     if (activeQuoteKey === quoteKey && priceError && quoteResource) {
