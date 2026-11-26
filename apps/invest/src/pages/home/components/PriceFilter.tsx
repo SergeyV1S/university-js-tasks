@@ -1,9 +1,7 @@
-import { Button } from "@/shared/ui/Button";
-import { Form } from "@/shared/ui/Form";
-import { Input } from "@/shared/ui/Input";
+import { Button, Form, Input } from "@/shared/ui";
 
-import type { PriceRange } from "../helpers/selectRows";
-import { usePriceFilter } from "../hooks/usePriceFilter";
+import type { PriceRange } from "../helpers";
+import { usePriceFilter } from "../hooks";
 
 type PriceFilterProps = {
   range: PriceRange;

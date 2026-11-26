@@ -1,16 +1,11 @@
 import { useId } from "react";
 import type { ChangeEvent, SubmitEvent } from "react";
 
-import type { Coin } from "@/shared/market/type";
+import type { Coin } from "@/shared/api/requests";
 
-import { needsConverterRates } from "../api";
-import { useCoinStore } from "../coinStore";
-import {
-  converterCurrencies,
-  formatConversion,
-  isQuote,
-  unavailableRate
-} from "../helpers/converter";
+import { needsConverterRates } from "../actions";
+import { useCoinStore } from "../store";
+import { converterCurrencies, formatConversion, isQuote, unavailableRate } from "../helpers";
 
 export const useCoinConverter = (coin: Coin | undefined) => {
   const inputId = useId();

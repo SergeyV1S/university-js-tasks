@@ -1,9 +1,10 @@
 import { useId, useState } from "react";
 import type { ChangeEvent, SubmitEvent } from "react";
 
-import { isRecoverableMarketError } from "@/shared/market/resource";
+import { isRecoverableMarketError } from "@/shared/market";
 
-import { usePortfolioStore } from "../portfolioStore";
+import { getPurchaseNotice } from "../helpers";
+import { usePortfolioStore } from "../store";
 
 const emptyDraft = { coinId: "", quantity: "", unitPrice: "" };
 
@@ -65,7 +66,7 @@ export const usePurchaseForm = (onSaved: () => void) => {
     symbol: selected?.symbol,
     errors,
     saving,
-    saveStatus,
+    notice: getPurchaseNotice(saveStatus),
     fieldsDisabled: readFailed || !writable || saving,
     loadingCoins,
     autoRetryCoins,

@@ -1,21 +1,9 @@
 import type { Ref } from "react";
 
-import { ApiText } from "@/shared/ui/ApiText";
-import { Banner } from "@/shared/ui/Banner";
-import { Button } from "@/shared/ui/Button";
-import { Form } from "@/shared/ui/Form";
-import { FormField } from "@/shared/ui/FormField";
-import { Icon } from "@/shared/ui/Icon";
-import { Input } from "@/shared/ui/Input";
+import { ApiText, Banner, Button, Form, FormField, Icon, Input } from "@/shared/ui";
 
-import { usePurchaseForm } from "../hooks/usePurchaseForm";
+import { usePurchaseForm } from "../hooks";
 import { PurchaseCoinPicker } from "./PurchaseCoinPicker";
-
-const notices = {
-  "rate-error": ["Курс USD/RUB недоступен", "Повторите сохранение чуть позже."],
-  "write-error": ["Не удалось сохранить покупку", "Проверьте хранилище и повторите."],
-  conflict: ["Портфель изменился в другой вкладке", "Повторите сохранение этой покупки."]
-} as const;
 
 type PurchaseFormProps = {
   className: string;
@@ -34,8 +22,7 @@ export const PurchaseForm = ({
   const coinId = `${form.id}-coin`;
   const quantityId = `${form.id}-quantity`;
   const priceId = `${form.id}-price`;
-  const notice =
-    form.saveStatus in notices ? notices[form.saveStatus as keyof typeof notices] : null;
+  const { notice } = form;
 
   return (
     <Form
@@ -130,8 +117,8 @@ export const PurchaseForm = ({
           >
             <Icon name='alert' className='mt-0.5 size-4.5 shrink-0' />
             <div>
-              <p className='text-invest-label'>{notice[0]}</p>
-              <p className='mt-0.75 text-invest-caption text-invest-muted'>{notice[1]}</p>
+              <p className='text-invest-label'>{notice.title}</p>
+              <p className='mt-0.75 text-invest-caption text-invest-muted'>{notice.detail}</p>
             </div>
           </Banner>
         )}

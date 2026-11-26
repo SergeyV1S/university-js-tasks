@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useRef } from "react";
 
-import type { CatalogCoin } from "@/shared/market/type";
-import { formatPercent } from "@/shared/helpers/format";
+import type { CatalogCoin } from "@/shared/api/requests";
+import { formatPercent } from "@/shared/helpers";
 
-import type { Allocation } from "../types";
+import { getAllocationView } from "../helpers";
+import type { Allocation, Valuation } from "../types";
 
 const colorTokens = [
   "--color-invest-accent",
@@ -18,8 +19,12 @@ const emptyAllocations: Allocation[] = [];
 
 export const usePortfolioAllocation = (
   coins: ReadonlyMap<string, CatalogCoin>,
-  allocations = emptyAllocations
+  valuation: Valuation,
+  loading: boolean
 ) => {
+  const view = getAllocationView(valuation, loading);
+  const allocations =
+    !loading && valuation.kind === "ready" ? valuation.allocations : emptyAllocations;
   const canvas = useRef<HTMLCanvasElement>(null);
   const rows = useMemo(
     () =>
@@ -61,6 +66,7 @@ export const usePortfolioAllocation = (
     canvas,
     rows,
     count,
+    view,
     countLabel: form === "one" || form === "few" || form === "many" ? labels[form] : labels.other
   };
 };

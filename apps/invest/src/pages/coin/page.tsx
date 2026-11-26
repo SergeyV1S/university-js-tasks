@@ -1,14 +1,10 @@
 import { Link } from "react-router";
 
-import { PATHS } from "@/shared/constants/router-paths";
-import { Button } from "@/shared/ui/Button";
-import { Icon } from "@/shared/ui/Icon";
-import { Notice } from "@/shared/ui/Notice";
+import { PATHS } from "@/shared/constants";
+import { ButtonLink, Icon, Notice } from "@/shared/ui";
 
-import { CoinConverter } from "./components/CoinConverter";
-import { CoinHeader } from "./components/CoinHeader";
-import { CoinHistory } from "./components/CoinHistory";
-import { useCoinPage } from "./hooks/useCoinPage";
+import { CoinConverter, CoinHeader, CoinHistory } from "./components";
+import { useCoinPage } from "./hooks";
 
 const detailsLayout =
   "mt-3.75 grid items-start gap-3.5 lg:mt-5.25 lg:grid-cols-[minmax(0,1fr)_21.25rem] lg:gap-5";
@@ -37,7 +33,7 @@ export const CoinPending = () => (
 );
 
 export const CoinPage = () => {
-  const { pending, status, coin, notice, dismiss, openMarket } = useCoinPage();
+  const { pending, status, coin, notice, dismiss } = useCoinPage();
 
   if (pending) return <CoinPending />;
 
@@ -69,9 +65,9 @@ export const CoinPage = () => {
               ? "Проверьте адрес или выберите монету в списке."
               : "Не удалось загрузить список монет."}
           </p>
-          <Button variant='primary' onClick={openMarket} className='mt-4.5 h-10 w-36.25'>
+          <ButtonLink to={PATHS.HOME} variant='primary' className='mt-4.5 h-10 w-36.25'>
             На главную
-          </Button>
+          </ButtonLink>
         </section>
       )}
       {notice && <Notice {...notice} className='mt-6.75' onDismiss={dismiss} />}

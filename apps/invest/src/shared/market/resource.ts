@@ -1,4 +1,4 @@
-import { marketError } from "./helpers.ts";
+import { isMarketError, marketError } from "./helpers.ts";
 import type { MarketError } from "./type.ts";
 
 export type MarketResult<T> = { data: T; error: null } | { data: null; error: MarketError };
@@ -12,11 +12,6 @@ export type MarketState<T> = {
 export const isRecoverableMarketError = (error: MarketError | null | undefined) =>
   error?.kind === "network" || error?.kind === "rate-limit";
 
-const normalizeError = (error: unknown): MarketError =>
-  error instanceof Error && "kind" in error
-    ? (error as MarketError)
-    : marketError("invalid-response");
-
 export const readMarket = async <T>(
   signal: AbortSignal,
   load: () => Promise<T>
@@ -27,7 +22,7 @@ export const readMarket = async <T>(
     return { data, error: null };
   } catch (error) {
     signal.throwIfAborted();
-    return { data: null, error: normalizeError(error) };
+    return { data: null, error: isMarketError(error) ? error : marketError("invalid-response") };
   }
 };
 
@@ -66,7 +61,7 @@ export const createMarketResource = <T>({
         wait();
         return;
       }
-      void run();
+      run();
     };
     const wait = () => {
       timer = setTimeout(retry, Math.min(retryAt - Date.now(), 2_147_483_647));
@@ -106,7 +101,7 @@ export const createMarketResource = <T>({
   };
 
   const stop = () => {
-    if (timer !== undefined) clearTimeout(timer);
+    if (timer) clearTimeout(timer);
     timer = undefined;
     controller?.abort();
     controller = undefined;

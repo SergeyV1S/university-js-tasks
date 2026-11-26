@@ -1,23 +1,14 @@
 import { NavLink, Outlet } from "react-router";
 
-import { CoinPending } from "@/pages/coin";
-import { HomePending } from "@/pages/home";
-import { PortfolioPending } from "@/pages/portfolio";
-import { PATHS } from "@/shared/constants/router-paths";
-import { Icon } from "@/shared/ui/Icon";
+import { PATHS } from "@/shared/constants";
+import { Icon } from "@/shared/ui";
 
-import { useApp } from "./hooks/useApp";
+import { useApp } from "./hooks";
 
-const navLink =
-  "flex h-11 items-center justify-center gap-2.5 rounded-lg text-invest-label lg:relative lg:h-18 lg:justify-start lg:rounded-none lg:px-3.5";
-const activeNavLink =
-  "bg-invest-selected text-invest-accent lg:bg-transparent lg:after:absolute lg:after:inset-x-2 lg:after:bottom-0 lg:after:h-0.5 lg:after:rounded-full lg:after:bg-invest-accent";
 const gutters = "mx-auto w-full max-w-384 px-4";
 
 export const App = () => {
-  const { isHome, isCoin, isPortfolio, homePending, coinPending, portfolioPending } = useApp();
-  const showDemoData =
-    isHome || isCoin || isPortfolio || homePending || coinPending || portfolioPending;
+  const { Pending, showDemoData, marketLinkClass, portfolioLinkClass } = useApp();
 
   return (
     <>
@@ -35,23 +26,11 @@ export const App = () => {
             className='z-10 flex shrink-0 gap-0.75 lg:ml-9 lg:gap-1.5'
             aria-label='Основная навигация'
           >
-            <NavLink
-              to={PATHS.HOME}
-              end
-              className={({ isActive }) =>
-                `${navLink} w-18.5 lg:w-27.25 ${!portfolioPending && (isActive || isCoin || coinPending) ? activeNavLink : "text-invest-muted"}`
-              }
-            >
+            <NavLink to={PATHS.HOME} end className={marketLinkClass}>
               <Icon name='market' className='hidden lg:block' />
               Рынок
             </NavLink>
-            <NavLink
-              to={PATHS.PORTFOLIO}
-              end
-              className={({ isActive }) =>
-                `${navLink} w-25 lg:w-31.5 ${portfolioPending || (isActive && !coinPending && !homePending) ? activeNavLink : "text-invest-muted"}`
-              }
-            >
+            <NavLink to={PATHS.PORTFOLIO} end className={portfolioLinkClass}>
               <Icon name='wallet' className='hidden lg:block' />
               Портфель
             </NavLink>
@@ -66,17 +45,7 @@ export const App = () => {
           )}
         </div>
       </header>
-      <main className={gutters}>
-        {coinPending ? (
-          <CoinPending />
-        ) : homePending ? (
-          <HomePending />
-        ) : portfolioPending ? (
-          <PortfolioPending />
-        ) : (
-          <Outlet />
-        )}
-      </main>
+      <main className={gutters}>{Pending ? <Pending /> : <Outlet />}</main>
     </>
   );
 };

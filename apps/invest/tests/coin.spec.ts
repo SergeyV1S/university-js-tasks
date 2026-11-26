@@ -81,7 +81,7 @@ test("opens_known_and_unknown_urls", async ({ context, page }) => {
   expect(
     requests.some(({ url }) => url.includes("/unknown/market_chart") || url.includes("ids=unknown"))
   ).toBe(false);
-  await page.getByRole("button", { name: "На главную" }).click();
+  await page.getByRole("link", { name: "На главную" }).click();
   await expect(page).toHaveURL("/");
 
   const internal = defer();

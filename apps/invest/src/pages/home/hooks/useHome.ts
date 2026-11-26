@@ -1,8 +1,8 @@
 import { useLayoutEffect } from "react";
 import { useLoaderData } from "react-router";
 
-import type { loadHome } from "../api";
-import { useHomeStore } from "../homeStore";
+import type { loadHome } from "../actions";
+import { useHomeStore } from "../store";
 
 export const useHome = () => {
   const data = useLoaderData<typeof loadHome>();

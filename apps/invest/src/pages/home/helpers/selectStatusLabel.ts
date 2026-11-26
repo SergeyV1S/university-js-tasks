@@ -1,4 +1,4 @@
-import { formatTime } from "@/shared/helpers/format";
+import { formatTime } from "@/shared/helpers";
 
 export const selectStatusLabel = (
   refreshing: boolean,

@@ -1,32 +1,15 @@
 import { Link } from "react-router";
 
-import type { Coin } from "@/shared/market/type";
-import { useInfinityScroll } from "@/shared/hooks/useInfinityScroll";
-import { ApiText } from "@/shared/ui/ApiText";
-import { Button } from "@/shared/ui/Button";
-import { CoinAvatar } from "@/shared/ui/CoinAvatar";
-import { Icon } from "@/shared/ui/Icon";
-import { Skeleton } from "@/shared/ui/Skeleton";
+import { ApiText, Button, CoinAvatar, Icon, Skeleton } from "@/shared/ui";
 
-import type { Sort, SortKey } from "../helpers/selectRows";
-import { useMarketTable } from "../hooks/useMarketTable";
+import { useMarketTable } from "../hooks";
+import type { MarketTableOptions } from "../hooks";
 
-type MarketTableProps = {
-  rows: Coin[];
-  sort: Sort;
-  sortBy?: (key: SortKey) => void;
+type MarketTableProps = MarketTableOptions & {
   sortedByUser?: boolean;
   loading?: boolean;
   unavailable?: boolean;
   "aria-describedby"?: string;
-  showCapitalization: boolean;
-  pagination?: {
-    page: number;
-    loading: boolean;
-    failed: boolean;
-    paused: boolean;
-    loadNext: () => void;
-  };
 };
 
 const cellStyles = {
@@ -48,16 +31,18 @@ export const MarketTable = ({
   pagination,
   "aria-describedby": descriptionId
 }: MarketTableProps) => {
-  const { columns, rows: tableRows } = useMarketTable(rows, sort, sortBy);
-
-  const loadMoreRef = useInfinityScroll({
-    enabled: Boolean(!pagination?.loading && !pagination?.failed && !pagination?.paused),
-    onLoadMore: pagination?.loadNext
+  const {
+    columns,
+    rows: tableRows,
+    loadMoreRef,
+    visibility
+  } = useMarketTable({
+    rows,
+    sort,
+    sortBy,
+    showCapitalization,
+    pagination
   });
-
-  const changeCell = showCapitalization ? "hidden lg:table-cell" : "";
-  const capCell = showCapitalization ? "" : "hidden lg:table-cell";
-  const visibility = { rank: "", name: "", price: "", change24h: changeCell, marketCap: capCell };
 
   return (
     <div className='@container overflow-clip rounded-xl border border-invest-divider bg-invest-surface'>
@@ -167,12 +152,12 @@ export const MarketTable = ({
                       {price}
                     </td>
                     <td
-                      className={`font-invest-numeric text-invest-compact-number lg:text-invest-table-number ${cellStyles.change24h} ${changeCell} ${changeColor}`}
+                      className={`font-invest-numeric text-invest-compact-number lg:text-invest-table-number ${cellStyles.change24h} ${visibility.change24h} ${changeColor}`}
                     >
                       {change}
                     </td>
                     <td
-                      className={`font-invest-numeric text-invest-note lg:text-invest-table-number ${cellStyles.marketCap} ${capCell}`}
+                      className={`font-invest-numeric text-invest-note lg:text-invest-table-number ${cellStyles.marketCap} ${visibility.marketCap}`}
                     >
                       {marketCap}
                     </td>

@@ -1,11 +1,7 @@
-import type { Coin } from "@/shared/market/type";
-import { ApiText } from "@/shared/ui/ApiText";
-import { CoinAvatar } from "@/shared/ui/CoinAvatar";
-import { FormField } from "@/shared/ui/FormField";
-import { Icon } from "@/shared/ui/Icon";
-import { Input } from "@/shared/ui/Input";
+import type { Coin } from "@/shared/api/requests";
+import { ApiText, CoinAvatar, FormField, Icon, Input } from "@/shared/ui";
 
-import { usePurchaseCoinPicker } from "../hooks/usePurchaseCoinPicker";
+import { usePurchaseCoinPicker } from "../hooks";
 
 type PurchaseCoinPickerProps = {
   id: string;
@@ -26,8 +22,7 @@ export const PurchaseCoinPicker = ({
   onQuery,
   onSelect
 }: PurchaseCoinPickerProps) => {
-  const picker = usePurchaseCoinPicker(coins, selection, query, onQuery, onSelect);
-  const selectionId = `${id}-selected`;
+  const picker = usePurchaseCoinPicker(id, error, coins, selection, query, onQuery, onSelect);
 
   return (
     <FormField id={id} label='Монета' error={error}>
@@ -47,7 +42,7 @@ export const PurchaseCoinPicker = ({
             aria-controls={picker.listId}
             aria-activedescendant={picker.activeId}
             aria-invalid={Boolean(error)}
-            aria-describedby={error ? `${id}-error` : picker.coinLabel ? selectionId : undefined}
+            aria-describedby={picker.descriptionId}
             autoComplete='off'
             placeholder={picker.coinLabel ? undefined : "Выберите из топ-100"}
             value={query}
@@ -59,7 +54,7 @@ export const PurchaseCoinPicker = ({
           />
           {picker.coinLabel && (
             <span
-              id={selectionId}
+              id={picker.selectionId}
               className={`pointer-events-none absolute inset-y-0 right-9 flex items-center ${picker.open ? "left-9.25" : "left-3"}`}
             >
               <span className='truncate'>

@@ -1,15 +1,7 @@
-import { Banner } from "@/shared/ui/Banner";
-import { Button } from "@/shared/ui/Button";
-import { Icon } from "@/shared/ui/Icon";
-import { Notice } from "@/shared/ui/Notice";
-import { SegmentedControl } from "@/shared/ui/SegmentedControl";
-import { Skeleton } from "@/shared/ui/Skeleton";
+import { Banner, Button, Icon, Notice, SegmentedControl, Skeleton } from "@/shared/ui";
 
-import { PortfolioAllocation } from "./components/PortfolioAllocation";
-import { PortfolioSummary } from "./components/PortfolioSummary";
-import { PurchaseForm } from "./components/PurchaseForm";
-import { PurchaseList } from "./components/PurchaseList";
-import { usePortfolioPage } from "./hooks/usePortfolioPage";
+import { PortfolioAllocation, PortfolioSummary, PurchaseForm, PurchaseList } from "./components";
+import { usePortfolioPage } from "./hooks";
 
 const grid = "grid items-start lg:grid-cols-[minmax(0,1fr)_22.25rem] lg:gap-x-5";
 
@@ -24,9 +16,9 @@ export const PortfolioPending = () => (
       </div>
       <section className='h-89.5 space-y-4 rounded-xl border border-invest-divider bg-invest-surface p-4.25'>
         <Skeleton className='h-6.5 w-40' />
-        <Skeleton className='mt-8 h-11.5 w-full' />
-        <Skeleton className='mt-8 h-11.5 w-full' />
-        <Skeleton className='mt-8 h-11.5 w-full' />
+        <Skeleton className='mt-8 h-invest-input-height w-full' />
+        <Skeleton className='mt-8 h-invest-input-height w-full' />
+        <Skeleton className='mt-8 h-invest-input-height w-full' />
         <Skeleton className='h-11 w-full' />
       </section>
     </div>
@@ -99,7 +91,7 @@ export const PortfolioPage = () => {
           <Banner
             variant='success'
             role='status'
-            className={`purchase-saved-enter mb-3 min-h-11.5 items-center gap-2.25 pl-3 text-invest-label ${p.mobileAdd ? "hidden lg:flex" : "flex"}`}
+            className={`purchase-saved-enter mb-3 min-h-invest-input-height items-center gap-2.25 pl-3 text-invest-label ${p.mobileAdd ? "hidden lg:flex" : "flex"}`}
           >
             <Icon name='check' className='size-4.5 shrink-0' />
             <span className='flex-1'>Покупка сохранена</span>
@@ -141,7 +133,7 @@ export const PortfolioPage = () => {
 
         <div className={p.readFailed ? "lg:max-w-89" : grid}>
           {!p.readFailed &&
-            (p.purchases.length === 0 ? (
+            (!p.hasPurchases ? (
               <div
                 className={`mb-4 lg:col-start-1 lg:row-start-1 lg:mb-0 ${p.mobileAdd ? "hidden lg:block" : ""}`}
               >
@@ -179,18 +171,12 @@ export const PortfolioPage = () => {
               </div>
             ))}
           <PurchaseForm
-            className={`${p.animateMobilePurchase ? "mobile-purchase-enter" : ""} ${
-              p.readFailed
-                ? ""
-                : p.purchases.length === 0
-                  ? "lg:col-start-2 lg:row-start-1"
-                  : `lg:col-start-2 lg:row-span-3 lg:row-start-1 lg:mt-0 ${p.mobileAdd ? "" : "mt-4.25"}`
-            }`}
+            className={`${p.animateMobilePurchase ? "mobile-purchase-enter" : ""} ${p.purchaseFormPlacement}`}
             mobileAdd={p.mobileAdd}
             mobileHeading={p.mobileHeading}
             onSaved={p.closePurchase}
           />
-          {!p.readFailed && p.purchases.length > 0 && (
+          {!p.readFailed && p.hasPurchases && (
             <div
               className={`mt-4.5 min-w-0 lg:col-start-1 lg:row-start-3 lg:mt-4.75 ${p.mobileAdd ? "hidden lg:block" : ""}`}
             >

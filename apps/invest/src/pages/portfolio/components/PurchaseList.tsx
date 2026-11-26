@@ -1,8 +1,7 @@
-import type { CatalogCoin } from "@/shared/market/type";
-import { ApiText } from "@/shared/ui/ApiText";
-import { CoinAvatar } from "@/shared/ui/CoinAvatar";
+import type { CatalogCoin } from "@/shared/api/requests";
+import { ApiText, CoinAvatar } from "@/shared/ui";
 
-import { usePurchaseList } from "../hooks/usePurchaseList";
+import { usePurchaseList } from "../hooks";
 import type { Purchase } from "../types";
 
 type PurchaseListProps = {
@@ -25,9 +24,9 @@ export const PurchaseList = ({ purchases, coins }: PurchaseListProps) => {
         <p className='text-invest-caption text-invest-muted'>{countLabel}</p>
       </div>
       <ul role='list'>
-        {rows.map(({ coin, index, quantity, unitPrice }) => (
+        {rows.map(({ coin, key, quantity, unitPrice }) => (
           <li
-            key={index}
+            key={key}
             className='flex min-h-13.5 items-start gap-2.25 border-t border-invest-divider pt-1.5 pb-2 first:min-h-14.25 first:pt-2.25'
           >
             <div className='mt-1 shrink-0'>
@@ -53,7 +52,7 @@ export const PurchaseList = ({ purchases, coins }: PurchaseListProps) => {
               <p className='font-invest-numeric wrap-anywhere text-invest-table-number'>
                 {unitPrice}
               </p>
-              <p className='mt-0.25 text-invest-note text-invest-muted'>за монету</p>
+              <p className='mt-px text-invest-note text-invest-muted'>за монету</p>
             </div>
           </li>
         ))}

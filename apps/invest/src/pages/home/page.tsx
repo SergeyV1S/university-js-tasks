@@ -1,13 +1,7 @@
-import { Button } from "@/shared/ui/Button";
-import { Icon } from "@/shared/ui/Icon";
-import { Input } from "@/shared/ui/Input";
-import { Notice } from "@/shared/ui/Notice";
+import { Button, Icon, Input, Notice } from "@/shared/ui";
 
-import { MarketMetrics } from "./components/MarketMetrics";
-import { MarketTable } from "./components/MarketTable";
-import { PriceFilter } from "./components/PriceFilter";
-import { useHome } from "./hooks/useHome";
-import { useHomePage } from "./hooks/useHomePage";
+import { MarketMetrics, MarketTable, PriceFilter } from "./components";
+import { useHome, useHomePage } from "./hooks";
 import "./home-animation.css";
 
 export const HomePage = () => {
@@ -48,8 +42,8 @@ const HomeContent = ({ state }: { state: ReturnType<typeof useHome> }) => {
             className={`mt-0.75 flex w-41 items-center justify-end gap-1.25 text-invest-caption lg:mt-0 lg:w-58.5 lg:justify-start ${view.hasError ? "text-invest-warning" : ""}`}
           >
             <Icon
-              name={view.refreshing ? "refresh" : view.hasError ? "alert" : "check"}
-              className={`shrink-0 ${view.refreshing ? "text-invest-accent motion-safe:animate-spin" : view.hasError ? "text-invest-warning" : "text-invest-positive"}`}
+              name={view.refreshIcon.name}
+              className={`shrink-0 ${view.refreshIcon.className}`}
             />
             {view.statusLabel}
           </p>
@@ -70,13 +64,7 @@ const HomeContent = ({ state }: { state: ReturnType<typeof useHome> }) => {
             loading={!state}
             unavailable={Boolean(state?.metricsError && state.metrics === null)}
             stale={view.metricsStale && !view.bothStale}
-            aria-describedby={
-              view.metricsStale
-                ? view.bothStale
-                  ? "market-refresh-status"
-                  : "metrics-stale"
-                : undefined
-            }
+            aria-describedby={view.metricsDescriptionId}
           />
         </div>
 
@@ -188,17 +176,11 @@ const HomeContent = ({ state }: { state: ReturnType<typeof useHome> }) => {
               sort={view.sort}
               sortBy={state?.sortBy}
               sortedByUser={state?.sortedByUser}
-              loading={!state}
+              loading={view.tableLoading}
               unavailable={view.unavailable}
-              aria-describedby={
-                view.tableStale
-                  ? view.bothStale
-                    ? "market-refresh-status"
-                    : "table-stale"
-                  : undefined
-              }
+              aria-describedby={view.tableDescriptionId}
               showCapitalization={view.showCapitalization}
-              pagination={view.pagination || undefined}
+              pagination={view.pagination}
             />
           </div>
         </section>

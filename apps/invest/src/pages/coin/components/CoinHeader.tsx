@@ -1,9 +1,7 @@
-import type { Coin } from "@/shared/market/type";
-import { ApiText } from "@/shared/ui/ApiText";
-import { CoinAvatar } from "@/shared/ui/CoinAvatar";
-import { Skeleton } from "@/shared/ui/Skeleton";
+import type { Coin } from "@/shared/api/requests";
+import { ApiText, CoinAvatar, Skeleton } from "@/shared/ui";
 
-import { useCoinHeader } from "../hooks/useCoinHeader";
+import { useCoinHeader } from "../hooks";
 
 type CoinHeaderProps = { coin?: Coin };
 
@@ -30,7 +28,7 @@ export const CoinHeader = ({ coin }: CoinHeaderProps) => {
               <Skeleton className='h-7 w-26 lg:h-9 lg:w-32' />
             )}
             {coin?.symbol && (
-              <span className='flex h-7 min-w-12.5 translate-y-0.75 items-center justify-center rounded-md border border-invest-divider bg-invest-raised px-2 font-invest-numeric text-invest-compact-number text-invest-muted lg:translate-y-0.25'>
+              <span className='flex h-7 min-w-12.5 translate-y-0.75 items-center justify-center rounded-md border border-invest-divider bg-invest-raised px-2 font-invest-numeric text-invest-compact-number text-invest-muted lg:translate-y-px'>
                 <span className='max-w-16 truncate uppercase'>
                   <ApiText value={coin.symbol} />
                 </span>

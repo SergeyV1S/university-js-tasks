@@ -1,5 +1,5 @@
-import { isRecoverableMarketError } from "./resource";
-import type { MarketError } from "./type";
+import { isRecoverableMarketError } from "./resource.ts";
+import type { MarketError } from "./type.ts";
 
 const secondsFormat = new Intl.NumberFormat("ru", {
   style: "unit",
@@ -23,13 +23,10 @@ export const marketNotice = (
           : "Повторим запрос автоматически."
     };
   }
+  const retryDetail = stale ? staleDetail : "Повторим запрос автоматически.";
   return {
     title: error.kind === "network" && stale ? "Нет подключения" : title,
-    detail: isRecoverableMarketError(error)
-      ? stale
-        ? staleDetail
-        : "Повторим запрос автоматически."
-      : undefined
+    detail: isRecoverableMarketError(error) ? retryDetail : undefined
   };
 };
 

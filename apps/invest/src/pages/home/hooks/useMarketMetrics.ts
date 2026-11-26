@@ -1,13 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent } from "react";
 
-import { formatPercent } from "@/shared/helpers/format";
-import { percentColor } from "@/shared/helpers/percentColor";
+import { formatPercent, percentColor } from "@/shared/helpers";
 
-import type { HomeInitialData } from "../api";
-import { buildCards } from "../helpers/buildCards";
+import type { HomeInitialData } from "../actions";
+import { buildCards, getMetricsState } from "../helpers";
 
-export const useMarketMetrics = (metrics: HomeInitialData["metrics"]["data"]) => {
+export const useMarketMetrics = (
+  metrics: HomeInitialData["metrics"]["data"],
+  loading?: boolean,
+  unavailable?: boolean
+) => {
   const [open, setOpen] = useState<{ index: number; pinned: boolean } | null>(null);
   const activeCard = useRef<HTMLElement | null>(null);
   const activeHelp = useRef<HTMLButtonElement | null>(null);
@@ -73,5 +76,11 @@ export const useMarketMetrics = (metrics: HomeInitialData["metrics"]["data"]) =>
     };
   });
 
-  return { cards, activeCard, activeHelp, closeExplanation };
+  return {
+    cards,
+    activeCard,
+    activeHelp,
+    closeExplanation,
+    view: getMetricsState(loading, unavailable)
+  };
 };

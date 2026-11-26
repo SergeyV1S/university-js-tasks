@@ -1,8 +1,7 @@
-import type { CatalogCoin } from "@/shared/market/type";
-import { ApiText } from "@/shared/ui/ApiText";
-import { Skeleton } from "@/shared/ui/Skeleton";
+import type { CatalogCoin } from "@/shared/api/requests";
+import { ApiText, Skeleton } from "@/shared/ui";
 
-import { usePortfolioSummary } from "../hooks/usePortfolioSummary";
+import { usePortfolioSummary } from "../hooks";
 import type { PortfolioCurrency, Valuation } from "../types";
 
 type PortfolioSummaryProps = {
@@ -57,7 +56,7 @@ export const PortfolioSummary = ({
                 {summary.total}
               </dd>
             </div>
-            <div className='mt-3.5 min-w-0 lg:mt-0.25'>
+            <div className='mt-3.5 min-w-0 lg:mt-px'>
               <dt className='text-invest-label text-invest-muted'>Общая прибыль / убыток</dt>
               <dd
                 className={`mt-0.75 wrap-anywhere text-invest-section lg:mt-3.25 lg:text-invest-metric ${summary.pnlColor}`}

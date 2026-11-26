@@ -1,6 +1,5 @@
-import type { CatalogCoin } from "@/shared/market/type";
-import { formatFiatAmount } from "@/shared/helpers/format";
-import { percentColor } from "@/shared/helpers/percentColor";
+import type { CatalogCoin } from "@/shared/api/requests";
+import { formatCoinLabel, formatFiatAmount, percentColor } from "@/shared/helpers";
 
 import type { PortfolioCurrency, Valuation } from "../types";
 
@@ -14,9 +13,7 @@ export const usePortfolioSummary = (
       ? valuation.missingIds
           .map((id) => {
             const coin = coins.get(id);
-            return coin?.symbol
-              ? `${coin.name} (${coin.symbol.toUpperCase()})`
-              : (coin?.name ?? id);
+            return coin ? formatCoinLabel(coin) : id;
           })
           .join(", ")
       : "";

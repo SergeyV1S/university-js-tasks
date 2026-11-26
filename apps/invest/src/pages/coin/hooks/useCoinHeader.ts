@@ -1,6 +1,5 @@
-import type { Coin } from "@/shared/market/type";
-import { formatMoney, formatPercent } from "@/shared/helpers/format";
-import { percentColor } from "@/shared/helpers/percentColor";
+import type { Coin } from "@/shared/api/requests";
+import { formatMoney, formatPercent, percentColor } from "@/shared/helpers";
 
 export const useCoinHeader = (coin: Coin | undefined) => {
   const change24h = coin?.change24h ?? null;

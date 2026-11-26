@@ -1,4 +1,4 @@
-import type { Coin } from "@/shared/market/type";
+import type { Coin } from "@/shared/api/requests";
 
 export type SortKey = "rank" | "name" | "price" | "change24h" | "marketCap";
 export type Sort = { key: SortKey; direction: "asc" | "desc" };
@@ -14,7 +14,7 @@ export const selectRows = (
     sort,
     includeUnranked = false
   }: PriceRange & { sort: Sort; includeUnranked?: boolean }
-): Coin[] => {
+) => {
   const lower = Math.min(min ?? -Infinity, max ?? Infinity);
   const upper = Math.max(min ?? -Infinity, max ?? Infinity);
   const hasPriceFilter = min !== null || max !== null;

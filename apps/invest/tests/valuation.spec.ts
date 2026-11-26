@@ -98,8 +98,10 @@ test("values_purchases_in_both_currencies", async ({ context, page }) => {
   let delayedUsd: Promise<void> | undefined;
   const { requests } = await installQuotes(
     context,
-    (id, currency) =>
-      id === "coin-1" ? (currency === "usd" ? (usdFirstPrice ?? firstPrice) : firstPrice) : 10,
+    (id, currency) => {
+      if (id !== "coin-1") return 10;
+      return currency === "usd" ? (usdFirstPrice ?? firstPrice) : firstPrice;
+    },
     (currency) => (currency === "usd" ? delayedUsd : undefined)
   );
 

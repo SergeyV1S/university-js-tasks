@@ -1,9 +1,14 @@
 import { useId, useState } from "react";
 import type { ChangeEvent, KeyboardEvent, MouseEvent, TransitionEvent } from "react";
 
-import type { Coin } from "@/shared/market/type";
+import type { Coin } from "@/shared/api/requests";
+import { formatCoinLabel } from "@/shared/helpers";
+
+import { getNextOptionIndex } from "../helpers";
 
 export const usePurchaseCoinPicker = (
+  id: string,
+  error: string | undefined,
   coins: Coin[],
   coinId: string,
   query: string,
@@ -17,9 +22,9 @@ export const usePurchaseCoinPicker = (
   const { open } = list;
   const [highlighted, setHighlighted] = useState(-1);
   const selected = coins.find((coin) => coin.id === coinId);
-  const coinLabel = selected?.symbol
-    ? `${selected.name} (${selected.symbol.toUpperCase()})`
-    : selected?.name;
+  const coinLabel = selected ? formatCoinLabel(selected) : undefined;
+  const selectionId = `${id}-selected`;
+  const selectionDescription = coinLabel ? selectionId : undefined;
   const matches = coins.filter((coin) =>
     coin.name.toLowerCase().includes(query.trim().toLowerCase())
   );
@@ -78,12 +83,7 @@ export const usePurchaseCoinPicker = (
     event.preventDefault();
     show();
     if (matches.length === 0) return;
-    const index =
-      event.key === "ArrowDown"
-        ? Math.min(highlighted + 1, matches.length - 1)
-        : highlighted === -1
-          ? matches.length - 1
-          : Math.max(0, highlighted - 1);
+    const index = getNextOptionIndex(event.key, highlighted, matches.length);
     setHighlighted(index);
     requestAnimationFrame(() => {
       const option = document.getElementById(optionId(index));
@@ -106,6 +106,8 @@ export const usePurchaseCoinPicker = (
     noMatches: (list.open || list.closingMatches !== null) && options.length === 0,
     activeId: open && matches[highlighted] ? optionId(highlighted) : undefined,
     coinLabel,
+    selectionId,
+    descriptionId: error ? `${id}-error` : selectionDescription,
     close,
     finishClosing,
     handleChange,

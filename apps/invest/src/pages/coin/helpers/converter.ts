@@ -1,4 +1,4 @@
-import type { Currency, Quotes } from "@/shared/market/type";
+import type { Currency, Quotes } from "@/shared/api/requests";
 
 export const converterCurrencies = ["USD", "EUR", "BTC"] as const satisfies readonly Currency[];
 export type ConverterCurrency = (typeof converterCurrencies)[number];
@@ -35,7 +35,7 @@ export const formatConversion = (
   currency: ConverterCurrency,
   quotes: Quotes,
   rates: Quotes
-): string => {
+) => {
   const unitPrice = getUnitPrice(currency, quotes, rates);
   if (!isQuote(unitPrice)) return unavailableRate;
 

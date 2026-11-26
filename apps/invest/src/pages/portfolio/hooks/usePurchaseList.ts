@@ -1,6 +1,7 @@
-import type { CatalogCoin } from "@/shared/market/type";
-import { formatQuantity, formatUnitPrice } from "@/shared/helpers/format";
+import type { CatalogCoin } from "@/shared/api/requests";
+import { formatQuantity, formatUnitPrice } from "@/shared/helpers";
 
+import { getPurchaseKeys } from "../helpers";
 import type { Purchase } from "../types";
 
 const records = new Intl.PluralRules("ru");
@@ -13,6 +14,7 @@ export const usePurchaseList = (
   const count = purchases.length;
   const plural = records.select(count);
   const label = plural === "one" || plural === "few" ? recordLabels[plural] : recordLabels.many;
+  const keys = getPurchaseKeys(purchases);
 
   return {
     countLabel: `${count} ${label}`,
@@ -24,7 +26,7 @@ export const usePurchaseList = (
         };
         return {
           coin,
-          index,
+          key: keys[index],
           quantity: formatQuantity(purchase.quantity),
           unitPrice: formatUnitPrice(purchase.unitPrice, purchase.currency)
         };

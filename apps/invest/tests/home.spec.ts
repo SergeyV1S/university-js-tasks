@@ -373,6 +373,8 @@ test("ignores_late_search", async ({ context, page }) => {
   await expect
     .poll(() => fixture.requests.some(({ url }) => url.endsWith("ids=coin-121")))
     .toBe(true);
+  await expect(page.getByRole("status", { name: "Загрузка котировок" })).toBeVisible();
+  await expect(coinLinks(page)).toHaveCount(0);
   await search(page).fill("latest");
   await expect(coinLinks(page)).toHaveText(["Latest result"]);
   older.resolve();

@@ -1,6 +1,6 @@
-import type { Coin } from "@/shared/market/type";
-import bitcoinMark from "@/shared/assets/bitcoin.svg";
-import { useCoinAvatar } from "@/shared/hooks/useCoinAvatar";
+import type { Coin } from "@/shared/api/requests";
+import { bitcoinMark } from "@/shared/assets";
+import { useCoinAvatar } from "@/shared/hooks";
 
 import { ApiText } from "./ApiText";
 

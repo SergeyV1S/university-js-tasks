@@ -1,9 +1,7 @@
-import { Button } from "@/shared/ui/Button";
-import { Icon } from "@/shared/ui/Icon";
-import { Skeleton } from "@/shared/ui/Skeleton";
+import { Button, Icon, Skeleton } from "@/shared/ui";
 
-import type { HomeInitialData } from "../api";
-import { useMarketMetrics } from "../hooks/useMarketMetrics";
+import type { HomeInitialData } from "../actions";
+import { useMarketMetrics } from "../hooks";
 
 type MetricsProps = {
   metrics: HomeInitialData["metrics"]["data"];
@@ -20,7 +18,11 @@ export const MarketMetrics = ({
   stale,
   "aria-describedby": descriptionId
 }: MetricsProps) => {
-  const { cards, activeCard, activeHelp, closeExplanation } = useMarketMetrics(metrics);
+  const { cards, activeCard, activeHelp, closeExplanation, view } = useMarketMetrics(
+    metrics,
+    loading,
+    unavailable
+  );
 
   return (
     <section
@@ -61,13 +63,15 @@ export const MarketMetrics = ({
             </Button>
           </div>
 
-          {loading ? (
+          {view === "loading" && (
             <Skeleton className='mt-3 h-5 w-4/5 rounded-md lg:mt-3.5 lg:h-7 lg:w-3/5' />
-          ) : unavailable ? (
+          )}
+          {view === "unavailable" && (
             <p className='mt-3 text-invest-caption text-invest-muted lg:mt-3.75'>
               Данные временно недоступны
             </p>
-          ) : (
+          )}
+          {view === "ready" && (
             <>
               <p className='mt-1.75 truncate text-invest-section lg:mt-1.25 lg:text-invest-metric'>
                 {card.value}

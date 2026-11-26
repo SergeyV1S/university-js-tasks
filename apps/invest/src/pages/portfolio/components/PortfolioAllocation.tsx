@@ -1,8 +1,7 @@
-import type { CatalogCoin } from "@/shared/market/type";
-import { ApiText } from "@/shared/ui/ApiText";
-import { Skeleton } from "@/shared/ui/Skeleton";
+import type { CatalogCoin } from "@/shared/api/requests";
+import { ApiText, Skeleton } from "@/shared/ui";
 
-import { usePortfolioAllocation } from "../hooks/usePortfolioAllocation";
+import { usePortfolioAllocation } from "../hooks";
 import type { Valuation } from "../types";
 
 type PortfolioAllocationProps = {
@@ -12,11 +11,12 @@ type PortfolioAllocationProps = {
 };
 
 export const PortfolioAllocation = ({ valuation, coins, loading }: PortfolioAllocationProps) => {
-  const { canvas, rows, count, countLabel } = usePortfolioAllocation(
+  const { canvas, rows, count, countLabel, view } = usePortfolioAllocation(
     coins,
-    valuation.kind === "ready" ? valuation.allocations : undefined
+    valuation,
+    loading
   );
-  if (valuation.kind === "empty") return null;
+  if (view === "hidden") return null;
 
   return (
     <section
@@ -27,17 +27,20 @@ export const PortfolioAllocation = ({ valuation, coins, loading }: PortfolioAllo
       <h2 id='portfolio-allocation' className='text-invest-block'>
         Структура портфеля
       </h2>
-      {loading ? (
+      {view === "loading" && (
         <Skeleton className='mx-auto mt-4.25 mb-1.5 h-35.5 w-42.5 lg:mx-0 lg:mt-6.5' />
-      ) : valuation.kind === "missing" ? (
+      )}
+      {view === "missing" && (
         <p className='mt-6.75 text-invest-body text-invest-muted'>
           Структура недоступна до получения всех котировок.
         </p>
-      ) : count === 0 ? (
+      )}
+      {view === "zero" && (
         <p className='mt-6.75 text-invest-body text-invest-muted'>
           Доли недоступны при нулевой стоимости портфеля
         </p>
-      ) : (
+      )}
+      {view === "ready" && (
         <div className='mt-4.25 grid justify-items-center lg:mt-3.25 lg:grid-cols-[10.5rem_minmax(0,1fr)] lg:items-start lg:justify-items-stretch lg:gap-9.75 lg:pl-0.75'>
           <div className='relative size-36 lg:size-42'>
             <canvas ref={canvas} role='img' aria-label='Доли монет' />

@@ -1,8 +1,8 @@
 import type { LoaderFunctionArgs, RouteObject } from "react-router";
 
-import { PATHS } from "@/shared/constants/router-paths";
+import { PATHS } from "@/shared/constants";
 
-import { loadCoin } from "./api";
+import { loadCoin } from "./actions";
 import { CoinPage, CoinPending } from "./page";
 
 export const coinRoute = {

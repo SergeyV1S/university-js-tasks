@@ -305,7 +305,8 @@ test("keeps cached home data and marks only the block still waiting for recovery
   let returning = false;
   await installMarketFixture(context, (url) => {
     if (url.pathname.endsWith("/global")) {
-      return metricsFail ? { abort: true } : metrics(returning ? 54 : 53);
+      if (metricsFail) return { abort: true };
+      return metrics(returning ? 54 : 53);
     }
     if (url.pathname.endsWith("/coins/markets")) {
       if (topFails) return { abort: true };

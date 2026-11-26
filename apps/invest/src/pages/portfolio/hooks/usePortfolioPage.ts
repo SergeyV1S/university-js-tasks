@@ -2,14 +2,12 @@ import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { MouseEvent } from "react";
 import { useLoaderData } from "react-router";
 
-import { useNoticeDismissal } from "@/shared/hooks/useNoticeDismissal";
-import { marketNotice, selectMarketError } from "@/shared/market/notice";
-import { isRecoverableMarketError } from "@/shared/market/resource";
-import type { CatalogCoin } from "@/shared/market/type";
+import { useNoticeDismissal } from "@/shared/hooks";
+import { isRecoverableMarketError, marketNotice, selectMarketError } from "@/shared/market";
 
-import type { loadPortfolio } from "../api";
-import { calculateValuation } from "../helpers/valuation";
-import { usePortfolioStore } from "../portfolioStore";
+import type { loadPortfolio } from "../actions";
+import { calculateValuation, getOwnedCoins, getPurchaseFormPlacement } from "../helpers";
+import { usePortfolioStore } from "../store";
 import type { Purchase } from "../types";
 
 const emptyPurchases: Purchase[] = [];
@@ -59,19 +57,17 @@ export const usePortfolioPage = () => {
   const closePurchase = () => setMobileView({ add: false });
 
   const purchases = snapshot?.purchases ?? emptyPurchases;
+  const hasPurchases = purchases.length > 0;
+  const mobileAdd = mobileView?.add ?? false;
+  const purchaseFormPlacement = getPurchaseFormPlacement(readFailed, hasPurchases, mobileAdd);
   const valuation = useMemo(
     () => calculateValuation(purchases, prices, currency),
     [purchases, prices, currency]
   );
-  const ownedCoins = useMemo(() => {
-    const byId = new Map(coins?.map((coin) => [coin.id, coin]));
-    const results = new Map<string, CatalogCoin & { image?: string }>();
-    for (const { coinId } of purchases) {
-      const coin = byId.get(coinId) ?? catalog?.get(coinId);
-      if (coin) results.set(coinId, coin);
-    }
-    return results;
-  }, [coins, catalog, purchases]);
+  const ownedCoins = useMemo(
+    () => getOwnedCoins(purchases, coins, catalog),
+    [coins, catalog, purchases]
+  );
 
   const valuationStale = Boolean(priceError && valuation.kind === "ready");
   const marketError = selectMarketError(priceError, coinsError, catalogError);
@@ -93,6 +89,7 @@ export const usePortfolioPage = () => {
     valuationUnavailable: Boolean(priceError && valuation.kind === "missing"),
     pending: data !== initial,
     purchases,
+    hasPurchases,
     ownedCoins,
     valuation,
     valuationLoading: loadingQuotes && !priceError && valuation.kind === "missing",
@@ -101,7 +98,8 @@ export const usePortfolioPage = () => {
     writable,
     saving,
     saved,
-    mobileAdd: mobileView?.add ?? false,
+    mobileAdd,
+    purchaseFormPlacement,
     animateMobilePurchase: mobileView?.animate ?? false,
     mobileHeading,
     mobileAddButton,

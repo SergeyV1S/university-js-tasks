@@ -18,6 +18,8 @@ test("switches_screens_in_one_document", async ({ context, page }) => {
   });
   await page.goto("/coin/bitcoin");
   await expect(page.getByRole("heading", { name: "Bitcoin", exact: true })).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole("heading", { name: "Bitcoin", exact: true })).toBeVisible();
 
   await page.evaluate(() => {
     window.navigationMarker = "same-document";
@@ -51,4 +53,7 @@ test("switches_screens_in_one_document", async ({ context, page }) => {
   await expect(page).toHaveURL("/portfolio");
   await expect(page.getByRole("heading", { name: "Мой портфель" })).toBeVisible();
   expect(await page.evaluate(() => window.navigationMarker)).toBe("same-document");
+
+  await page.reload();
+  await expect(page.getByRole("heading", { name: "Мой портфель" })).toBeVisible();
 });

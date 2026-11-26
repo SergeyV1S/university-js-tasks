@@ -1,6 +1,6 @@
-import type { HistoryDays } from "@/shared/market/type";
+import type { HistoryDays } from "@/shared/api/requests";
 
-import { useHistoryChart } from "../hooks/useHistoryChart";
+import { useHistoryChart } from "../hooks/historyChart";
 
 type HistoryChartProps = { prices: Array<[number, number]>; period: HistoryDays };
 

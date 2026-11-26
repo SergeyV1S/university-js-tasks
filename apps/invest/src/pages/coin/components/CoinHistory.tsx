@@ -1,11 +1,8 @@
 import { lazy, Suspense } from "react";
 
-import { Button } from "@/shared/ui/Button";
-import { Icon } from "@/shared/ui/Icon";
-import { SegmentedControl } from "@/shared/ui/SegmentedControl";
-import { Skeleton } from "@/shared/ui/Skeleton";
+import { Button, Icon, SegmentedControl, Skeleton } from "@/shared/ui";
 
-import { useCoinHistory } from "../hooks/useCoinHistory";
+import { useCoinHistory } from "../hooks";
 
 const HistoryChart = lazy(async () => ({ default: (await import("./HistoryChart")).HistoryChart }));
 
@@ -16,7 +13,7 @@ const HistoryPending = () => (
 );
 
 export const CoinHistory = ({ pending = false }: { pending?: boolean }) => {
-  const { options, period, history } = useCoinHistory(pending);
+  const { options, period, view } = useCoinHistory(pending);
 
   return (
     <section
@@ -43,21 +40,21 @@ export const CoinHistory = ({ pending = false }: { pending?: boolean }) => {
       </div>
       <p className='mt-3 text-invest-caption text-invest-muted lg:mt-1.75'>Цена в USD</p>
       <div className='mt-3 h-37.5 min-w-0 lg:mt-4 lg:h-68'>
-        {!history || (!history.data && !history.error) ? (
-          <HistoryPending />
-        ) : history.data && history.data.length > 0 ? (
+        {view.kind === "loading" && <HistoryPending />}
+        {view.kind === "ready" && (
           <Suspense fallback={<HistoryPending />}>
-            <HistoryChart prices={history.data} period={period} />
+            <HistoryChart prices={view.prices} period={period} />
           </Suspense>
-        ) : (
+        )}
+        {(view.kind === "error" || view.kind === "empty") && (
           <div role='status' className='flex flex-col items-center pt-5 text-center lg:pt-11'>
-            {history.error ? (
+            {view.kind === "error" ? (
               <Icon name='alert' className='size-5 text-invest-warning' />
             ) : (
               <Icon name='chart' className='text-invest-muted' />
             )}
             <p className='mt-4 text-invest-block'>
-              {history.error ? "Не удалось загрузить график" : "За этот период нет данных"}
+              {view.kind === "error" ? "Не удалось загрузить график" : "За этот период нет данных"}
             </p>
             <p className='mt-2.5 text-invest-caption text-invest-muted'>Выберите другой период.</p>
           </div>

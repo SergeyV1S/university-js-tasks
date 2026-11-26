@@ -1,13 +1,11 @@
 import { useLayoutEffect } from "react";
-import { useLoaderData, useNavigate } from "react-router";
+import { useLoaderData } from "react-router";
 
-import { PATHS } from "@/shared/constants/router-paths";
-import { useNoticeDismissal } from "@/shared/hooks/useNoticeDismissal";
-import { marketNotice, selectMarketError } from "@/shared/market/notice";
-import { isRecoverableMarketError } from "@/shared/market/resource";
+import { useNoticeDismissal } from "@/shared/hooks";
+import { isRecoverableMarketError, marketNotice, selectMarketError } from "@/shared/market";
 
-import type { loadCoin } from "../api";
-import { useCoinStore } from "../coinStore";
+import type { loadCoin } from "../actions";
+import { useCoinStore } from "../store";
 
 export const useCoinPage = () => {
   const data = useLoaderData<typeof loadCoin>();
@@ -17,17 +15,12 @@ export const useCoinPage = () => {
   const historyError = useCoinStore((state) => state.history?.error);
   const quotes = useCoinStore((state) => state.quotes);
   const rates = useCoinStore((state) => state.rates);
-  const navigate = useNavigate();
 
   useLayoutEffect(() => {
     const { setInitialData, stop } = useCoinStore.getState();
     setInitialData(data);
     return stop;
   }, [data]);
-
-  const openMarket = () => {
-    void navigate(PATHS.HOME);
-  };
 
   const status = details?.data?.status ?? "error";
   const identity = details?.data?.status === "ready" ? details.data.identity : undefined;
@@ -63,7 +56,6 @@ export const useCoinPage = () => {
         details?.error ? "Не удалось загрузить список монет" : "Не удалось загрузить котировки",
         Boolean((quotes?.error && quotes.data) || (rates?.error && rates.data)),
         "Показываем последние полученные курсы."
-      ),
-    openMarket
+      )
   };
 };

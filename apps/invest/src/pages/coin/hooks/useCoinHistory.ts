@@ -1,7 +1,8 @@
-import type { HistoryDays } from "@/shared/market/type";
+import type { HistoryDays } from "@/shared/api/requests";
 
-import { initialPeriod } from "../api";
-import { useCoinStore } from "../coinStore";
+import { initialPeriod } from "../actions";
+import { getHistoryView } from "../helpers";
+import { useCoinStore } from "../store";
 
 const periods = [
   { days: 1, label: "1 д" },
@@ -24,5 +25,5 @@ export const useCoinHistory = (pending: boolean) => {
     }
   }));
 
-  return { options, period: active, history: pending ? null : history };
+  return { options, period: active, view: getHistoryView(pending ? null : history) };
 };

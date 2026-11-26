@@ -1,8 +1,8 @@
 import { useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
 
-import { parsePrice } from "../helpers/selectRows";
-import type { PriceRange } from "../helpers/selectRows";
+import { parsePrice } from "../helpers";
+import type { PriceRange } from "../helpers";
 
 export const usePriceFilter = (range: PriceRange, onApply: (min: string, max: string) => void) => {
   const [min, setMin] = useState(String(range.min ?? ""));

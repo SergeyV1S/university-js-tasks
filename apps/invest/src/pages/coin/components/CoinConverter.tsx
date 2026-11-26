@@ -1,12 +1,7 @@
-import type { Coin } from "@/shared/market/type";
-import { ApiText } from "@/shared/ui/ApiText";
-import { Button } from "@/shared/ui/Button";
-import { Form } from "@/shared/ui/Form";
-import { Input } from "@/shared/ui/Input";
-import { SegmentedControl } from "@/shared/ui/SegmentedControl";
-import { Skeleton } from "@/shared/ui/Skeleton";
+import type { Coin } from "@/shared/api/requests";
+import { ApiText, Button, Form, Input, SegmentedControl, Skeleton } from "@/shared/ui";
 
-import { useCoinConverter } from "../hooks/useCoinConverter";
+import { useCoinConverter } from "../hooks";
 
 type CoinConverterProps = { coin?: Coin };
 

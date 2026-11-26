@@ -1,5 +1,5 @@
-import type { GlobalMetrics } from "@/shared/market/type";
-import { formatCompactMoney, formatPercent } from "@/shared/helpers/format";
+import type { GlobalMetrics } from "@/shared/api/requests";
+import { formatCompactMoney, formatPercent } from "@/shared/helpers";
 
 export const buildCards = (metrics: GlobalMetrics | null) => [
   {
