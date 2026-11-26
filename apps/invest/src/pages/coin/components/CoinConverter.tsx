@@ -1,0 +1,97 @@
+import type { Coin } from "@/shared/api/requests";
+import { ApiText, Button, Form, Input, SegmentedControl, Skeleton } from "@/shared/ui";
+
+import { useCoinConverter } from "../hooks";
+
+type CoinConverterProps = { coin?: Coin };
+
+export const CoinConverter = ({ coin }: CoinConverterProps) => {
+  const {
+    inputId,
+    currencyLabelId,
+    quantity,
+    options,
+    result,
+    resultUnavailable,
+    stale,
+    changeQuantity,
+    preventSubmit
+  } = useCoinConverter(coin);
+
+  return (
+    <section
+      aria-labelledby='coin-converter-heading'
+      className={`min-w-0 rounded-xl border border-invest-divider bg-invest-surface p-4 lg:p-5 ${stale ? "min-h-81.5" : "min-h-74"}`}
+    >
+      <h2 id='coin-converter-heading' className='text-invest-block'>
+        Конвертер
+      </h2>
+      {coin && stale && (
+        <p role='status' className='mt-1 text-invest-caption text-invest-warning'>
+          Могут быть устаревшими
+        </p>
+      )}
+      <Form className={stale ? "mt-5.5" : "mt-3.5"} onSubmit={preventSubmit}>
+        <label htmlFor={inputId} className='block text-invest-label text-invest-muted'>
+          Количество
+          {coin && (
+            <>
+              {" "}
+              <ApiText value={coin.name} />
+            </>
+          )}
+        </label>
+        <div className='relative mt-1.5'>
+          <Input
+            id={inputId}
+            name='quantity'
+            type='text'
+            inputMode='decimal'
+            autoComplete='off'
+            disabled={!coin}
+            value={coin ? quantity : "1"}
+            onChange={changeQuantity}
+            className='h-invest-input-height pr-20 font-invest-numeric'
+          />
+          {coin?.symbol && (
+            <span
+              aria-hidden='true'
+              className='pointer-events-none absolute top-1/2 right-3 max-w-16 -translate-y-1/2 truncate font-invest-numeric text-invest-compact-number text-invest-muted uppercase'
+            >
+              <ApiText value={coin.symbol} />
+            </span>
+          )}
+        </div>
+        <p id={currencyLabelId} className='mt-3.75 text-invest-label text-invest-muted'>
+          Валюта результата
+        </p>
+        <SegmentedControl aria-labelledby={currencyLabelId} className='mt-1.25'>
+          {options.map(({ code, selected, select }) => (
+            <Button
+              key={code}
+              variant='segment'
+              aria-pressed={selected}
+              disabled={!coin}
+              onClick={select}
+            >
+              {code}
+            </Button>
+          ))}
+        </SegmentedControl>
+        <div className='invest-value-panel mt-4 min-h-14 rounded-lg border border-invest-divider px-3 py-2'>
+          {coin ? (
+            <output
+              htmlFor={inputId}
+              aria-label='Результат конвертации'
+              className={`block wrap-anywhere ${resultUnavailable ? "text-invest-block text-invest-warning" : "text-invest-section lg:text-invest-metric"}`}
+            >
+              {result}
+            </output>
+          ) : (
+            <Skeleton className='mt-0.75 h-6.25 w-42.75 rounded-[5px]!' />
+          )}
+        </div>
+      </Form>
+    </section>
+  );
+};
