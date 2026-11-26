@@ -28,6 +28,16 @@
   padding: 1.125rem 1rem;
 }
 
+:root[data-theme="light"] .market-intro::before {
+  opacity: 0.86;
+}
+
+@media (width < 64rem) {
+  :root[data-theme="light"] .market-intro::before {
+    opacity: 0.2;
+  }
+}
+
 .market-metric:first-of-type {
   border-color: var(--color-invest-selected-border);
   background: linear-gradient(

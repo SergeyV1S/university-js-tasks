@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef } from "react";
 
 import type { CatalogCoin } from "@/shared/api/requests";
 import { formatPercent } from "@/shared/helpers";
+import { useTheme } from "@/shared/theme";
 
 import { getAllocationView } from "../helpers";
 import type { Allocation, Valuation } from "../types";
@@ -26,6 +27,7 @@ export const usePortfolioAllocation = (
   const allocations =
     !loading && valuation.kind === "ready" ? valuation.allocations : emptyAllocations;
   const canvas = useRef<HTMLCanvasElement>(null);
+  const theme = useTheme();
   const rows = useMemo(
     () =>
       allocations.map(({ coinId, percent }, index) => ({
@@ -58,7 +60,7 @@ export const usePortfolioAllocation = (
       active = false;
       destroyChart?.();
     };
-  }, [allocations]);
+  }, [allocations, theme]);
 
   const count = rows.length;
   const form = coinPlural.select(count);

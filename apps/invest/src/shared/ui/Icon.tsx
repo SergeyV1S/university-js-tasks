@@ -1,7 +1,23 @@
 import type { ComponentProps } from "react";
 
-// Vector geometry from the Invest Figma components.
 const icons = {
+  sun: {
+    size: 20,
+    paths: [
+      ["M 14 10 A 4 4 0 1 1 6 10 A 4 4 0 1 1 14 10 Z", 0, 0, 1.5],
+      [
+        "M 10 1.75 V 3.25 M 10 16.75 V 18.25 M 1.75 10 H 3.25 M 16.75 10 H 18.25 M 4.17 4.17 L 5.23 5.23 M 14.77 14.77 L 15.83 15.83 M 4.17 15.83 L 5.23 14.77 M 14.77 5.23 L 15.83 4.17",
+        0,
+        0,
+        1.5
+      ]
+    ]
+  },
+  moon: {
+    size: 20,
+    paths: [["M 17.2 12.35 A 7.5 7.5 0 1 1 7.65 2.8 A 7.5 7.5 0 0 0 17.2 12.35 Z", 0, 0, 1.5]]
+  },
+  // Vector geometry from the Invest Figma components.
   logo: {
     size: 22,
     paths: [

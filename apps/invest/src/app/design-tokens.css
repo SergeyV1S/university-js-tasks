@@ -146,3 +146,33 @@
   --radius-invest-button: 9px;
   --radius-invest-input: 8px;
 }
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --color-invest-background: #f3f0ea;
+  --color-invest-navigation: #f9f7f2;
+  --color-invest-surface: #fffdf8;
+  --color-invest-raised: #ebe6dd;
+  --color-invest-divider: #d8d1c5;
+  --color-invest-border: #bfb5a7;
+  --color-invest-field-border: #8b8174;
+  --color-invest-table-header: #ebe6de;
+  --color-invest-foreground: #27231f;
+  --color-invest-muted: #625a51;
+  --color-invest-accent: #80532d;
+  --color-invest-accent-hover: #69421f;
+  --color-invest-accent-pressed: #593616;
+  --color-invest-accent-ink: #fffdf8;
+  --color-invest-selected: #eee0ce;
+  --color-invest-selected-border: #ac8863;
+  --color-invest-positive: #136443;
+  --color-invest-negative: #9d3740;
+  --color-invest-warning: #74491e;
+  --color-invest-warning-background: #f2e5d5;
+  --color-invest-focus: #6f431f;
+  --color-invest-blue: #486b97;
+  --color-invest-chart-coral: #a15a4b;
+  --color-invest-skeleton: #d8d1c5;
+  --color-invest-chart-fill-top: #80532d38;
+  --color-invest-chart-fill-bottom: #80532d00;
+}

@@ -2,11 +2,13 @@ import { useEffect, useRef } from "react";
 
 import type { HistoryDays } from "@/shared/api/requests";
 import { formatMoney } from "@/shared/helpers";
+import { useTheme } from "@/shared/theme";
 
 import { createHistoryChart } from "../../helpers/historyChart";
 
 export const useHistoryChart = (prices: Array<[number, number]>, period: HistoryDays) => {
   const canvas = useRef<HTMLCanvasElement>(null);
+  const theme = useTheme();
   const latest = prices.at(-1)?.[1] ?? null;
   const label = `График цены в USD. Последняя цена ${formatMoney(latest)}`;
 
@@ -30,7 +32,7 @@ export const useHistoryChart = (prices: Array<[number, number]>, period: History
       chart?.destroy();
       chart = undefined;
     };
-  }, [prices, period]);
+  }, [prices, period, theme]);
 
   return { canvas, label };
 };
