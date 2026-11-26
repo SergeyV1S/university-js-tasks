@@ -70,25 +70,25 @@
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .market-intro[data-enter][data-ready="true"]::before {
-    animation: market-art-enter 700ms var(--ease-invest-out);
+@media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
+  .market-intro::before {
+    transform-origin: right center;
+    transition: scale 260ms var(--ease-invest-out);
   }
 
-  @media (hover: hover) and (pointer: fine) {
-    .market-quote-arrow {
-      transition: translate 140ms var(--ease-invest-out);
-    }
-
-    .market-quote:hover .market-quote-arrow {
-      translate: 2px 0;
-    }
+  .market-intro:hover::before {
+    scale: 1.025;
   }
-}
 
-@keyframes market-art-enter {
-  from {
-    opacity: 0.3;
-    transform: translateX(1rem);
+  .market-quote {
+    transition: background-color 140ms ease;
+  }
+
+  .market-quote-arrow {
+    transition: translate 140ms var(--ease-invest-out);
+  }
+
+  .market-quote:hover .market-quote-arrow {
+    translate: 3px 0;
   }
 }

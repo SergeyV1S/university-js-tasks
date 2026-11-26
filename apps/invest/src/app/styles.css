@@ -107,6 +107,24 @@
     .invest-button:not(.invest-press, :disabled):active {
       translate: 0 1px;
     }
+
+    @media (hover: hover) and (pointer: fine) {
+      .invest-lift:not(.invest-press, :disabled, :active):hover {
+        translate: 0 -1px;
+      }
+
+      .invest-press:enabled:not(:active):hover {
+        scale: 1.012;
+      }
+
+      .invest-back-icon {
+        transition: translate 140ms var(--ease-invest-out);
+      }
+
+      .invest-back-link:hover .invest-back-icon {
+        translate: -3px 0;
+      }
+    }
   }
 
   .purchase-saved-enter {

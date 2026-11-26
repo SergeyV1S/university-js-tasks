@@ -9,7 +9,11 @@ export const CoinHeader = ({ coin }: CoinHeaderProps) => {
   const { price, change, changeColor } = useCoinHeader(coin);
 
   return (
-    <header className='invest-feature-panel mt-2 flex flex-col gap-4 rounded-xl border border-invest-divider p-4 lg:flex-row lg:items-center lg:justify-between lg:gap-8 lg:p-7'>
+    <header
+      className='invest-intro invest-feature-panel mt-2 flex flex-col gap-4 rounded-xl border border-invest-divider p-4 lg:flex-row lg:items-center lg:justify-between lg:gap-8 lg:p-7'
+      data-ready={Boolean(coin)}
+      data-enter
+    >
       <div className='flex min-w-0 items-center gap-3 lg:gap-4'>
         <div className='mt-0.5 shrink-0'>
           {coin ? (

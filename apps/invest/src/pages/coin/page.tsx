@@ -12,9 +12,9 @@ const detailsLayout =
 const MarketLink = () => (
   <Link
     to={PATHS.HOME}
-    className='inline-flex h-11 w-45 items-center gap-1.75 rounded-sm text-invest-label text-invest-muted hover:text-invest-foreground'
+    className='invest-back-link inline-flex h-11 w-45 items-center gap-1.75 rounded-sm text-invest-label text-invest-muted hover:text-invest-foreground'
   >
-    <Icon name='back' />
+    <Icon name='back' className='invest-back-icon' />
     Все криптовалюты
   </Link>
 );

@@ -16,8 +16,8 @@ const HomeContent = ({ state }: { state: ReturnType<typeof useHome> }) => {
 
   return (
     <div className='market-page pt-4 pb-8 lg:pt-7 lg:pb-12'>
-      <header className='market-intro' data-ready={state !== null} data-enter>
-        <div className='market-intro-content'>
+      <header className='market-intro'>
+        <div className='invest-intro market-intro-content' data-ready={state !== null} data-enter>
           <h1 className='text-invest-mobile-title lg:text-invest-title'>Рынок криптовалют</h1>
           <p className='mt-2 text-invest-body text-invest-muted'>Цены и капитализация в USD</p>
           <div className='mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-invest-caption text-invest-muted lg:mt-5'>

@@ -50,7 +50,7 @@ export const PortfolioPage = () => {
       <header
         className={`invest-feature-panel flex-wrap items-center justify-between gap-x-2 gap-y-3 rounded-xl border border-invest-divider p-4 lg:flex lg:gap-5 lg:p-7 ${p.mobileAdd ? "hidden" : "flex"}`}
       >
-        <div className='min-w-0 min-[390px]:flex-1'>
+        <div className='invest-intro min-w-0 min-[390px]:flex-1' data-enter>
           <h1 className='text-invest-mobile-title lg:text-invest-title'>Мой портфель</h1>
           <p className='mt-2 flex items-center gap-1.75 text-invest-caption text-invest-muted'>
             <Icon name='lock' className='shrink-0' />
