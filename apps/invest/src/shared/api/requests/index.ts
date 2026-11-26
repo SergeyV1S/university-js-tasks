@@ -1,5 +1,6 @@
 export {
   getCoinsIdMarketChart,
+  getCoinsIdOhlc,
   getCoinsList,
   getCoinsMarkets,
   TOP_MARKETS_PAGE_SIZE

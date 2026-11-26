@@ -13,6 +13,7 @@ const aliases = registerHooks({
 });
 const {
   getCoinsIdMarketChart,
+  getCoinsIdOhlc,
   getCoinsList,
   getCoinsMarkets,
   getExchangeRates,
@@ -133,6 +134,27 @@ test("normalizes_market_payloads_and_errors", async (context) => {
   assert.equal(history.searchParams.get("days"), "365");
   respond.mock.mockImplementation(() => Response.json({ prices: [] }));
   assert.deepEqual(await getCoinsIdMarketChart({ params: { id: "bitcoin", days: 7 }, config }), []);
+
+  const candleRequest = new AbortController();
+  const readCandles = () =>
+    getCoinsIdOhlc({
+      params: { id: "bitcoin" },
+      config: { ...config, signal: candleRequest.signal }
+    });
+  respond.mock.mockImplementation(() => Response.json([[now, 0, 3, 0, 2]]));
+  assert.deepEqual(await readCandles(), [{ timestamp: now, open: 0, high: 3, low: 0, close: 2 }]);
+  assert.equal(lastRequestUrl().pathname, "/api/v3/coins/bitcoin/ohlc");
+  assert.deepEqual(Object.fromEntries(lastRequestUrl().searchParams), {
+    vs_currency: "usd",
+    days: "1"
+  });
+  assert.equal(requests.at(-1)?.config.signal, candleRequest.signal);
+  respond.mock.mockImplementation(() => Response.json([]));
+  assert.deepEqual(await readCandles(), []);
+  for (const invalid of [[[now, 1, 3, 0]], [[now, 1, 3, 0, "2"]], [[now, 1, 3, 0, 4]]]) {
+    respond.mock.mockImplementation(() => Response.json(invalid));
+    await assert.rejects(readCandles, { kind: "invalid-response" });
+  }
 
   respond.mock.mockImplementation(() => Response.json({ bitcoin: { usd: 0, eur: null, jpy: 20 } }));
   assert.deepEqual(

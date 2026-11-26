@@ -21,8 +21,8 @@
   --color-invest-accent-ink: #22190f;
   --color-invest-selected: #31291f;
   --color-invest-selected-border: #82674a;
-  --color-invest-positive: #8cdbb3;
-  --color-invest-negative: #ff9c9d;
+  --color-invest-positive: #00ff00;
+  --color-invest-negative: #ff2400;
   --color-invest-warning: #ffd097;
   --color-invest-warning-background: #302620;
   --color-invest-focus: #ffd198;
@@ -165,8 +165,8 @@
   --color-invest-accent-ink: #fffdf8;
   --color-invest-selected: #eee0ce;
   --color-invest-selected-border: #ac8863;
-  --color-invest-positive: #136443;
-  --color-invest-negative: #9d3740;
+  --color-invest-positive: #1d921d;
+  --color-invest-negative: #bb2b2b;
   --color-invest-warning: #74491e;
   --color-invest-warning-background: #f2e5d5;
   --color-invest-focus: #6f431f;

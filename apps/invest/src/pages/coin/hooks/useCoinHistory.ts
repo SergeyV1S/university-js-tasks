@@ -25,5 +25,5 @@ export const useCoinHistory = (pending: boolean) => {
     }
   }));
 
-  return { options, period: active, view: getHistoryView(pending ? null : history) };
+  return { options, view: getHistoryView(pending ? null : history) };
 };

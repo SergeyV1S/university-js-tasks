@@ -1,16 +1,18 @@
 import { useEffect, useRef } from "react";
 
-import type { HistoryDays } from "@/shared/api/requests";
 import { formatMoney } from "@/shared/helpers";
 import { useTheme } from "@/shared/theme";
 
+import type { HistorySeries } from "../../actions";
 import { createHistoryChart } from "../../helpers/historyChart";
 
-export const useHistoryChart = (prices: Array<[number, number]>, period: HistoryDays) => {
+export const useHistoryChart = (series: HistorySeries) => {
   const canvas = useRef<HTMLCanvasElement>(null);
   const theme = useTheme();
-  const latest = prices.at(-1)?.[1] ?? null;
-  const label = `График цены в USD. Последняя цена ${formatMoney(latest)}`;
+  const label =
+    series.period === 1
+      ? `График цены в USD. Свечи за 1 день. Последняя цена закрытия ${formatMoney(series.candles.at(-1)?.close ?? null)}`
+      : `График цены в USD. Последняя цена ${formatMoney(series.prices.at(-1)?.[1] ?? null)}`;
 
   useEffect(() => {
     const element = canvas.current;
@@ -20,7 +22,7 @@ export const useHistoryChart = (prices: Array<[number, number]>, period: History
     let chart: ReturnType<typeof createHistoryChart> | undefined;
     const render = () => {
       chart?.destroy();
-      chart = createHistoryChart(element, prices, period, desktop.matches);
+      chart = createHistoryChart(element, series, desktop.matches);
     };
 
     render();
@@ -32,7 +34,7 @@ export const useHistoryChart = (prices: Array<[number, number]>, period: History
       chart?.destroy();
       chart = undefined;
     };
-  }, [prices, period, theme]);
+  }, [series, theme]);
 
   return { canvas, label };
 };

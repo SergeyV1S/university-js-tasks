@@ -1,5 +1,6 @@
 import {
   getCoinsIdMarketChart,
+  getCoinsIdOhlc,
   getCoinsList,
   getCoinsMarkets,
   getExchangeRates,
@@ -12,10 +13,20 @@ import { converterCurrencies, isQuote } from "../helpers";
 
 export const initialPeriod = 7 satisfies HistoryDays;
 
-export const loadHistory = async (id: string, days: HistoryDays, signal: AbortSignal) => {
-  const prices = await getCoinsIdMarketChart({ params: { id, days }, config: { signal } });
-  return [...prices].sort(([left], [right]) => left - right);
+export const loadHistory = async (id: string, period: HistoryDays, signal: AbortSignal) => {
+  if (period === 1) {
+    const candles = await getCoinsIdOhlc({ params: { id }, config: { signal } });
+    return {
+      period,
+      candles: [...candles].sort((left, right) => left.timestamp - right.timestamp)
+    } as const;
+  }
+
+  const prices = await getCoinsIdMarketChart({ params: { id, days: period }, config: { signal } });
+  return { period, prices: [...prices].sort(([left], [right]) => left - right) } as const;
 };
+
+export type HistorySeries = Awaited<ReturnType<typeof loadHistory>>;
 
 export const loadCoinMarkets = async (id: string, signal: AbortSignal) => {
   const markets = await getCoinsMarkets({ params: { ids: [id] }, config: { signal } });

@@ -20,6 +20,14 @@ const history = (last = 100): FixtureResponse => ({
   }
 });
 
+const candles: FixtureResponse = {
+  status: 200,
+  json: [
+    [start + 1_800_000, 70, 73, 65, 68],
+    [start, 55, 71, 50, 70]
+  ]
+};
+
 const respond = (url: URL): FixtureResponse => {
   if (url.pathname.endsWith("/coins/list")) return { status: 200, json: catalog };
   if (url.pathname.endsWith("/global")) return { status: 200, json: { data: {} } };
@@ -46,6 +54,23 @@ const defer = () => {
 };
 
 const graph = (page: Page) => page.getByRole("img", { name: /^График цены/ });
+const hasGraphColor = (page: Page, color: [number, number, number]) =>
+  graph(page).evaluate((element, [r, g, b]) => {
+    if (!(element instanceof HTMLCanvasElement)) return false;
+    const pixels = element.getContext("2d")?.getImageData(0, 0, element.width, element.height).data;
+    if (!pixels) return false;
+    for (let index = 0; index < pixels.length; index += 4) {
+      if (
+        pixels[index] === r &&
+        pixels[index + 1] === g &&
+        pixels[index + 2] === b &&
+        pixels[index + 3] === 255
+      ) {
+        return true;
+      }
+    }
+    return false;
+  }, color);
 const period = (page: Page, name: string) => page.getByRole("button", { name, exact: true });
 const quantity = (page: Page) => page.getByRole("textbox", { name: /^Количество/ });
 const conversion = (page: Page) => page.getByRole("status", { name: "Результат конвертации" });
@@ -104,13 +129,14 @@ test("opens_known_and_unknown_urls", async ({ context, page }) => {
 
 test("shows_selected_history", async ({ context, page }) => {
   const requestedPeriods: number[] = [];
+  let dayEmpty = true;
   let yearUnavailable = true;
   await installMarketFixture(context, (url) => {
-    if (!url.pathname.endsWith("/market_chart")) return respond(url);
+    if (!/\/(market_chart|ohlc)$/.test(url.pathname)) return respond(url);
     const days = Number(url.searchParams.get("days"));
     requestedPeriods.push(days);
     expect(url.searchParams.get("vs_currency")).toBe("usd");
-    if (days === 1) return { status: 200, json: { prices: [] } };
+    if (url.pathname.endsWith("/ohlc")) return dayEmpty ? { status: 200, json: [] } : candles;
     if (days === 365 && yearUnavailable) return { status: 503 };
     return history(days * 10);
   });
@@ -118,27 +144,7 @@ test("shows_selected_history", async ({ context, page }) => {
   await page.goto("/coin/bitcoin");
   await expect(period(page, "7 д")).toHaveAttribute("aria-pressed", "true");
   await expect(graph(page)).toHaveAccessibleName(/\$70,00/);
-  await expect
-    .poll(() =>
-      graph(page).evaluate((element) => {
-        if (!(element instanceof HTMLCanvasElement)) return false;
-        const pixels = element
-          .getContext("2d")
-          ?.getImageData(0, 0, element.width, element.height).data;
-        if (!pixels) return false;
-        for (let index = 0; index < pixels.length; index += 4) {
-          if (
-            pixels[index] === 237 &&
-            pixels[index + 1] === 189 &&
-            pixels[index + 2] === 129 &&
-            pixels[index + 3] === 255
-          )
-            return true;
-        }
-        return false;
-      })
-    )
-    .toBe(true);
+  await expect.poll(() => hasGraphColor(page, [237, 189, 129])).toBe(true);
   await period(page, "1 д").click();
   await expect(page.getByText("За этот период нет данных")).toBeVisible();
   await expect(graph(page)).toHaveCount(0);
@@ -156,6 +162,15 @@ test("shows_selected_history", async ({ context, page }) => {
   await expect(graph(page)).toHaveAccessibleName(/\$300,00/);
   await period(page, "1 год").click();
   await expect(graph(page)).toHaveAccessibleName(/\$3\s650,00/);
+
+  dayEmpty = false;
+  await period(page, "1 д").click();
+  await expect(graph(page)).toHaveAccessibleName(/Свечи.*\$68,00/);
+  await expect.poll(() => hasGraphColor(page, [140, 219, 179])).toBe(true);
+  await expect.poll(() => hasGraphColor(page, [255, 156, 157])).toBe(true);
+  await period(page, "7 д").click();
+  await expect(graph(page)).toHaveAccessibleName(/\$70,00/);
+  await expect.poll(() => hasGraphColor(page, [237, 189, 129])).toBe(true);
 });
 
 test("converts_loaded_prices", async ({ context, page }) => {
@@ -241,14 +256,15 @@ test("ignores_late_history", async ({ context, page }) => {
   const stale = defer();
   let oneDayRequested = false;
   const { requests } = await installMarketFixture(context, async (url) => {
-    if (!url.pathname.endsWith("/market_chart")) return respond(url);
-    const days = url.searchParams.get("days");
-    if (days === "1") {
+    if (url.pathname.endsWith("/ohlc")) {
       oneDayRequested = true;
       await stale.promise;
-      return history(10);
+      return candles;
     }
-    return history(days === "30" ? 300 : 70);
+    if (url.pathname.endsWith("/market_chart")) {
+      return history(url.searchParams.get("days") === "30" ? 300 : 70);
+    }
+    return respond(url);
   });
 
   try {
@@ -263,7 +279,7 @@ test("ignores_late_history", async ({ context, page }) => {
   }
 
   await expect
-    .poll(() => requests.find(({ url }) => new URL(url).searchParams.get("days") === "1")?.status)
+    .poll(() => requests.find(({ url }) => new URL(url).pathname.endsWith("/ohlc"))?.status)
     .toBe(200);
   await expect(period(page, "30 д")).toHaveAttribute("aria-pressed", "true");
   await expect(graph(page)).toHaveAccessibleName(/\$300,00/);

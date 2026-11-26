@@ -13,16 +13,14 @@ import {
   loadHistory,
   needsConverterRates
 } from "../actions";
-import type { CoinData, CoinInitialData } from "../actions";
+import type { CoinData, CoinInitialData, HistorySeries } from "../actions";
 import type { ConverterCurrency } from "../helpers";
-
-type Prices = Awaited<ReturnType<typeof loadHistory>>;
 
 type CoinState = {
   initial: CoinInitialData | null;
   details: MarketState<CoinData> | null;
   market: MarketState<Coin | null> | null;
-  history: MarketState<Prices> | null;
+  history: MarketState<HistorySeries> | null;
   quotes: MarketState<Quotes> | null;
   rates: MarketState<Quotes> | null;
   period: HistoryDays;
@@ -38,13 +36,13 @@ type CoinState = {
 export const useCoinStore = create<CoinState>()((set, get) => {
   let details: ReturnType<typeof createMarketResource<CoinData>> | undefined;
   let market: ReturnType<typeof createMarketResource<Coin | null>> | undefined;
-  let history: ReturnType<typeof createMarketResource<Prices>> | undefined;
+  let history: ReturnType<typeof createMarketResource<HistorySeries>> | undefined;
   let quotes: ReturnType<typeof createMarketResource<Quotes>> | undefined;
   let rates: ReturnType<typeof createMarketResource<Quotes>> | undefined;
   const lastQuotes = new Map<string, Quotes>();
   let lastRates: Quotes | null = null;
 
-  const createHistory = (id: string, period: HistoryDays, initial?: MarketResult<Prices>) =>
+  const createHistory = (id: string, period: HistoryDays, initial?: MarketResult<HistorySeries>) =>
     createMarketResource({
       initial,
       retainOnFailure: false,

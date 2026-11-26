@@ -13,7 +13,7 @@ const HistoryPending = () => (
 );
 
 export const CoinHistory = ({ pending = false }: { pending?: boolean }) => {
-  const { options, period, view } = useCoinHistory(pending);
+  const { options, view } = useCoinHistory(pending);
 
   return (
     <section
@@ -43,7 +43,7 @@ export const CoinHistory = ({ pending = false }: { pending?: boolean }) => {
         {view.kind === "loading" && <HistoryPending />}
         {view.kind === "ready" && (
           <Suspense fallback={<HistoryPending />}>
-            <HistoryChart prices={view.prices} period={period} />
+            <HistoryChart series={view.series} />
           </Suspense>
         )}
         {(view.kind === "error" || view.kind === "empty") && (
