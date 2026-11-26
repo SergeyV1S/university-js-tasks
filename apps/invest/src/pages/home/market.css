@@ -1,0 +1,94 @@
+.market-intro {
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
+  border: 1px solid var(--color-invest-divider);
+  border-radius: var(--radius-xl);
+  background: linear-gradient(
+    110deg,
+    var(--color-invest-raised),
+    var(--color-invest-background) 72%
+  );
+}
+
+.market-intro::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0 0 0 auto;
+  width: min(68%, 50rem);
+  pointer-events: none;
+  content: "";
+  background: url("@/shared/assets/market-hero.webp") center 49% / cover no-repeat;
+  mask-image: linear-gradient(90deg, transparent, black 52%);
+  opacity: 0.8;
+}
+
+.market-intro-content {
+  position: relative;
+  padding: 1.125rem 1rem;
+}
+
+.market-metric:first-of-type {
+  border-color: var(--color-invest-selected-border);
+  background: linear-gradient(
+    115deg,
+    var(--color-invest-selected),
+    var(--color-invest-surface) 84%
+  );
+}
+
+.market-metric-value {
+  overflow-wrap: anywhere;
+}
+
+.market-toolbar {
+  display: grid;
+  gap: 0.5rem;
+}
+
+@media (width < 40rem) {
+  .market-intro::before {
+    width: 78%;
+    opacity: 0.34;
+  }
+
+  .market-metric-value {
+    font-size: clamp(1.0625rem, 5.35vw, 1.4375rem);
+    line-height: 1.3;
+  }
+}
+
+@media (width >= 64rem) {
+  .market-intro-content {
+    padding: 1.875rem 2rem;
+  }
+
+  .market-toolbar {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    gap: 1rem;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .market-intro[data-enter][data-ready="true"]::before {
+    animation: market-art-enter 700ms var(--ease-invest-out);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .market-quote-arrow {
+      transition: translate 140ms var(--ease-invest-out);
+    }
+
+    .market-quote:hover .market-quote-arrow {
+      translate: 2px 0;
+    }
+  }
+}
+
+@keyframes market-art-enter {
+  from {
+    opacity: 0.3;
+    transform: translateX(1rem);
+  }
+}

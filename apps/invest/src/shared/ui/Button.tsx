@@ -3,7 +3,7 @@ import { Link } from "react-router";
 
 const buttonVariants = {
   secondary:
-    "border border-invest-border bg-invest-surface text-invest-foreground hover:border-invest-muted",
+    "border border-invest-border bg-invest-surface text-invest-foreground enabled:hover:border-invest-muted enabled:hover:bg-invest-raised",
   primary:
     "bg-invest-accent text-invest-accent-ink focus-visible:outline-offset-2 enabled:hover:bg-invest-accent-hover enabled:active:bg-invest-accent-pressed",
   ghost: "text-invest-muted hover:text-invest-foreground aria-pressed:text-invest-accent",
@@ -17,7 +17,7 @@ type ButtonProps = ComponentProps<"button"> & { variant?: ButtonVariant };
 type ButtonLinkProps = ComponentProps<typeof Link> & { variant?: ButtonVariant };
 
 const getButtonClassName = (variant: ButtonVariant, className: string) =>
-  `inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 text-invest-label disabled:cursor-default ${variant !== "primary" ? "focus-visible:-outline-offset-2" : ""} ${variant === "segment" ? "rounded-md" : "rounded-invest-button disabled:opacity-50"} ${buttonVariants[variant]} ${className}`;
+  `invest-button inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 text-invest-label disabled:cursor-default ${variant !== "primary" ? "focus-visible:-outline-offset-2" : ""} ${variant === "segment" ? "rounded-md" : "rounded-invest-button disabled:opacity-50"} ${buttonVariants[variant]} ${className}`;
 
 export const Button = ({
   variant = "secondary",

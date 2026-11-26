@@ -9,7 +9,7 @@ import type { Allocation, Valuation } from "../types";
 const colorTokens = [
   "--color-invest-accent",
   "--color-invest-blue",
-  "--color-invest-lavender",
+  "--color-invest-chart-coral",
   "--color-invest-positive",
   "--color-invest-negative"
 ];

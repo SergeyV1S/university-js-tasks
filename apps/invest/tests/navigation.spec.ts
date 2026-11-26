@@ -29,6 +29,8 @@ test("switches_screens_in_one_document", async ({ context, page }) => {
   const portfolio = page.getByRole("link", { name: "Портфель" });
 
   await page.keyboard.press("Tab");
+  await expect(page.getByRole("link", { name: "К содержимому" })).toBeFocused();
+  await page.keyboard.press("Tab");
   await expect(home).toBeFocused();
   await page.keyboard.press("Enter");
   await expect(page).toHaveURL("/");

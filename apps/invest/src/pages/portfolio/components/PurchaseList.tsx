@@ -15,7 +15,7 @@ export const PurchaseList = ({ purchases, coins }: PurchaseListProps) => {
   return (
     <section
       aria-labelledby='portfolio-purchases'
-      className='min-w-0 rounded-xl border border-invest-divider bg-invest-surface px-3.25 pt-3 pb-3.75 lg:px-5.25'
+      className='min-w-0 rounded-xl border border-invest-divider bg-invest-surface px-4 py-4 lg:px-6 lg:py-5'
     >
       <div className='flex items-center justify-between gap-2 pb-2.5'>
         <h2 id='portfolio-purchases' className='text-invest-block'>

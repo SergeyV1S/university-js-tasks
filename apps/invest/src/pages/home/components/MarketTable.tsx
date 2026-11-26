@@ -13,7 +13,7 @@ type MarketTableProps = MarketTableOptions & {
 };
 
 const cellStyles = {
-  rank: "pl-2.25 text-left lg:pl-4.75",
+  rank: "pl-2.25 text-left max-[375px]:pl-1.5 lg:pl-4.75",
   name: "pl-1 text-left",
   price: "pr-1 text-right lg:pr-5",
   change24h: "pr-3 text-right lg:pr-5",
@@ -58,14 +58,14 @@ export const MarketTable = ({
         aria-busy={loading || pagination?.loading}
       >
         <colgroup>
-          <col className='w-9.5 lg:w-22.5' />
+          <col className='w-9.5 max-[375px]:w-6.75 lg:w-22.5' />
           <col />
-          <col className='w-22.25 lg:w-[18cqw]' />
+          <col className='w-22.25 max-[375px]:w-21.25 lg:w-[18cqw]' />
           <col
-            className={`w-22.25 lg:w-[calc(18.125cqw-24.6px)] ${showCapitalization ? "hidden lg:table-column" : ""}`}
+            className={`w-22.25 max-[375px]:w-17.5 lg:w-[calc(18.125cqw-24.6px)] ${showCapitalization ? "hidden lg:table-column" : ""}`}
           />
           <col
-            className={`w-22.25 lg:w-[calc(31.25cqw-114px)] ${showCapitalization ? "" : "hidden lg:table-column"}`}
+            className={`w-22.25 max-[375px]:w-17.5 lg:w-[calc(31.25cqw-114px)] ${showCapitalization ? "" : "hidden lg:table-column"}`}
           />
           <col className='hidden w-12.5 lg:table-column' />
         </colgroup>
@@ -75,7 +75,7 @@ export const MarketTable = ({
               <th
                 key={key}
                 scope='col'
-                className={`p-0 ${cellStyles[key]} ${visibility[key]}`}
+                className={`relative p-0 ${cellStyles[key]} ${visibility[key]}`}
                 aria-sort={ariaSort}
               >
                 <button
@@ -83,7 +83,7 @@ export const MarketTable = ({
                   aria-label={`Сортировать ${action}`}
                   disabled={!sortBy}
                   onClick={handleSort}
-                  className={`inline-flex h-invest-input-height max-w-full items-center gap-0.5 rounded-sm text-invest-caption focus-visible:-outline-offset-2 enabled:cursor-pointer enabled:hover:text-invest-accent lg:h-12 lg:text-invest-label ${active ? "lg:text-invest-accent" : ""} ${key === "rank" || key === "name" ? "" : "lg:translate-x-5"} text-invest-muted`}
+                  className={`inline-flex h-invest-input-height max-w-full items-center gap-0.5 rounded-sm text-invest-caption focus-visible:-outline-offset-2 enabled:cursor-pointer enabled:hover:text-invest-foreground max-lg:after:absolute max-lg:after:inset-0 lg:h-12 lg:text-invest-label ${active ? "text-invest-accent" : "text-invest-muted"} ${key === "rank" || key === "name" ? "" : "lg:translate-x-5"}`}
                 >
                   {key === "rank" && <span className='lg:hidden'>#</span>}
                   {key === "marketCap" && <span className='lg:hidden'>Капит.</span>}
@@ -121,7 +121,7 @@ export const MarketTable = ({
                 ({ coin, destination, symbol, price, change, changeColor, marketCap }) => (
                   <tr
                     key={coin.id}
-                    className='relative h-15.5 bg-[linear-gradient(var(--color-invest-divider),var(--color-invest-divider))] bg-size-[calc(100%-18px)_1px] bg-top bg-no-repeat first:bg-none focus-within:bg-invest-raised hover:bg-invest-raised lg:h-13.5 lg:bg-size-[calc(100%-38px)_1px]'
+                    className='market-quote relative h-15.5 border-b border-invest-divider last:border-b-0 focus-within:bg-invest-raised hover:bg-invest-raised lg:h-14'
                   >
                     <td
                       className={`font-invest-numeric text-invest-table-number text-invest-muted ${cellStyles.rank}`}
@@ -162,7 +162,7 @@ export const MarketTable = ({
                       {marketCap}
                     </td>
                     <td className='hidden pr-2.5 text-right text-invest-muted lg:table-cell'>
-                      <Icon name='next' className='ml-auto' />
+                      <Icon name='next' className='market-quote-arrow ml-auto' />
                     </td>
                   </tr>
                 )
@@ -187,7 +187,7 @@ export const MarketTable = ({
       )}
       {pagination?.loading && (
         <p role='status' className='px-3 py-3 text-center text-invest-caption text-invest-muted'>
-          Загружаем ещё монеты...
+          Загружаем ещё монеты…
         </p>
       )}
       {pagination?.failed && (

@@ -28,7 +28,7 @@ export const MarketMetrics = ({
     <section
       aria-label='Рыночные метрики'
       aria-describedby={descriptionId}
-      className='market-metrics relative grid grid-cols-2 gap-2 lg:grid-cols-4 lg:gap-4'
+      className='market-metrics relative grid grid-cols-2 gap-2.5 md:grid-cols-4 lg:gap-3'
     >
       {stale && (
         <p
@@ -38,15 +38,15 @@ export const MarketMetrics = ({
           Могут быть устаревшими
         </p>
       )}
-      {cards.map((card, index) => (
+      {cards.map((card) => (
         <article
           key={card.title}
           ref={card.visible ? activeCard : undefined}
           onPointerLeave={card.handlePointerLeave}
-          className={`market-metric h-23.5 min-w-0 rounded-xl border border-invest-divider bg-invest-surface px-2.5 pt-2.75 lg:relative lg:h-28 lg:px-4.25 lg:pt-3.5 ${index === 0 ? "invest-cold-edge" : ""}`}
+          className='market-metric min-h-25 min-w-0 rounded-xl border border-invest-divider bg-invest-surface px-2.75 pt-3 pb-2.5 lg:relative lg:min-h-28 lg:px-4.75 lg:pt-3.75'
         >
           <div className='relative lg:static'>
-            <h2 className='truncate pr-4.5 text-invest-caption/4 text-invest-muted max-[375px]:tracking-[-0.04em] lg:pr-8 lg:text-invest-label'>
+            <h2 className='min-h-8 pr-5 text-invest-caption/4 text-invest-muted lg:min-h-0 lg:pr-8 lg:text-invest-label'>
               {card.title}
             </h2>
             <Button
@@ -57,7 +57,7 @@ export const MarketMetrics = ({
               ref={card.visible ? activeHelp : undefined}
               onPointerEnter={card.handlePointerEnter}
               onClick={card.toggleExplanation}
-              className='absolute -top-3 -right-2.75 h-11 w-10.5 lg:top-0 lg:right-0'
+              className='absolute -top-3 -right-2.75 size-11 lg:top-0 lg:right-0'
             >
               <Icon name='help' />
             </Button>
@@ -73,7 +73,7 @@ export const MarketMetrics = ({
           )}
           {view === "ready" && (
             <>
-              <p className='mt-1.75 truncate text-invest-section lg:mt-1.25 lg:text-invest-metric'>
+              <p className='market-metric-value mt-1.25 text-invest-section lg:text-invest-metric'>
                 {card.value}
               </p>
               {card.change && (

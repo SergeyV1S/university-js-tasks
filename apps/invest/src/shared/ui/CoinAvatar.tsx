@@ -25,7 +25,7 @@ export const CoinAvatar = ({ coin, size = "small" }: CoinAvatarProps) => {
     return (
       <span aria-hidden='true' className={avatarClass} style={{ backgroundColor, color }}>
         {coin.id === "bitcoin" && size === "large" ? (
-          <img src={bitcoinMark} alt='' className='h-5.25 w-3' />
+          <img src={bitcoinMark} alt='' width={12} height={21} className='h-5.25 w-3' />
         ) : (
           character
         )}
@@ -58,6 +58,8 @@ export const CoinAvatar = ({ coin, size = "small" }: CoinAvatarProps) => {
         <img
           src={image}
           alt=''
+          width={32}
+          height={32}
           loading='lazy'
           referrerPolicy='no-referrer'
           className='size-full'

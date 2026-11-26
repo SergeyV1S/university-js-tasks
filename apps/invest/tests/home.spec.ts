@@ -198,9 +198,9 @@ test("combines_price_and_sort", async ({ context, page }) => {
   );
   await page.goto("/");
   await expect(coinLinks(page)).toHaveCount(5);
-  await expect(page.getByText("+2%", { exact: true })).toHaveCSS("color", "rgb(116, 216, 171)");
-  await expect(page.getByText("−2%", { exact: true })).toHaveCSS("color", "rgb(255, 149, 153)");
-  await expect(page.getByText("0%", { exact: true })).toHaveCSS("color", "rgb(243, 242, 238)");
+  await expect(page.getByText("+2%", { exact: true })).toHaveCSS("color", "rgb(140, 219, 179)");
+  await expect(page.getByText("−2%", { exact: true })).toHaveCSS("color", "rgb(255, 156, 157)");
+  await expect(page.getByText("0%", { exact: true })).toHaveCSS("color", "rgb(244, 242, 233)");
 
   const sortCases = [
     { name: "по рангу", asc: [0, 1, 2, 3, 4] },

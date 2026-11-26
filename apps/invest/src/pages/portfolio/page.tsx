@@ -6,9 +6,11 @@ import { usePortfolioPage } from "./hooks";
 const grid = "grid items-start lg:grid-cols-[minmax(0,1fr)_22.25rem] lg:gap-x-5";
 
 export const PortfolioPending = () => (
-  <div role='status' aria-label='Загрузка портфеля' aria-busy='true' className='pt-5.5 lg:pt-7.25'>
-    <Skeleton className='h-10 w-53 lg:h-12 lg:w-66.5' />
-    <Skeleton className='mt-2 h-4.5 w-56' />
+  <div role='status' aria-label='Загрузка портфеля' aria-busy='true' className='pt-4 lg:pt-7'>
+    <div className='invest-feature-panel rounded-xl border border-invest-divider p-4 lg:p-7'>
+      <Skeleton className='h-8 w-48 lg:h-12 lg:w-66.5' />
+      <Skeleton className='mt-2 h-4.5 w-56' />
+    </div>
     <div className={`mt-7 gap-y-4 ${grid}`}>
       <div className='space-y-4'>
         <Skeleton className='h-45.75 rounded-xl! lg:h-40.5' />
@@ -26,13 +28,13 @@ export const PortfolioPending = () => (
 );
 
 const EmptyPortfolio = () => (
-  <section className='lg:flex lg:min-h-88.75 lg:items-center lg:justify-center lg:rounded-xl lg:border lg:border-invest-divider lg:bg-invest-surface lg:px-4 lg:text-center'>
-    <div className='lg:-translate-y-2.5'>
-      <span className='mx-auto hidden size-10 place-items-center rounded-invest-button bg-invest-raised text-invest-muted lg:grid'>
-        <Icon name='wallet' className='size-5.5' />
-      </span>
-      <h2 className='text-invest-section lg:mt-2.25 lg:text-invest-block'>Портфель пока пуст</h2>
-      <p className='mt-1.25 max-w-80 text-invest-caption text-invest-muted lg:max-w-none'>
+  <section className='flex items-start gap-3 rounded-xl border border-invest-divider bg-invest-surface p-4 lg:min-h-88.75 lg:flex-col lg:items-center lg:justify-center lg:gap-4 lg:text-center'>
+    <span className='grid size-11 shrink-0 place-items-center rounded-invest-button border border-invest-selected-border bg-invest-selected text-invest-accent lg:size-14'>
+      <Icon name='wallet' className='size-5.5' />
+    </span>
+    <div className='min-w-0'>
+      <h2 className='text-invest-block lg:text-invest-section'>Портфель пока пуст</h2>
+      <p className='mt-1 max-w-80 text-invest-caption text-invest-muted lg:text-invest-body'>
         Добавьте первую покупку, чтобы увидеть стоимость и доли монет.
       </p>
     </div>
@@ -44,18 +46,19 @@ export const PortfolioPage = () => {
   if (p.pending) return <PortfolioPending />;
 
   return (
-    <div className='pt-5.5 pb-4 lg:pt-7.25'>
-      <header className={`relative ${p.mobileAdd ? "hidden lg:block" : ""}`}>
-        <h1 className='text-invest-mobile-title lg:text-invest-title'>Мой портфель</h1>
-        <p className='mt-2.25 flex items-center gap-1.75 text-invest-caption text-invest-muted lg:mt-1.25'>
-          <Icon name='lock' />
-          Покупки хранятся в этом браузере
-        </p>
-        <p className='mt-1.25 text-invest-caption text-invest-muted lg:hidden'>Демо-данные</p>
-        <SegmentedControl
-          aria-label='Валюта портфеля'
-          className='absolute -top-0.5 right-0 w-26.5 lg:top-3 lg:w-36'
-        >
+    <div className='pt-4 pb-8 lg:pt-7 lg:pb-12'>
+      <header
+        className={`invest-feature-panel flex-wrap items-center justify-between gap-x-2 gap-y-3 rounded-xl border border-invest-divider p-4 lg:flex lg:gap-5 lg:p-7 ${p.mobileAdd ? "hidden" : "flex"}`}
+      >
+        <div className='min-w-0 min-[390px]:flex-1'>
+          <h1 className='text-invest-mobile-title lg:text-invest-title'>Мой портфель</h1>
+          <p className='mt-2 flex items-center gap-1.75 text-invest-caption text-invest-muted'>
+            <Icon name='lock' className='shrink-0' />
+            Покупки хранятся в этом браузере
+          </p>
+          <p className='mt-1.25 text-invest-caption text-invest-muted lg:hidden'>Демо-данные</p>
+        </div>
+        <SegmentedControl aria-label='Валюта портфеля' className='w-26.5 lg:w-36'>
           <Button
             variant='segment'
             aria-pressed={p.currency === "RUB"}
@@ -79,7 +82,7 @@ export const PortfolioPage = () => {
         <Button
           variant='ghost'
           onClick={p.closePurchase}
-          className='-mt-2.75 mb-2.25 flex h-11 justify-start lg:hidden'
+          className='mb-2.25 flex h-11 justify-start lg:hidden'
         >
           <Icon name='back' />
           Мой портфель

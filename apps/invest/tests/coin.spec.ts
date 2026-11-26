@@ -128,9 +128,9 @@ test("shows_selected_history", async ({ context, page }) => {
         if (!pixels) return false;
         for (let index = 0; index < pixels.length; index += 4) {
           if (
-            pixels[index] === 255 &&
-            pixels[index + 1] === 198 &&
-            pixels[index + 2] === 122 &&
+            pixels[index] === 237 &&
+            pixels[index + 1] === 189 &&
+            pixels[index + 2] === 129 &&
             pixels[index + 3] === 255
           )
             return true;

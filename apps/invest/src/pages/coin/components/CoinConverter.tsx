@@ -21,7 +21,7 @@ export const CoinConverter = ({ coin }: CoinConverterProps) => {
   return (
     <section
       aria-labelledby='coin-converter-heading'
-      className={`min-w-0 rounded-xl border border-invest-divider bg-invest-surface px-3.25 pt-3.5 pb-4 lg:px-4.75 ${stale ? "min-h-81.5" : "min-h-74"}`}
+      className={`min-w-0 rounded-xl border border-invest-divider bg-invest-surface p-4 lg:p-5 ${stale ? "min-h-81.5" : "min-h-74"}`}
     >
       <h2 id='coin-converter-heading' className='text-invest-block'>
         Конвертер
@@ -44,6 +44,7 @@ export const CoinConverter = ({ coin }: CoinConverterProps) => {
         <div className='relative mt-1.5'>
           <Input
             id={inputId}
+            name='quantity'
             type='text'
             inputMode='decimal'
             autoComplete='off'
@@ -77,7 +78,7 @@ export const CoinConverter = ({ coin }: CoinConverterProps) => {
             </Button>
           ))}
         </SegmentedControl>
-        <div className='mt-3.75 border-t border-invest-divider pt-2.75'>
+        <div className='invest-value-panel mt-4 min-h-14 rounded-lg border border-invest-divider px-3 py-2'>
           {coin ? (
             <output
               htmlFor={inputId}

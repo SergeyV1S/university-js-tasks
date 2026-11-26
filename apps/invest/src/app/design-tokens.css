@@ -5,32 +5,32 @@
   --ease-invest-out: cubic-bezier(0.23, 1, 0.32, 1);
 
   /* Invest / цвет */
-  --color-invest-background: #101216;
-  --color-invest-navigation: #14161b;
-  --color-invest-surface: #191c22;
-  --color-invest-raised: #22262e;
-  --color-invest-divider: #2b303a;
-  --color-invest-border: #3b4350;
-  --color-invest-field-border: #626d7a;
-  --color-invest-table-header: #1e2229;
-  --color-invest-foreground: #f3f2ee;
-  --color-invest-muted: #a7afbc;
-  --color-invest-accent: #ffc67a;
-  --color-invest-accent-hover: #ffd39a;
-  --color-invest-accent-pressed: #eaa858;
-  --color-invest-accent-ink: #20170d;
-  --color-invest-selected: #352a20;
-  --color-invest-selected-border: #8d6442;
-  --color-invest-positive: #74d8ab;
-  --color-invest-negative: #ff9599;
+  --color-invest-background: #111514;
+  --color-invest-navigation: #161a18;
+  --color-invest-surface: #191e1c;
+  --color-invest-raised: #232b27;
+  --color-invest-divider: #303a34;
+  --color-invest-border: #46534b;
+  --color-invest-field-border: #69766c;
+  --color-invest-table-header: #202722;
+  --color-invest-foreground: #f4f2e9;
+  --color-invest-muted: #abb8af;
+  --color-invest-accent: #edbd81;
+  --color-invest-accent-hover: #ffd6a0;
+  --color-invest-accent-pressed: #dba46a;
+  --color-invest-accent-ink: #22190f;
+  --color-invest-selected: #31291f;
+  --color-invest-selected-border: #82674a;
+  --color-invest-positive: #8cdbb3;
+  --color-invest-negative: #ff9c9d;
   --color-invest-warning: #ffd097;
   --color-invest-warning-background: #302620;
-  --color-invest-focus: #ffb05e;
-  --color-invest-blue: #9db6ff;
-  --color-invest-lavender: #bc9ff5;
-  --color-invest-skeleton: #303641;
-  --color-invest-chart-fill-top: #ffc67a2b;
-  --color-invest-chart-fill-bottom: #ffc67a04;
+  --color-invest-focus: #ffd198;
+  --color-invest-blue: #91c4ea;
+  --color-invest-chart-coral: #dba295;
+  --color-invest-skeleton: #303a34;
+  --color-invest-chart-fill-top: #edbd8139;
+  --color-invest-chart-fill-bottom: #edbd8100;
 
   /* Invest 3 · Палитра */
   --color-invest-3-background: #0e1218;
@@ -96,15 +96,15 @@
   --color-invest-3-focus: #a0c6ff;
 
   /* Invest / текстовые стили */
-  --text-invest-title: 38px;
-  --text-invest-title--line-height: 48px;
+  --text-invest-title: 46px;
+  --text-invest-title--line-height: 1.1;
   --text-invest-title--font-weight: 800;
-  --text-invest-title--letter-spacing: -0.026em;
-  --text-invest-mobile-title: 30px;
-  --text-invest-mobile-title--line-height: 40px;
+  --text-invest-title--letter-spacing: -0.045em;
+  --text-invest-mobile-title: 29px;
+  --text-invest-mobile-title--line-height: 1.15;
   --text-invest-mobile-title--font-weight: 800;
-  --text-invest-mobile-title--letter-spacing: -0.02em;
-  --text-invest-section: 22px;
+  --text-invest-mobile-title--letter-spacing: -0.035em;
+  --text-invest-section: 23px;
   --text-invest-section--line-height: 30px;
   --text-invest-section--font-weight: 800;
   --text-invest-section--letter-spacing: -0.014em;
@@ -127,11 +127,11 @@
   --text-invest-metric: 30px;
   --text-invest-metric--line-height: 39px;
   --text-invest-metric--font-weight: 700;
-  --text-invest-metric--letter-spacing: -0.01em;
+  --text-invest-metric--letter-spacing: -0.035em;
   --text-invest-total: 40px;
   --text-invest-total--line-height: 51px;
   --text-invest-total--font-weight: 700;
-  --text-invest-total--letter-spacing: -0.016em;
+  --text-invest-total--letter-spacing: -0.035em;
   --text-invest-table-number: 14px;
   --text-invest-table-number--line-height: 20px;
   --text-invest-table-number--font-weight: 500;

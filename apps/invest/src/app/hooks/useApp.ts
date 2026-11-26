@@ -6,9 +6,9 @@ import { PATHS } from "@/shared/constants";
 import { getPendingRoute } from "../helpers";
 
 const navLink =
-  "flex h-11 items-center justify-center gap-2.5 rounded-lg text-invest-label lg:relative lg:h-18 lg:justify-start lg:rounded-none lg:px-3.5";
-const activeNavLink =
-  "bg-invest-selected text-invest-accent lg:bg-transparent lg:after:absolute lg:after:inset-x-2 lg:after:bottom-0 lg:after:h-0.5 lg:after:rounded-full lg:after:bg-invest-accent";
+  "flex h-11 items-center justify-center gap-2 rounded-lg text-invest-label transition-colors motion-reduce:transition-none";
+const activeNavLink = "bg-invest-selected text-invest-accent inset-ring inset-ring-invest-divider";
+const inactiveNavLink = "text-invest-muted hover:bg-invest-raised hover:text-invest-foreground";
 
 export const useApp = () => {
   const { pathname } = useLocation();
@@ -23,11 +23,11 @@ export const useApp = () => {
 
   const marketLinkClass = ({ isActive }: NavLinkRenderProps) => {
     const active = !portfolioPending && (isActive || isCoin || coinPending);
-    return `${navLink} w-18.5 lg:w-27.25 ${active ? activeNavLink : "text-invest-muted"}`;
+    return `${navLink} px-2.5 lg:px-4 ${active ? activeNavLink : inactiveNavLink}`;
   };
   const portfolioLinkClass = ({ isActive }: NavLinkRenderProps) => {
     const active = portfolioPending || (isActive && !coinPending && !homePending);
-    return `${navLink} w-25 lg:w-31.5 ${active ? activeNavLink : "text-invest-muted"}`;
+    return `${navLink} px-2.5 lg:px-4 ${active ? activeNavLink : inactiveNavLink}`;
   };
 
   return {

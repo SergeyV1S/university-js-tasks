@@ -22,7 +22,7 @@ export const PortfolioAllocation = ({ valuation, coins, loading }: PortfolioAllo
     <section
       aria-labelledby='portfolio-allocation'
       aria-busy={loading}
-      className='min-w-0 rounded-xl border border-invest-divider bg-invest-surface px-3.25 pt-3 pb-4.75 lg:min-h-61.25 lg:px-5.25'
+      className='min-w-0 rounded-xl border border-invest-divider bg-invest-surface p-4 lg:min-h-61.25 lg:px-6 lg:py-5'
     >
       <h2 id='portfolio-allocation' className='text-invest-block'>
         Структура портфеля

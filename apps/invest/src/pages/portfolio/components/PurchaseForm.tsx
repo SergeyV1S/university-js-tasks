@@ -27,7 +27,7 @@ export const PurchaseForm = ({
   return (
     <Form
       aria-labelledby={`${form.id}-title`}
-      className={`min-w-0 rounded-xl border border-invest-divider bg-invest-surface px-4.25 pt-3.5 pb-2.5 ${className}`}
+      className={`min-w-0 rounded-xl border border-invest-divider bg-invest-surface p-4 lg:p-5 ${className}`}
       onSubmit={form.handleSubmit}
     >
       <div id={`${form.id}-title`}>
@@ -73,6 +73,7 @@ export const PurchaseForm = ({
             <div className='relative'>
               <Input
                 id={quantityId}
+                name='quantity'
                 inputMode='decimal'
                 autoComplete='off'
                 placeholder='0,00'
@@ -95,6 +96,7 @@ export const PurchaseForm = ({
             <div className='relative'>
               <Input
                 id={priceId}
+                name='unit-price'
                 inputMode='decimal'
                 autoComplete='off'
                 placeholder='0,00'
